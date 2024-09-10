@@ -47,6 +47,11 @@
         <label for="grupo">Grupo:</label>
         <input type="text" name="grupo" id="grupo" maxlength="1" pattern="[A-Za-z]{1}" required> <br> <br>
 
+        <div id="tarjetabien" hidden>
+            <label for="numTarjetaBien">Número de su tarjeta del Bienestar:</label>
+            <input type="text" name="numTarjetaBien" id="numTarjetaBien" pattern="\d{4}-\d{4}-\d{4}-\d{4}" maxlength="19"> <br> <br>
+        </div>
+
         <label for="contraseña">Contraseña:</label>
         <input type="password" name="contraseña" id="contraseña" maxlength="30" 
         pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required> <br> <br>
@@ -60,6 +65,7 @@
 
     </form>
 
+    <script src="/static/js/validacionRegistro.js"></script>
 </body>
 </html>
 
