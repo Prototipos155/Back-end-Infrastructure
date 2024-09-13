@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro en P2P</title>
-</head>
+{% extends "layout.html" %}
+
+{% block content %}
 <body>
     Complete los siguientes campos para su registro en P2P: <br> <br>
 
@@ -67,7 +63,8 @@
 
     <script src="/static/js/validacionRegistro.js"></script>
 </body>
-</html>
+
+{% endblock %}
 
 <!-- admin - rfc
  tabla en BD que almacene las peticiones de registro (tutor o admin) para ser aceptados -->
