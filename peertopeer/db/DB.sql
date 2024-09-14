@@ -14,7 +14,33 @@ deterministic
 begin
     return (select id_Perfil from educamesta.perfil p where p.numeroControl=numControl);
 end //
+DELIMITER ;
 
+
+DELIMITER //
+create procedure InsertIntoPerfil(in numControl varchar(20), in instMail varchar(150),in telefono varchar(10),in psw varchar(256),out idPerfil int)
+begin 
+	insert into perfil(numerocontrol,correoinstitucional,telefono,contraseña) values(numControl,instMail,telefono,psw);
+    set idPerfil=(select obtener_id_perfil(numControl));
+end //
+DELIMITER ; 
+
+DELIMITER //
+create procedure InsertIntoAlumno(in numControl varchar(20), in instMail varchar(150),in telefono varchar(10),in psw varchar(256),
+	in nickName varchar(30),in grado int, in grupo varchar(1))
+begin
+	call InsertIntoPerfil(numControl,instMail,telefono,psw,@idPerfil);
+    insert into alumno values(@idPerfil,nickName,grado,grupo);
+end //
+DELIMITER ; 
+
+DELIMITER //
+create procedure InsertIntoTutor(in numControl varchar(20), in instMail varchar(150),in telefono varchar(10),in psw varchar(256),
+	in nombres varchar(30),in apellidos varchar(30),in numTarjeta varchar(16),in nombreEscuela varchar(100),in gradoAvance varchar(15))
+begin
+	call InsertIntoPerfil(numControl,instMail,telefono,psw,@idPerfil);
+    insert into tutor values(@idPerfil,nombres,apellidos,numTarjeta,nombreEscuela,(select idnivel from nivelacademico where nivel=gradoAvance));
+end //
 DELIMITER ;
 /*=========================================================================================================tablas*/
 create table nivelAcademico(
@@ -37,16 +63,16 @@ create table perfil(
     numeroControl varchar(20) primary key not null,
     correoInstitucional varchar(150) unique not null,
     id_perfil int unique auto_increment not null,
-    telefono varchar(10) unique not null
-    
+    telefono varchar(10) unique not null,
+    contraseña varchar(256) not null
     #,nickName varchar(10) unique not null
 );
 
-insert into perfil(correoInstitucional,telefono,numeroControl) values
-('22301061550038@cetis155.edu.mx','4491261629','22301061550038')
-,('22301061550037@cetis155.edu.mx','4491121629','22301061550037')
-,('22301061550036@cetis155.edu.mx','4491261822','22301061550036')
-,('22301061550035@cetis155.edu.mx','4491236713','22301061550035')
+insert into perfil(correoInstitucional,telefono,numeroControl,contraseña) values
+('22301061550038@cetis155.edu.mx','4491261629','22301061550038','elPepe')
+,('22301061550037@cetis155.edu.mx','4491121629','22301061550037','djShark')
+,('22301061550036@cetis155.edu.mx','4491261822','22301061550036','paquito777')
+,('22301061550035@cetis155.edu.mx','4491236713','22301061550035','terreneitor')
 ;
 
 create table alumno(
@@ -65,8 +91,8 @@ insert into alumno values
 -- select * from tutor;
 create table tutor(
 	idPerfil int unique not null,
-    nombres varchar(30) not null,
-    apellidos varchar(30) not null,
+    nombres varchar(50) not null,
+    apellidos varchar(50) not null,
     numTarjetaBienestar varchar(16) unique not null,
     
     nombreEscuela varchar(100) not null,
