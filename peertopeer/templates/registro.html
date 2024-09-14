@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<body>
+    Complete los siguientes campos para su registro en P2P: <br> <br>
+
+    <form action="/registrar" name="form-registro">
+
+        <h4>¿Qué desea ser?</h4>
+
+        <label>
+            <input type="checkbox" name="rol" id="alumno" value="alumno" required>
+            Alumno
+        </label>
+
+        <label>
+            <input type="checkbox" name="rol" id="tutor" value="tutor" required>
+            Tutor
+        </label> <br> <br>
+
+
+        <label for="nombres">Nombres:</label>
+        <input type="text" name="nombres" id="nombres" pattern="[A-Za-z ]{3,30}" maxlength="30" required> <br> <br>
+        
+        <label for="apellidos">Apellidos:</label>
+        <input type="text" name="apellidos" id="apellidos" pattern="[A-Za-z ]{5,30}" maxlength="30" required> <br> <br>
+
+        <label for="nickname">Nombre de usuario:</label>
+        <input type="text" name="nickname" id="nickname" pattern="[A-Za-z ]{3,30}" max="30" required> <br> <br>
+
+        <label for="telefono">Teléfono:</label>
+        <input type="text" name="telefono" id="telefono" pattern="\d{10}" maxlength="10" required> <br> <br>
+
+        <label for="numControl">Número de control:</label>
+        <input type="text" name="numControl" id="numControl" pattern="[0-9]{5,20}" maxlength="20" required> <br> <br>
+
+        <label for="correoInstitu">Correo institucional:</label>
+        <input type="email" name="correoInstitu" id="correoInstitu" maxlength="150" minlength="10" required> <br> <br>
+
+        <label for="grado">Grado:</label>
+        <input type="number" name="grado" id="grado" max="10" min="1" required> <br> <br>
+
+        <label for="grupo">Grupo:</label>
+        <input type="text" name="grupo" id="grupo" maxlength="1" pattern="[A-Za-z]{1}" required> <br> <br>
+
+        <div id="tarjetabien" hidden>
+            <label for="numTarjetaBien">Número de su tarjeta del Bienestar:</label>
+            <input type="text" name="numTarjetaBien" id="numTarjetaBien" pattern="\d{4}-\d{4}-\d{4}-\d{4}" maxlength="19"> <br> <br>
+        </div>
+
+        <label for="contraseña">Contraseña:</label>
+        <input type="password" name="contraseña" id="contraseña" maxlength="30" 
+        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required> <br> <br>
+
+        <label for="confirmContra">Confirmar contraseña:</label>
+        <input type="password" name="confirmContra" id="confirmContra" maxlength="30"
+        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required> <br> <br>
+
+        
+        <button id="registrarse"> Confirmar registro </button>
+
+    </form>
+
+    <script src="/static/js/validacionRegistro.js"></script>
+</body>
+
+{% endblock %}
+
+<!-- admin - rfc
+ tabla en BD que almacene las peticiones de registro (tutor o admin) para ser aceptados -->
+
