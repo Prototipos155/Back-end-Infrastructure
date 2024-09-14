@@ -78,35 +78,32 @@ class SQLFile():
 
     def functionIncomplete(self,buscaFin=None):
         index=0
-        for inst in self.bloque :
+        while(True):
+            inst=self.bloque[index]
+            #recorremos las instrucciones
             if(not (self.containsAgroup(inst)==-1 and buscaFin==None)):
                 #o bien encontramos un 'begin' o estamos buscando un 'end'
 
                 if(self.containsAgroup(inst)!=-1):
-                    print('INICIO DEL BEGIN :',index)
+                    #print(f'INICIO DEL BEGIN({index}) :{Back.YELLOW}[__]'+f"{Back.RESET}\n{Back.YELLOW}[...".join(self.bloque)+f'{Back.RESET}..._')
                     #este bloque contiene el inicio de un delimiter
                     buscaFin =index
                     
                 if(self.containsAgroup(inst,True)!=-1):
-                    #este bloque contiene el fin de un delimiter
-                    if(buscaFin==index):
-                        #encontramos el fin en la misma instruccion
-                        print('begin...end en la misma linea')
-                        buscaFin=False
-                    else:
-                        #encontramos el fin en otra linea
-                        print(f'founded({index})')
-                        index-=self.joinBlock(buscaFin,index)
-                        buscaFin=None
-                
+                    #este bloque contiene el fin de un delimiter 
+                    index-=self.joinBlock(buscaFin,index)
+                    buscaFin=None
             index+=1
+            if(index==len(self.bloque)):
+                break                
+
         if (buscaFin!=None):
-            print('NO SE ENCONTRO EL END EN EL BLOQUE')
-            #alv, no esta el bloque end en esta lectura, hay que probar en la siguiente
+            #print('NO SE ENCONTRO EL END EN EL BLOQUE')
+            print(f'{Back.GREEN}alv, no esta el bloque end en esta lectura, hay que probar en la siguiente{Back.RESET}')
             self.joinBlock(buscaFin,index)
             self.buscaFin= buscaFin
-
-        self.buscaFin= False
+        else:
+            self.buscaFin= False
 
     def recortarDelimiter(self,indexBegin):
         self.bloque[indexBegin]=self.bloque[indexBegin].replace('//','')
@@ -116,7 +113,7 @@ class SQLFile():
 
 
     def joinBlock(self,indexBegin,indexEnd):
-        print('JOINBLOCK')
+        #print('JOINBLOCK')
         #begin ....     7
         #   update...;  8
         #   update...;  9
@@ -124,7 +121,7 @@ class SQLFile():
         self.bloque[indexBegin]+=';'
 
         for times in range(indexEnd-indexBegin):
-            print(f'parte{times+1}:=={self.bloque[indexBegin+1]}')
+            #print(f'parte{times+1}:=={self.bloque[indexBegin+1]}')
             self.bloque[indexBegin]+=self.bloque[indexBegin+1]
             if(times<(indexEnd-indexBegin-1)):
                 self.bloque[indexBegin]+=';'
@@ -133,19 +130,40 @@ class SQLFile():
         
         self.recortarDelimiter(indexBegin)
         
-        print(f'final bloxk={self.bloque[indexBegin]}')
+        #print(f'final bloxk={self.bloque[indexBegin]}')
         return (indexEnd-indexBegin)
 
     def containsAgroup(self,inst,delimiterFin=None):
-        return inst.lower().find("end" if delimiterFin else "begin")
+        #print("busca :"+"end" if delimiterFin else "begin")
+        return inst.lower().find("end" if delimiterFin!=None else "begin")
 
     
-    def getSQLines(self,archivo): 
+    def getSQLines(self,archivo):
+        self.buscaFin= None
         #quitamos los espacios en blanco de mas
         self.bloque= archivo.read(3500).replace('  ',' ')
         #print('Bloque sql:{',self.bloque,'}')
         
         #separamos por lineas sql
+
+        # self.bloque=''.join(
+        #     [extract.split('*/')[1] for extract in self.bloque.split('/*') if len(extract)>1]
+        # )
+        blk=[]
+        for extract in self.bloque.split('/*') :
+            #quita los bloques comentados para que no jodan el algoritmo
+            if extract!='':
+                goodBlock=extract.split('*/')
+                if(len(goodBlock)==1):
+                    blk.append(goodBlock[0])
+                else:
+                    blk.append(goodBlock[1])
+
+        #print('\n'.join(blk))
+
+        self.bloque=''.join(blk)
+
+
         self.bloque=self.bloque.split(";") 
 
         # escenarios:

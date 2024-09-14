@@ -1,6 +1,6 @@
 import pymysql
 from colorama import init, Fore, Back, Style
-from peertopeer.open import SQLFile
+from .open import SQLFile
 import sqlite3
 import re
 
@@ -31,16 +31,19 @@ class Conexion:
 
         self.conectarDB(self.getArchivoVersionDB())
     
+    def getArchivoDir(self,archivo):
+        return f'peertopeer/db/{archivo}'
+    
     def getArchivoVersionDB(self):
         try:
-            return open(self.archivoVersion,'r').read()
+            return open(self.getArchivoDir(self.archivoVersion),'r').read()
         except Exception:
-            open(self.archivoVersion,'x')
-            open(self.archivoVersion,'w').write(1)
+            open(self.getArchivoDir(self.archivoVersion),'x')
+            #open(self.getArchivoDir(self.archivoVersion),'w').write()
             return ''
     
     def setNewFileVersion(self,version):
-        open(self.archivoVersion,'w').write(version)
+        open(self.getArchivoDir(self.archivoVersion),'w').write(f'{version}')
     
     def makeConexionSQL(self):
         try:
@@ -79,7 +82,22 @@ class Conexion:
             print(f"{Back.RED}____________>Fallo La consulta{Back.RESET}({e})")
             print()
             return -1
+    
+    def callProcedure(self,procedureName,parametersTuple=None,returnFetch=False):
+        try:
+            if parametersTuple!=None: 
+                self.cursor.callproc(procedureName,parametersTuple)            
+            else:
+                self.cursor.callproc(procedureName)
+            self.conn.commit()
+
+        except Exception as e:
+            print(e)
+            return e
         
+        if (returnFetch):
+            return self.cursor.fetchall()
+    
     def detectar_Instruccion(self,query):
         #    print("  __det consult")
         query=query.lower()    
@@ -95,51 +113,85 @@ class Conexion:
     def executeSQLFile(self,extension):
         self.file=SQLFile()
         #self.print=True
-        #self.showQuery(False)
+        self.showQuery(False)
 
-        with open(self.archivoSQL, "r",encoding="utf-8") as archivo:
+        with open(self.getArchivoDir(self.archivoSQL), "r",encoding="utf-8") as archivo:
             c=0
+            #print('EXTENSION:',extension)
             while True:
-                self.SqlQueries=self.file.getSQLines(archivo)
-                #print(c)
+                
+                self.SqlQueries=self.file.getSQLines(archivo) 
 
-                #print('queries=',self.SqlQueries)
-                #print(f'MITAD:[{self.file.primera_mitad}]')
-                print('QUERYS:[')
-                print("\n".join(self.SqlQueries))
-                print('======<FIN')
+                # print(f'{Back.GREEN}QUERYS:[')
+                # print("\n.--".join(self.SqlQueries))
+                # print(f'======<FIN{Back.RESET}')
 
                 for i in self.SqlQueries:
                     #ubicamos la instuccion
-                    
+                    #print(f'__i={i}')
                     i=i.lower().replace('database','schema',1)
+                    indexDB=i.lower().find(self.db.lower())
 
-                    if(i.lower().find(self.db.lower())!=-1):
-                        # hay que hacer una operacion en la db             
-                        inst=self.detectar_Instruccion(i)
-                        print('EXECUTE CON UNA PEQUEÑA MODIFICACION')         
+                    # if(extension !=''):
+                    #     print(f'{Back.WHITE}EXECUTE SIN PROBLEMAS__{Back.RESET}')
+                    #     self.execute_query(i)
 
-                        if(inst ==6 or inst ==5):
-                            # requiere crear o borrar la db
-                            res=re.search('create schema',i,re.IGNORECASE)
+                    inst=self.detectar_Instruccion(i)
+                    # if(indexDB!=-1):
+                    #     # hay que hacer una operacion en la db ya que nuestra DB tuvo que ser renombrada por una extension          
+                    #     print('EXECUTE CON UNA PEQUEÑA MODIFICACION')
 
-                            print(f'NEL PERRO, NO DEJARE QUE LE HAGAS {self.instrucciones[inst]}')
-                        else:
-                            # reuquiere usar la db
-                            self.execute_query(i.lower().replace(self.db.lower(),f'{self.db}{extension}'))    
-                        
+                    divididos=i.split('begin')
+
+                    if (len(divididos)>1 and extension !='' and indexDB!=-1):
+                        dbChanged=[]
+                        #estamos trabajando una funcion/ bloque begin...end
+                        # a su vez la db tiene un nombre repetido
+                        # y aqui aparece el nombre de la db en algun lado
+
+                        for instOfBlock in divididos[1].split(';'):
+                            #recorremos las insrtrucciones del bloque y hay que remplazar las bd en caso de usarlas
+                            # instOfBlock.lower().split(self.db.lower())
+                            
+                            dbChanged.append(self.corregirDB(instOfBlock,extension))
+                        self.execute_query(divididos[0]+'begin\n'+';'.join(dbChanged))
+
                     else:
-                        print('EXECUTE SIN PROBLEMAS')
-                        self.execute_query(i)
-
+                        if(inst ==6 or inst ==5) and indexDB!=-1 and len(divididos)==1:
+                            # requiere crear o borrar la db
+                            # res=re.search('create schema',i,re.IGNORECASE)
+                            print(f'{Back.MAGENTA}NEL PERRO, NO DEJARE QUE LE HAGAS {self.instrucciones[inst]}{Back.RESET}')
+                        else:
+                            if(extension==''):
+                                self.execute_query(i)
+                            else:
+                                self.execute_query(i.lower().replace(self.db.lower(),f'{self.db}{extension}'))    
                 
                 if self.SqlQueries==[''] or self.SqlQueries==[]:
                     #print('PM:{',self.file.primera_mitad,'}')
+                    print(f'{Back.RED}FIN DE LA LECTURA{Back.RESET}')
                     if(len(self.file.primera_mitad)>1):
                         self.execute_query(self.file.primera_mitad)
                     break
                 c+=1
         self.showQuery(True)
+
+    def corregirDB(self,query,extension):
+        # aqui deberia de instanciar un objeto DBLocator cuando le de un algoritmo que funcione
+        divd=query.lower().split(self.db.lower())
+        #print(divd)
+        c=0
+        index=0
+        queryAdapted=''
+        while index < len(divd):
+            x=divd[index]
+            print(f'{c}:({c+len(x)})')
+            queryAdapted+=query[c:(c+len(x))]
+            if(index!=len(divd)-1):
+                queryAdapted+=self.db+extension
+            c+=len(x)+10
+            index+=1
+        return queryAdapted
 
     def crear_DB(self,extension):
         if(extension!=''):
@@ -149,14 +201,14 @@ class Conexion:
         self.execute_query(f"create schema {self.db+extension}")
 
         self.execute_query(f"use {self.db+extension}")
+        
+
+        self.executeSQLFile(extension)
+
         query='create table version( version int not null);'
         self.execute_query(query)
         query='insert into version values(%s);'%(self.version)
         self.execute_query(query)
-
-        self.executeSQLFile(extension)
-
-        # self.crear_tablas()
 
     def getFromVersion(self):
         r=self.execute_query('select version from version')
@@ -221,3 +273,6 @@ class Conexion:
     
     def showQuery(self,booleano):
         self.print=booleano
+
+
+#cx=Conexion('EducamEsta',1,'DB.sql')
