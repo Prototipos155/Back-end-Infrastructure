@@ -1,8 +1,10 @@
 from .conexion import Conexion
 test = False
 class Admin():
+
     SQLFile='DB.sql'
     db='EducamEsta'
+
     def __init__(self):
         self.cx=Conexion(self.db,1,self.SQLFile)
     

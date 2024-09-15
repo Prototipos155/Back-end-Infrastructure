@@ -1,6 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from local_library.hash import generate_password_hash, check_password_hash
+from db.admin import Admin
+from db.conexion import Conexion
 
 import os
+import pymysql
+
+dbc = Admin()
 
 app = Flask(__name__)
 
@@ -20,7 +26,28 @@ def iniciarSesion():
 
 @app.route ('/registro')
 def registro():
-    return render_template("registro.html")
+
+    if request.method in ["GET","POST"]:
+
+        nombres = request.form ['nombres']
+        apellidos = request.form ['apellidos']
+        apodo = request.form ['apodo']
+        correo = request.form ['correo']
+        telefono = request.form ['telefono']
+        grado = request.form ['grado']
+        grupo = request.form ['grupo']
+        contraseña = request.form ['contraseña']
+        contraseña1 = request.form ['contraseña1']
+    
+        try:
+            dbc.cursor.excute("SELECT correo FROM perfil where correo = %s", (correo,))
+            ce = dbc.cursor.fetchone()
+
+        except:
+            return render_template
+
+    else:
+        return render_template("registro.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
