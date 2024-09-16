@@ -20,17 +20,17 @@ DELIMITER ;
 DELIMITER //
 create procedure InsertIntoPerfil(in numControl varchar(20), in instMail varchar(150),in telefono varchar(10),in psw varchar(256),out idPerfil int)
 begin 
-	insert into perfil(numerocontrol,correoinstitucional,telefono,contraseña) values(numControl,instMail,telefono,psw);
+	insert into perfil(numerocontrol,correo,telefono,contraseña_encript) values(numControl,instMail,telefono,psw);
     set idPerfil=(select obtener_id_perfil(numControl));
 end //
 DELIMITER ; 
 
 DELIMITER //
 create procedure InsertIntoAlumno(in numControl varchar(20), in instMail varchar(150),in telefono varchar(10),in psw varchar(256),
-	in nickName varchar(30),in grado int, in grupo varchar(1))
+	in apodo varchar(30),in grado int, in grupo varchar(1))
 begin
 	call InsertIntoPerfil(numControl,instMail,telefono,psw,@idPerfil);
-    insert into alumno values(@idPerfil,nickName,grado,grupo);
+    insert into alumno values(@idPerfil,apodo,grado,grupo);
 end //
 DELIMITER ; 
 
@@ -61,23 +61,27 @@ insert into departamento(nombre) values
 
 create table perfil(
     numeroControl varchar(20) primary key not null,
-    correoInstitucional varchar(150) unique not null,
-    id_perfil int unique auto_increment not null,
+    nombres varchar (40) not null,
+    apellidos varchar (40) not null,
+    apodo varchar(10) unique not null,
+    correo varchar(150) unique not null,
     telefono varchar(10) unique not null,
-    contraseña varchar(256) not null
-    #,nickName varchar(10) unique not null
+    grado varchar (1) not null,
+    grupo varchar (1) not null,
+    contraseña_encript varchar(256) not null,
+    id_perfil int unique auto_increment not null
 );
 
-insert into perfil(correoInstitucional,telefono,numeroControl,contraseña) values
-('22301061550038@cetis155.edu.mx','4491261629','22301061550038','elPepe')
-,('22301061550037@cetis155.edu.mx','4491121629','22301061550037','djShark')
-,('22301061550036@cetis155.edu.mx','4491261822','22301061550036','paquito777')
-,('22301061550035@cetis155.edu.mx','4491236713','22301061550035','terreneitor')
+insert into perfil(nombres,apellidos,apodo,correo,telefono,grado,grupo,numeroControl,contraseña_encript) values
+('Martinoli','Perez Perez','MARTINGOD','22301061550038@cetis155.edu.mx','4491261629','5','A','22301061550038','elPepe')
+,('Oscarin','Rosa Melano','oalmed','22301061550037@cetis155.edu.mx','4491121629','3','F','22301061550037','djShark')
+,('Flavio','Mendina Martinez','favinclavin','22301061550036@cetis155.edu.mx','4491261822','5','D','22301061550036','paquito777')
+,('Daniela','Tenoria Mendina','el+enamorado','22301061550035@cetis155.edu.mx','4491236713','5','G','22301061550035','terreneitor')
 ;
 
 create table alumno(
 	idPerfil int primary key not null,
-    nickName varchar(30) unique not null,
+    apodo varchar(30) unique not null,
     grado int not null,
     grupo varchar(1) not null,
 

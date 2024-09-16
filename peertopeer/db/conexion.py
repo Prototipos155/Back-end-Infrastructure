@@ -8,9 +8,9 @@ class Conexion:
     conn=None
     archivoVersion='dbVersion.txt'
     print=True
-    cursor=True
+    cursor=False
     db=None
-    fetch= True
+    fetch= False
 
     instrucciones=["use","insert","select","update","delete",'create',"drop"]
     

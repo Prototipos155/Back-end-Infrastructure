@@ -24,29 +24,35 @@ def home():
 def iniciarSesion():
     return render_template("iniciosesi.html")
 
-@app.route ('/registro')
+@app.route ('/registro', methods=['GET','POST'])
 def registro():
 
-    if request.method in ["GET","POST"]:
+    if request.method == ["GET","POST"]:
 
-        nombres = request.form ['nombres']
-        apellidos = request.form ['apellidos']
+        nombres = request.form['nombres']
+        apellidos = request.form['apellidos']
         apodo = request.form ['apodo']
-        correo = request.form ['correo']
-        telefono = request.form ['telefono']
-        grado = request.form ['grado']
-        grupo = request.form ['grupo']
-        contraseña = request.form ['contraseña']
-        contraseña1 = request.form ['contraseña1']
-    
+        telefono = request.form['telefono']
+        numcontrol = request.form['numcontrol']
+        correo = request.form['correo']
+        grado = request.form['grado']
+        grupo = request.form['grupo']
+        contraseña = request.form['contraseña']
+        confirmContra = request.form['confirmContra']
+
         try:
-            dbc.cursor.excute("SELECT correo FROM perfil where correo = %s", (correo,))
-            ce = dbc.cursor.fetchone()
+           dbc.execute("SELECT correo FROM perfil where correo =  %s", (correo,)) 
+           correo_exist = self.cx.getFetch()
+
+           if correo_exist:
+               return render_template("home.html")
+           else:
+               return render_template ("registrar.html")
 
         except:
-            return render_template
-
-    else:
+            return render_template("registro.html")
+        
+    else: 
         return render_template("registro.html")
 
 if __name__ == "__main__":
