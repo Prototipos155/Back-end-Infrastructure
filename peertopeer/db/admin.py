@@ -1,16 +1,34 @@
 from .conexion import Conexion
 test = False
 class Admin():
-
     SQLFile='DB.sql'
     db='EducamEsta'
-
     def __init__(self):
         self.cx=Conexion(self.db,1,self.SQLFile)
     
     def execute(self,query):
-        self.cx.execute_query(query)
+        return self.cx.execute_query(query)
 
+    def existsDataInTable(self,table,rows_to_return,row_compairing_name,value):
+        self.execute(f"select {rows_to_return} from {table} were {row_compairing_name} = {value}")
+        return self.cx.getFetch()
+        
+    def existsDataInPerfiles(self,correo,numcontrol,telefono,contraseña):
+        datos=(
+            [correo,'numeroControl'],
+            [numcontrol,'correoInstitucional'],
+            [telefono,'telefono'],
+            [contraseña,'contraseña']
+            )
+
+        c=0
+        while c<len(datos):
+            if(self.existsDataInTable('perfil',datos[c][1],datos[c][1],datos[c][0])[0] != None):
+                return c
+            c+=1
+        
+        return -1
+        
     def logInUser(self,numControl,correoInst,telefono,psw,
             nickName,grado,grupo,
             nombres,apellidos,numTarjetaBienestar,nombreEscuela,idGradoAvance

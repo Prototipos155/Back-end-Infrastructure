@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,7 +10,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <script src="/static/js/design.js"></script>
-    <script src="/static/js/validacionRegistro.js"></script>
+    <script src="/static/js/design.js"></script>
 
 
 </head>
@@ -20,7 +21,7 @@
         <a href="#" class="logo">Peer2Peer</a>
         <ul class="nav-links">
             <i class="bx bx-chevron-left navCloseBtn"></i>
-            <li><a href="#">Home</a></li>
+            <li><a href="/">Home</a></li>
             <li><a href="#">Contáctanos</a></li>
             <li><a href="/registro">Registrate</a></li>
             <li><a href="/iniciarSesion">Iniciar Sesión</a></li>
@@ -30,6 +31,11 @@
             <i class="bx bx-search search-icon princi"></i>
             <input type="text" placeholder="Busca aquí..." />
         </div>
+
+        {% if mensaje %}
+        {{mensaje}}
+        {% endif %}
+
     </nav>
 
     {% block content %}

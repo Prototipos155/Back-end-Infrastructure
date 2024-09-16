@@ -4,56 +4,62 @@ from db.admin import Admin
 from db.conexion import Conexion
 
 import os
+import sqlite3
 import pymysql
 
-dbc = Admin()
+cbd = Admin()
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
 
-    a=Admin()
-    # a.logInAlumn('22301061553360','22301061553360@cetis155.edu.mx','7839123848','contraseñ','pepito',3,'A')
-    # a.logInTutor('22301061553361','22301061553361@cetis155.edu.mx','7839120048','contraseñ','oscar','guzaman alvedo','1234123340989301','josefa ortiz de dominguez','bachillerato')
-    a.close()
-
     return render_template("home.html")
 
-@app.route ('/iniciarSesion')
+@app.route ('/iniciarSesion', methods=['GET', 'POST'])
 def iniciarSesion():
-    return render_template("iniciosesi.html")
+
+    print(f"metodo en uso: {request.method}")
+
+    if request.method == "POST":
+        return render_template("iniciosesi.html")
+
+    else:
+        return render_template("home.html", mensaje = "este pedo ya no jalo")        
 
 @app.route ('/registro', methods=['GET','POST'])
 def registro():
 
-    if request.method == ["GET","POST"]:
+    print(f"metodo en uso: {request.method}")
 
-        nombres = request.form['nombres']
-        apellidos = request.form['apellidos']
-        apodo = request.form ['apodo']
-        telefono = request.form['telefono']
-        numcontrol = request.form['numcontrol']
-        correo = request.form['correo']
-        grado = request.form['grado']
-        grupo = request.form['grupo']
-        contraseña = request.form['contraseña']
-        confirmContra = request.form['confirmContra']
+    if request.method =="POST":
 
-        try:
-           dbc.execute("SELECT correo FROM perfil where correo =  %s", (correo,)) 
-           correo_exist = self.cx.getFetch()
+            nombres = request.form.get('nombres')
+            apellidos = request.form.get('apellidos')
+            apodo = request.form.get('apodo')
+            telefono = request.form.get('telefono')
+            numcontrol = request.form.get('numcontrol')
+            correo = request.form.get('correo')
+            grado = request.form.get('grado')
+            grupo = request.form.get('grupo')
+            contraseña = request.form.get('contraseña')
+            confirmContra = request.form.get('confirmContra')
 
-           if correo_exist:
-               return render_template("home.html")
-           else:
-               return render_template ("registrar.html")
+            try:
+                cbd.execute("SELECT correo FROM perfil WHERE correo = %s", (correo,))
+                ces = cbd.cursor.fetchone()
+                
+                if ces:
+                  return render_template("registro.html", mensaje = "este correo ya esta en uso" )
 
-        except:
-            return render_template("registro.html")
-        
-    else: 
-        return render_template("registro.html")
+                else:
+                  return render_template("registro.html", mensaje = "El correo está disponible")
+                
+            except:
+                return render_template("home.html", mensaje = "este pedo ya no jalo")
+            
+
+    return render_template("home.html", mensaje = "YA NO JALA OTRA VEZ")
 
 if __name__ == "__main__":
     app.run(debug=True)
