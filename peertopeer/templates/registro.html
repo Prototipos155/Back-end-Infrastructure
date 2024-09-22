@@ -5,7 +5,7 @@
 <body><br><br><br>
     Complete los siguientes campos para su registro en P2P: <br> <br>
 
-    <form method="POST" action="/registro">
+    <form action="/registro" id="registro_form" method="post">
 
         <h4>¿Que perfil desea utilizar?</h4><br>
 
@@ -23,7 +23,8 @@
         <div>
             Ingrese su nombre(s). Las primeras letras de la palabra con mayúscula<br>
             <label for="nombres">Nombres:</label>
-            <input type="text" name="nombres" id="nombres" class="nombres" pattern="[A-Za-z ]{3,30}" maxlength="30" required>
+            <input type="text" name="nombres" id="nombres" class="nombres" pattern="[A-Za-z ]{3,30}" maxlength="30"
+                required>
         </div>
 
         <br>
@@ -31,7 +32,8 @@
         <div>
             Ingrese sus apellidos. Las primeras letras de la palabra con mayúscula<br>
             <label for="apellidos">Apellidos:</label>
-            <input type="text" name="apellidos" id="apellidos" class="apellidos" pattern="[A-Za-z ]{5,30}" maxlength="30" required>
+            <input type="text" name="apellidos" id="apellidos" class="apellidos" pattern="[A-Za-z ]{5,30}"
+                maxlength="30" required>
         </div>
 
         <br>
@@ -52,17 +54,16 @@
 
         <div>
             <label for="numcontrol">Número de control:</label>
-            <input type="text" name="numcontrol" id="numcontrol" class="numcontrol" pattern="[0-9]{5,20}" maxlength="20" required>
+            <input type="text" name="numcontrol" id="numcontrol" class="numcontrol" pattern="[0-9]{5,20}" maxlength="20"
+                required>
         </div>
 
         <br>
 
         <div>
-            {% if mensaje %}
-            {{mensaje}}
-            {% endif %}
             <label for="correo">Correo institucional:</label>
-            <input type="email" name="correo" id="correo" class="correo" placeholder="Correo" maxlength="150" minlength="10" required>
+            <input type="email" name="correo" id="correo" class="correo" placeholder="Correo" maxlength="150"
+                minlength="10" required>
         </div>
 
         <br>
@@ -100,7 +101,7 @@
         <button type="submit">Enviar</button>
 
     </form>
-
+    <script src="/static/js/registro.js"></script>
 </body>
 
 {% endblock %}
