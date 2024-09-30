@@ -9,21 +9,25 @@
 
         <h4>¿Que perfil desea utilizar?</h4><br>
 
+        {% if mensaje %}
+        {{mensaje}}
+        {% endif %}
+
 
         <label>
-            <input type="checkbox" name="rol" id="alumno" value="alumno">
+            <input type="radio" name="alumno"  id="alumno" value="alumno">
             Alumno
         </label>
 
         <label>
-            <input type="checkbox" name="rol" id="tutor" value="tutor">
+            <input type="radio" name="tutor" id="rol" value="tutor">
             Tutor
         </label> <br> <br>
 
         <div>
             Ingrese su nombre(s). Las primeras letras de la palabra con mayúscula<br>
             <label for="nombres">Nombres:</label>
-            <input type="text" name="nombres" id="nombres" class="nombres" pattern="[A-Za-z ]{3,30}" maxlength="30"
+            <input type="text" name="nombres" id="nombres" class="nombres" value="Carlos" pattern="[A-Za-z ]{3,30}" maxlength="30"
                 required>
         </div>
 
@@ -32,7 +36,7 @@
         <div>
             Ingrese sus apellidos. Las primeras letras de la palabra con mayúscula<br>
             <label for="apellidos">Apellidos:</label>
-            <input type="text" name="apellidos" id="apellidos" class="apellidos" pattern="[A-Za-z ]{5,30}"
+            <input type="text" name="apellidos" id="apellidos" class="apellidos" value="Arias" pattern="[A-Za-z ]{5,30}"
                 maxlength="30" required>
         </div>
 
@@ -40,14 +44,14 @@
 
         <div>
             <label for="apodo">Nombre de usuario:</label>
-            <input type="text" name="apodo" id="apodo" class="apodo" pattern="[A-Za-z ]{3,30}" max="30" required>
+            <input type="text" name="apodo" id="apodo" class="apodo" value="Carlozzz" pattern="[A-Za-z ]{3,30}" max="30" required>
         </div>
 
         <br>
 
         <div>
             <label for="telefono">Teléfono:</label>
-            <input type="text" name="telefono" id="telefono" class="telefono" pattern="\d{10}" maxlength="10" required>
+            <input type="number" name="telefono" id="telefono" class="telefono" pattern="\d{10}" maxlength="10" required>
         </div>
 
         <br>
@@ -84,16 +88,14 @@
 
         <div>
             <label for="contraseña">Contraseña:</label>
-            <input type="password" name="contraseña" id="contraseña" class="contraseña" maxlength="30"
-                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required>
+            <input type="password" name="contraseña" id="contraseña" value="Carlos.74" class="contraseña" maxlength="30">
         </div>
 
         <br>
 
         <div>
             <label for="confirmContra">Confirmar contraseña:</label>
-            <input type="password" name="confirmContra" id="confirmContra" class="confirmContra" maxlength="30"
-                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required>
+            <input type="password" name="confirmContra" id="confirmContra" value="Carlos.74" class="confirmContra" maxlength="30">
         </div>
 
         <br>

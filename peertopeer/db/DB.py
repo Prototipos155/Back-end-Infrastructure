@@ -126,6 +126,7 @@ class CC():
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS perfil 
                 (id_perfil int unique auto_increment not null,
+                rol varchar (20) not null,
                 numcontrol varchar(20) primary key not null,
                 nombres varchar (40) not null,
                 apellidos varchar (40) not null,
