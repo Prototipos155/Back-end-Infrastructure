@@ -1,14 +1,21 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 from flask import Flask, render_template,uest, redirect, url_for, flash
 =======
 from flask import Flask, render_template #,uest, redirect, url_for, flash
 from db.admin import Admin
 >>>>>>> DB/main
+=======
+from flask import Flask, render_template, request, redirect, url_for, flash
+
+import os
+>>>>>>> 7f685ae1798463d8c70a0bc4f83809877f9d2b36
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
     a=Admin()
@@ -18,6 +25,17 @@ def home():
     
 >>>>>>> DB/main
     return render_template("principal.html")
+=======
+    return render_template("home.html")
+
+@app.route ('/iniciarSesion')
+def iniciarSesion():
+    return render_template("iniciosesi.html")
+
+@app.route ('/registro')
+def registro():
+    return render_template("registro.html")
+>>>>>>> 7f685ae1798463d8c70a0bc4f83809877f9d2b36
 
 if __name__ == "__main__":
     app.run(debug=True)
