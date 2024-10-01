@@ -1,180 +1,62 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<<<<<<< HEAD
-<body>
-    Complete los siguientes campos para su registro en P2P: <br> <br>
+<div class="container">
+    <h2 class="form-title">Complete los siguientes campos para su registro en P2P:</h2>
 
-    <form action="/registrar" name="form-registro">
-
+    <form action="/registro" name="form-registro" class="form-registro" method="post">
         <h4>¿Qué desea ser?</h4>
+        <div class="role-selection">
 
-        <label>
-            <input type="checkbox" name="rol" id="alumno" value="alumno" required>
-=======
+            
+            <label class="radio" for="checkbox1">
+                <span class="label">Alumno</span>
+                <input type="radio" name="alumno"  id="rol" value="alumno">
+                <span class="checkmark"></span>
+            </label>
 
-<body><br><br><br>
-    Complete los siguientes campos para su registro en P2P: <br> <br>
+            <label class="radio" for="checkbox2">
+                <span class="label">Tutor</span>
+                <input type="radio" name="tutor" id="rol" value="tutor">
+                <span class="checkmark"></span>
+            </label>
+            
 
-    <form action="/registro" id="registro_form" method="post">
-
-        <h4>¿Que perfil desea utilizar?</h4><br>
-
-        {% if mensaje %}
-        {{mensaje}}
-        {% endif %}
-
-
-        <label>
-            <input type="radio" name="alumno"  id="alumno" value="alumno">
->>>>>>> 6e587cac256e69ce4344690ab43e1efcf57e77e9
-            Alumno
-        </label>
-
-        <label>
-<<<<<<< HEAD
-            <input type="checkbox" name="rol" id="tutor" value="tutor" required>
-            Tutor
-        </label> <br> <br>
-
+        </div>
 
         <label for="nombres">Nombres:</label>
-        <input type="text" name="nombres" id="nombres" pattern="[A-Za-z ]{3,30}" maxlength="30" required> <br> <br>
-        
-        <label for="apellidos">Apellidos:</label>
-        <input type="text" name="apellidos" id="apellidos" pattern="[A-Za-z ]{5,30}" maxlength="30" required> <br> <br>
+        <input class='input' type="text" name="nombres" id="nombres" placeholder="Ingrese sus nombres" required>
 
-        <label for="nickname">Nombre de usuario:</label>
-        <input type="text" name="nickname" id="nickname" pattern="[A-Za-z ]{3,30}" max="30" required> <br> <br>
+        <label for="apellidos">Apellidos:</label>
+        <input class='input' type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" required>
+
+        <label for="apodo">Nombre de usuario:</label>
+        <input class='input' type="text" name="apodo" id="apodo" placeholder="Ingrese un nombre de usuario" required>
 
         <label for="telefono">Teléfono:</label>
-        <input type="text" name="telefono" id="telefono" pattern="\d{10}" maxlength="10" required> <br> <br>
+        <input class='input' type="text" name="telefono" id="telefono" placeholder="Ingrese su número de teléfono" required>
 
-        <label for="numControl">Número de control:</label>
-        <input type="text" name="numControl" id="numControl" pattern="[0-9]{5,20}" maxlength="20" required> <br> <br>
+        <label for="numcontrol">Número de control:</label>
+        <input class='input' type="text" name="numcontrol" id="numcontrol" placeholder="Ingrese su número de control" required>
 
-        <label for="correoInstitu">Correo institucional:</label>
-        <input type="email" name="correoInstitu" id="correoInstitu" maxlength="150" minlength="10" required> <br> <br>
+        <label for="correo">Correo institucional:</label>
+        <input class='input' type="email" name="correo" id="correo" placeholder="Ingrese su correo institucional" required>
 
         <label for="grado">Grado:</label>
-        <input type="number" name="grado" id="grado" max="10" min="1" required> <br> <br>
+        <input class='input' type="number" name="grado" id="grado" placeholder="Ingrese su grado" required>
 
         <label for="grupo">Grupo:</label>
-        <input type="text" name="grupo" id="grupo" maxlength="1" pattern="[A-Za-z]{1}" required> <br> <br>
-
-        <div id="tarjetabien" hidden>
-            <label for="numTarjetaBien">Número de su tarjeta del Bienestar:</label>
-            <input type="text" name="numTarjetaBien" id="numTarjetaBien" pattern="\d{4}-\d{4}-\d{4}-\d{4}" maxlength="19"> <br> <br>
-        </div>
+        <input class='input' type="text" name="grupo" id="grupo" placeholder="Ingrese su grupo" required>
 
         <label for="contraseña">Contraseña:</label>
-        <input type="password" name="contraseña" id="contraseña" maxlength="30" 
-        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required> <br> <br>
+        <input class='input' type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
 
-        <label for="confirmContra">Confirmar contraseña:</label>
-        <input type="password" name="confirmContra" id="confirmContra" maxlength="30"
-        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-_])([A-Za-z\d!#.-_]|[^\s]){8,30}$" required> <br> <br>
+        <label for="confirmcontra">Confirmar contraseña:</label>
+        <input class='input' type="password" name="confirmcontra" id="confirmcontra" placeholder="Confirme su contraseña"  required>
 
-        
-        <button id="registrarse"> Confirmar registro </button>
-
+        <center>
+        <button type="submit" id="registrarse" class="btn-registrarse">Confirmar registro</button>
+        </center>
     </form>
-
-    <script src="/static/js/validacionRegistro.js"></script>
-=======
-            <input type="radio" name="tutor" id="rol" value="tutor">
-            Tutor
-        </label> <br> <br>
-
-        <div>
-            Ingrese su nombre(s). Las primeras letras de la palabra con mayúscula<br>
-            <label for="nombres">Nombres:</label>
-            <input type="text" name="nombres" id="nombres" class="nombres" value="Carlos" pattern="[A-Za-z ]{3,30}" maxlength="30"
-                required>
-        </div>
-
-        <br>
-
-        <div>
-            Ingrese sus apellidos. Las primeras letras de la palabra con mayúscula<br>
-            <label for="apellidos">Apellidos:</label>
-            <input type="text" name="apellidos" id="apellidos" class="apellidos" value="Arias" pattern="[A-Za-z ]{5,30}"
-                maxlength="30" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="apodo">Nombre de usuario:</label>
-            <input type="text" name="apodo" id="apodo" class="apodo" value="Carlozzz" pattern="[A-Za-z ]{3,30}" max="30" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="telefono">Teléfono:</label>
-            <input type="number" name="telefono" id="telefono" class="telefono" pattern="\d{10}" maxlength="10" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="numcontrol">Número de control:</label>
-            <input type="text" name="numcontrol" id="numcontrol" class="numcontrol" pattern="[0-9]{5,20}" maxlength="20"
-                required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="correo">Correo institucional:</label>
-            <input type="email" name="correo" id="correo" class="correo" placeholder="Correo" maxlength="150"
-                minlength="10" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="grado">Grado:</label>
-            <input type="number" name="grado" id="grado" class="grado" max="10" min="1" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="grupo">Grupo:</label>
-            <input type="text" name="grupo" id="grupo" class="grupo" maxlength="1" pattern="[A-Za-z]{1}" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="contraseña">Contraseña:</label>
-            <input type="password" name="contraseña" id="contraseña" value="Carlos.74" class="contraseña" maxlength="30">
-        </div>
-
-        <br>
-
-        <div>
-            <label for="confirmContra">Confirmar contraseña:</label>
-            <input type="password" name="confirmContra" id="confirmContra" value="Carlos.74" class="confirmContra" maxlength="30">
-        </div>
-
-        <br>
-
-        <button type="submit">Enviar</button>
-
-    </form>
-    <script src="/static/js/registro.js"></script>
->>>>>>> 6e587cac256e69ce4344690ab43e1efcf57e77e9
-</body>
-
+</div>
 {% endblock %}
-
-<!-- admin - rfc
-<<<<<<< HEAD
- tabla en BD que almacene las peticiones de registro (tutor o admin) para ser aceptados -->
-
-=======
- tabla en BD que almacene las peticiones de registro (tutor o admin) para ser aceptados -->
->>>>>>> 6e587cac256e69ce4344690ab43e1efcf57e77e9
