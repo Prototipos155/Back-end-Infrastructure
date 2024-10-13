@@ -1,6 +1,10 @@
-var truealumno = document.getElementById('alumno');
+const form = document.getElementById('form-registro')
+const confirmacion = document.getElementById('confirmacion')
 
-truealumno.addEventListener('click', function() {
-    if(truealumno.checked){
-        alert('Se registra como alumno') }   
-})
+confirmacion.hidden = true;
+
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    console.log('Formulario enviado');
+    confirmacion.hidden = false;
+});

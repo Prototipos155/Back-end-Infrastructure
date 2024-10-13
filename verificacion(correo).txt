@@ -1,0 +1,48 @@
+"""from dotenv import load_dotenv
+from email.message import EmailMessage
+
+import os
+import ssl
+import smtplib
+import random
+
+load_dotenv()
+
+email_sender = "peertopeerverificacion@gmail.com"
+password = os.getenv("PASSWORD")
+email_reciver = (f"{correo}")
+
+subjet = "Correo de Verificación"
+body= (f"El código para verificar que ingresaste un correo de tu propiedad es: {random.randint(10000, 99999)} ")
+                                    
+header = EmailMessage()
+header["From"] = remitente
+header["To"] = destinatario
+header["Subjet"] = asunto
+
+em.set_content(body)
+
+context = ssl.create_default_context()
+
+with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
+    smtp.login(email_sender,password)
+    smtp.sendmail(email_sender,email_reciver,em.as_string())"""
+
+
+
+     try:
+        payload = jwt.decode(token, 'pEER2Peer2024', algorithms=['HS256'])
+        rol = payload['rol']
+        nombres = payload['nombres']
+        apellidos = payload['apellidos']
+        apodo = payload['apodo']
+        telefono = ['telefono']
+        numcontrol = ['numcontrol']
+        correo = ['correo']
+        grado = ['grado']
+        grupo = ['grupo']
+        contraseña_encript = ['contraseña_encript']
+        exp= datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+
+    except:
+        return jsonify({'message':'shhh'})

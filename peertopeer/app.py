@@ -1,13 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template,redirect, request, session, jsonify, url_for
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta, timezone
+from dotenv import load_dotenv
+from email.message import EmailMessage
+
 from db.DB import CC
 
 import pymysql
+import jwt
+import os
+import ssl
+import smtplib
+import random
 
 
 cbd = CC()
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv("PASSWORD1")
+##csrf = CSRFProtect(app)
 
 @app.route('/')
 def home():
@@ -56,7 +69,7 @@ def registro():
             try:
 
                 if apodo_exist:
-                    return render_template("registro.html", mensaje1 = "este apodo ya esta en uso")
+                    return jsonify("registro.html", mensaje1 = "este apodo ya esta en uso")
                         
                 else:
                     if telefono_exist:
@@ -75,13 +88,59 @@ def registro():
 
                                     contraseña_encript = generate_password_hash(confirmcontra)
 
-                                    cbd.cursor.execute("INSERT INTO perfil (rol, nombres, apellidos, apodo, telefono, numcontrol, correo, grado, grupo, contraseña_encript) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (rol, nombres, apellidos, apodo, telefono, numcontrol, correo, grado, grupo, contraseña_encript ))
-                                    cbd.connection.commit()
+                                    try:
+                                        payload = {
+                                        'rol' : rol,
+                                        'nombres' : nombres,
+                                        'apellidos' : apellidos,
+                                        'apodo' : apodo,
+                                        'telefono' : telefono,
+                                        'numcontrol' : numcontrol,
+                                        'correo' : correo,
+                                        'grado' : grado,
+                                        'grupo' : grupo,
+                                        'contraseña_encript' : contraseña_encript,
+                                        'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
+                                        }
+
+                                        token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+
+                                        try:
+                                            remitente = "peertopeerverificacion@gmail.com"
+                                            password = os.getenv("PASSWORD")
+                                            destinatario = (f"{correo}")
+                                            codigoveri = random.randint(10000, 99999)
+
+                                            asunto = "Correo de Verificación"
+                                            body = (f"El código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                                                                
+                                            em = EmailMessage()
+                                            em["From"] = remitente
+                                            em["To"] = destinatario
+                                            em["Subjet"] = asunto
+
+                                            em.set_content(body)
+
+                                            context = ssl.create_default_context()
+
+                                            with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
+                                                smtp.login(remitente,password)
+                                                smtp.sendmail(remitente,destinatario,em.as_string())
+
+                                        except pymysql.Error as err:
+                                            return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
+
+                                        session['token'] = token
+                                        session['codigoveri'] = codigoveri
+                                        return redirect(url_for('dueñocorreo'))
+
+
+                                    except pymysql.Error as err:
+                                        return render_template("registro.html", mensaje1 = "este pedo ya no jalo") 
                                         
                                 else:
                                      return render_template("registro.html", mensaje1 = "las contraseñas que ingresas no coinciden")
                 
-                    
             except pymysql.Error as err:
  
                 return render_template("registro.html", mensaje = "las comprobaciones no jalaron")
@@ -89,8 +148,53 @@ def registro():
         except pymysql.Error as err:
             return render_template("home.html", mensaje = "este pedo ya no jalo")
         
-        
     return render_template ("registro.html")
+
+@app.route ('/dueñocorreo', methods=['GET', 'POST'])
+def dueñocorreo():
+
+    codigoveri = session.get('codigoveri')
+    token = session.get('token')
+    
+    if request.method in "POST":
+
+        codigo = request.form.get('codigo')
+        print(codigo)
+        print(codigoveri)
+
+        if str(codigo) == str(codigoveri):
+
+            try:
+                payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
+                
+                rol = payload['rol'],
+                nombres = payload['nombres'],
+                apellidos = payload['apellidos'],
+                apodo = payload['apodo'],
+                telefono = payload['telefono'],
+                numcontrol = payload['numcontrol'],
+                correo = payload['correo'],
+                grado = payload['grado'],
+                grupo = payload['grupo'],
+                contraseña_encript = payload['contraseña_encript']
+                
+                try:
+                    cbd.cursor.execute("INSERT INTO perfil (rol, nombres, apellidos, apodo, telefono, numcontrol, correo, grado, grupo, contraseña_encript) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (rol, nombres, apellidos, apodo, telefono, numcontrol, correo, grado, grupo, contraseña_encript ))
+                    cbd.connection.commit()
+
+                    return render_template("home.html", mensaje1 = "registro exitoso")
+                
+                except:
+                    return render_template("dueñocorreo.html", mensaje1 = "no se pudieron insertar los valores del registro")
+
+            except:
+                return render_template("dueñocorreo.html", mensaje1 = "no se pudo separar el token")
+            
+        else:
+            return render_template("dueñocorreo.html", mensaje1= "no se porque no jala este pedo")
+
+
+    return render_template("dueñocorreo.html")
 
 @app.route ('/acceso', methods=['GET', 'POST'])
 def acceso():
@@ -128,20 +232,20 @@ def acceso():
                             return render_template("home.html", mensaje1 =f"id: {id_perfil}   rol: {rol}")
 
                         else:
-                            return render_template("acceso.html", mensaje="Contraseña incorrecta") 
+                            return render_template("acceso.html", mensaje1="Contraseña incorrecta") 
                     
                     else:
-                        return render_template("acceso.html", mensaje="Contraseña no definida en la base de datos.")
+                        return render_template("acceso.html", mensaje1="Contraseña no definida en la base de datos.")
 
                 else:
-                    return render_template("acceso.html", mensaje="El apodo y/o correo no coinciden")
+                    return render_template("acceso.html", mensaje1="El apodo y/o correo no coinciden")
             
             except pymysql.Error as err:
-                return render_template("acceso.html", mensaje=" no se puede iniciar sesion")
+                return render_template("acceso.html", mensaje1=" no se puede iniciar sesion")
 
 
         except pymysql.Error as err:
-            return render_template("acceso.html", mensaje="esta madre no jalo")
+            return render_template("acceso.html", mensaje1="esta madre no jalo")
 
 
     return render_template ("acceso.html" )

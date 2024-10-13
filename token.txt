@@ -1,0 +1,18 @@
+"""from flask import request
+
+import jwt
+
+def autenticacion_middleware(request, response):
+    token = request.cookies.get('token')
+    if not token:
+        response.estado_codigo = 401
+        return response
+    
+    try:
+        decifrar_token = jwt.decode(token, 'juanjuegajuegos', algoritms=['HS256'])
+        request.id_perfil = decifrar_token['sub']
+    
+    except jwt.exceptions.DecodeError:
+        response.estado_codigo = 401
+        return response
+        """
