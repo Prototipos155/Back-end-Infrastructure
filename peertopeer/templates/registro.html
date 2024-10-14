@@ -6,24 +6,24 @@
 
     <form action="/registro" name="form-registro" id="form-registro" class="form-registro" method="post">
         <h4>¿Qué desea ser?</h4>
-        <div class="role-selection">
+        <div class="role-selection" id="role-selection">
 
             
             <label class="radio" for="checkbox1">
                 <span class="label">Básico</span>
-                <input type="radio" name="basico"  id="nivel" value="basico">
+                <input type="radio" name="basico"  id="nivel" value="basico" required>
                 <span class="checkmark"></span>
             </label>
 
             <label class="radio" for="checkbox2">
                 <span class="label">Medio Superior</span>
-                <input type="radio" name="medio-superior" id="nivel" value="medio-superior">
+                <input type="radio" name="medio-superior" id="nivel" value="medio-superior" required>
                 <span class="checkmark"></span>
             </label>
 
             <label class="radio" for="checkbox2">
                 <span class="label">Superior</span>
-                <input type="radio" name="superior" id="nivel" value="superior">
+                <input type="radio" name="superior" id="nivel" value="superior" required>
                 <span class="checkmark"></span>
             </label>
 
@@ -57,4 +57,6 @@
 
     </form>
 </div>
+
+<script src="../static/js/validacionesRegistro.js"></script>
 {% endblock %}
