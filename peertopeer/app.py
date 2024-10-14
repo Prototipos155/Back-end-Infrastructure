@@ -95,10 +95,10 @@ def registro():
                                         remitente = "peertopeerverificacion@gmail.com"
                                         password = os.getenv("PASSWORD")
                                         destinatario = (f"{correo}")
-                                        codigoveri = random.randint(10000, 99999)
+                                        codigoveri = random.randint(100000, 999999)
 
                                         asunto = "Correo de Verificación"
-                                        body = (f"El código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                        body = (f"Hola {apodo} el código para verificar que ingresaste un correo que esta en tu propiedad es: {codigoveri}")
                                                                             
                                         em = EmailMessage()
                                         em["From"] = remitente
@@ -111,7 +111,7 @@ def registro():
 
                                         with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
                                             smtp.login(remitente,password)
-                                            smtp.sendmail(remitente,destinatario,em.as_string())
+                                            smtp.sendmail(remitente,destinatario,asunto,em.as_string())
 
                                     except pymysql.Error as err:
                                         return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
@@ -136,8 +136,8 @@ def registro():
         
     return render_template ("registro.html")
 
-@app.route ('/dueñocorreo', methods=['GET', 'POST'])
-def dueñocorreo():
+@app.route ('/vericorreo_registro', methods=['GET', 'POST'])
+def vericorreo_registro():
 
     codigoveri = session.get('codigoveri')
     token = session.get('token')
@@ -168,16 +168,16 @@ def dueñocorreo():
                     return render_template("home.html", mensaje1 = "registro exitoso")
                 
                 except:
-                    return render_template("dueñocorreo.html", mensaje1 = "no se pudieron insertar los valores del registro")
+                    return render_template("vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
 
             except:
-                return render_template("dueñocorreo.html", mensaje1 = "no se pudo separar el token")
+                return render_template("vericorreo_registro.html", mensaje1 = "no se pudo separar el token")
             
         else:
-            return render_template("dueñocorreo.html", mensaje1= "no se porque no jala este pedo")
+            return render_template("vericorreo_registro.html", mensaje1= "no se porque no jala este pedo")
 
 
-    return render_template("dueñocorreo.html")
+    return render_template("vericorreo_registro.html")
 
 @app.route ('/acceso', methods=['GET', 'POST'])
 def acceso():
@@ -191,7 +191,7 @@ def acceso():
         contraseña = request.form.get('contraseña')
 
         try:
-            cbd.cursor.execute("SELECT  id_perfil, nivel, apodo, correo, contraseña_encript FROM perfil WHERE apodo = %s AND correo = %s", (apodo, correo))
+            cbd.cursor.execute("SELECT  id_perfil, nivel, apodo, correo, telefono, contraseña_encript FROM perfil WHERE apodo = %s AND correo = %s", (apodo, correo))
             perfil_exist = cbd.cursor.fetchone()
 
             if perfil_exist:
@@ -200,7 +200,8 @@ def acceso():
                 nivel = perfil_exist[1]
                 apodo_exist = perfil_exist[2]
                 correo_exist = perfil_exist[3]
-                contraseña_encript = perfil_exist[4]     
+                telefono_exist = perfil_exist[4]
+                contraseña_encript = perfil_exist[5]     
 
             try:
                 if apodo == apodo_exist and correo == correo_exist:
@@ -212,7 +213,48 @@ def acceso():
 
                         if check_password_hash(contraseña_encript, contraseña):
 
-                            return render_template("archivo.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}")
+                            try:
+                                payload = {
+                                'id_perfil' : id_perfil,
+                                'nivel' : nivel,
+                                'apodo' : apodo,
+                                'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
+                                    }
+
+                                token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+
+                                try:
+                                    remitente = "peertopeerverificacion@gmail.com"
+                                    password = os.getenv("PASSWORD")
+                                    destinatario = (f"{correo}")
+                                    codigoveri = random.randint(100000, 999999)
+
+                                    asunto = "Correo de Verificación"
+                                    body = (f"Hola {apodo} tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                                                                
+                                    em = EmailMessage()
+                                    em["From"] = remitente
+                                    em["To"] = destinatario
+                                    em["Subjet"] = asunto
+
+                                    em.set_content(body)
+
+                                    context = ssl.create_default_context()
+
+                                    with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
+                                        smtp.login(remitente,password)
+                                        smtp.sendmail(asunto,remitente,destinatario,em.as_string())
+
+                                except pymysql.Error as err:
+                                    return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
+                            
+                                session['token'] = token
+                                session['codigoveri'] = codigoveri
+                                return redirect(url_for('vericorreo_acceso'))
+
+                            except pymysql.Error as err:
+                                    return render_template ("acceso.html", mensaje1 = f"el token no ha podido ser generado: {err}")
+
 
                         else:
                             return render_template("acceso.html", mensaje1="Contraseña incorrecta") 
@@ -233,6 +275,37 @@ def acceso():
 
 
     return render_template ("acceso.html" )
+
+@app.route ('/vericorreo_acceso', methods=['GET', 'POST'])
+def vericorreo_acceso():
+
+    codigoveri = session.get('codigoveri')
+    token = session.get('token')
+    
+    if request.method in "POST":
+
+        codigo = request.form.get('codigo')
+
+        if str(codigo) == str(codigoveri):
+
+            try:
+                payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
+                
+                id_perfil = payload['id_perfil'],
+                nivel = payload['nivel'],
+                apodo = payload['apodo']
+                
+                return render_template("home.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo{apodo}")
+
+            except:
+                return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
+            
+        else:
+            return render_template("vericorreo_acceso.html", mensaje1= "no se porque no jala este pedo")
+
+
+
+    return render_template("vericorreo_acceso.html")
 
 @app.route ('/archivo', methods=['GET', 'POST'])
 def archivo():
