@@ -24,6 +24,7 @@ class CC():
                 self.tabla_guardar_documentos()
                 self.tabla_documentos_tutorias()
                 self.tabla_catalogo_quejas()
+                self.tabla_filtro_archivos()
 
             except pymysql.Error as err:
                 print("\n error al intentar crear las tablas " .format(err))
@@ -126,15 +127,12 @@ class CC():
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS perfil 
                 (id_perfil int unique auto_increment not null,
-                rol varchar (20) not null,
-                numcontrol varchar(20) primary key not null,
+                nivel varchar (20) not null,
                 nombres varchar (40) not null,
                 apellidos varchar (40) not null,
                 apodo varchar(10) unique not null,
                 correo varchar(150) unique not null,
                 telefono varchar(10) unique not null,
-                grado varchar (1) not null,
-                grupo varchar (1) not null,
                 contraseña_encript varchar(256) not null)""")
             print("tabla perfil creada")
 
@@ -299,6 +297,19 @@ class CC():
 
         except pymysql.Error as er:
             print("\nLa tabla catalogo quejas no fue creada:", er)
+
+    def tabla_filtro_archivos(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS filtro_archivos(
+                id_perfil int unique auto_increment not null,
+                archivo BLOB NOT NULL,
+                            
+                foreign key(id_perfil) references perfil(id_perfil))""")
+            print("Tabla filtro archivos creada")
+            
+        except pymysql.Error as er:
+            print("\la tabla filtro archivos no fue creada ")
 
 
 
