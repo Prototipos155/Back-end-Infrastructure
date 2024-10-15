@@ -99,7 +99,8 @@ class CC():
                 apodo varchar(20) unique not null,
                 correo varchar(150) unique not null,
                 telefono varchar(12) unique not null,
-                contraseña_encript varchar(256) not null)""")
+                contraseña_encript varchar(256) not null,
+                cuenta_activa TINYINT not null)""")
             print("tabla perfil creada")
 
         except pymysql.Error as er:

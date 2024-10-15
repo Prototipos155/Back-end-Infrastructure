@@ -38,7 +38,7 @@ def registro():
 
     if request.method in "POST":
 
-        nivel = request.form.get('basico','medio-superior','superior')
+        nivel = request.form.get('nivel')
         nombres = request.form.get('nombres')
         apellidos = request.form.get('apellidos')
         apodo = request.form.get('apodo')
@@ -103,7 +103,7 @@ def registro():
                                         em = EmailMessage()
                                         em["From"] = remitente
                                         em["To"] = destinatario
-                                        em["Subjet"] = asunto
+                                        em["Subject"] = asunto
 
                                         em.set_content(body)
 
@@ -118,7 +118,7 @@ def registro():
 
                                     session['token'] = token
                                     session['codigoveri'] = codigoveri
-                                    return redirect(url_for('dueñocorreo'))
+                                    return render_template("vericorreo_acceso.html")
 
 
                                 except pymysql.Error as err:
