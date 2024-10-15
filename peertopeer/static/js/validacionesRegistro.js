@@ -63,13 +63,13 @@ function validarFormulario() {
         document.getElementById("msgApellidos").remove();
     }
 
-    if (apodo.value.trim() == '' || apodo.value.trim().length < 1 || apodo.value.trim().length > 10) {
+    if (apodo.value.trim() == '' || apodo.value.trim().length < 1 || apodo.value.trim().length > 20) {
         valido = false;
         if (!document.getElementById("msgApodo")) {
             let msgApodo = document.createElement('span');
             msgApodo.id = "msgApodo";
             msgApodo.className = "msgsValidaciones";
-            msgApodo.textContent = "Campo obligatorio, debe contener entre 1 y 10 caracteres";
+            msgApodo.textContent = "Campo obligatorio, debe contener entre 1 y 20 caracteres";
             form.children["apodo"].parentNode.insertBefore(msgApodo, form.children["apodo"]);
         }
 

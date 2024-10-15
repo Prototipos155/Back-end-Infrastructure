@@ -103,22 +103,22 @@ def registro():
                                         em = EmailMessage()
                                         em["From"] = remitente
                                         em["To"] = destinatario
-                                        em["Subjet"] = asunto
+                                        em["Subject"] = asunto
 
                                         em.set_content(body)
 
                                         context = ssl.create_default_context()
 
-                                        with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
-                                            smtp.login(remitente,password)
-                                            smtp.sendmail(remitente,destinatario,em.as_string())
+                                        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = context) as smtp:
+                                            smtp.login(remitente, password)
+                                            smtp.sendmail(remitente, destinatario, em.as_string())
 
                                     except pymysql.Error as err:
                                         return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
 
                                     session['token'] = token
                                     session['codigoveri'] = codigoveri
-                                    return redirect(url_for('dueñocorreo'))
+                                    return redirect('vericorreo_registro')
 
 
                                 except pymysql.Error as err:
@@ -235,7 +235,7 @@ def acceso():
                                     em = EmailMessage()
                                     em["From"] = remitente
                                     em["To"] = destinatario
-                                    em["Subjet"] = asunto
+                                    em["Subject"] = asunto
 
                                     em.set_content(body)
 
@@ -243,7 +243,7 @@ def acceso():
 
                                     with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
                                         smtp.login(remitente,password)
-                                        smtp.sendmail(remitente,destinatario,em.as_string())
+                                        smtp.sendmail(remitente,destinatario,asunto,em.as_string())
 
                                 except pymysql.Error as err:
                                     return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")

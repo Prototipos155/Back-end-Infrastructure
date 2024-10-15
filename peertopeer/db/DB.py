@@ -13,6 +13,9 @@ class CC():
                 self.tabla_perfil()
                 self.tabla_peticiones()
                 self.tabla_filtro_archivos()
+                self.tabla_buzon_quejas()
+                self.tabla_categorias()
+                self.tabla_subcategorias()
 
             except pymysql.Error as err:
                 print("\n error al intentar crear las tablas " .format(err))
@@ -91,15 +94,15 @@ class CC():
     def tabla_perfil(self):
         try:
             self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS perfil 
-                (id_perfil int unique auto_increment not null,
-                nivel varchar (15) not null,
-                nombres varchar (50) not null,
-                apellidos varchar (50) not null,
-                apodo varchar(20) unique not null,
-                correo varchar(150) unique not null,
-                telefono varchar(12) unique not null,
-                contraseña_encript varchar(256) not null)""")
+            CREATE TABLE IF NOT EXISTS perfil (
+                id_perfil INT UNIQUE AUTO_INCREMENT NOT NULL,
+                nivel VARCHAR (15) NOT NULL,
+                nombres VARCHAR (50) NOT NULL,
+                apellidos VARCHAR (50) NOT NULL,
+                apodo VARCHAR(20) UNIQUE NOT NULL,
+                correo VARCHAR(150) UNIQUE NOT NULL,
+                telefono VARCHAR(12) UNIQUE NOT NULL,
+                contraseña_encript VARCHAR(256) NOT NULL)""")
             print("tabla perfil creada")
 
         except pymysql.Error as er:
@@ -108,16 +111,16 @@ class CC():
     def tabla_peticiones(self):
         try:
             self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS peticiones
-                (id_peticion int not null auto_increment,
-                id_perfil int not null,
-                mensaje varchar (256) not null,
+            CREATE TABLE IF NOT EXISTS peticiones(
+                id_peticion INT UNIQUE NOT NULL AUTO_INCREMENT,
+                id_perfil INT NOT NULL,
+                mensaje VARCHAR (256) NOT NULL,
                 archivo BLOB null,
-                fecha varchar (11) not null,
-                hora varchar (15) not null,
+                fecha VARCHAR (11) NOT NULL,
+                hora VARCHAR (15) NOT NULL,
                                 
-                primary key (id_peticion),
-                foreign key(id_perfil) references perfil(id_perfil)) """)
+                PRIMARY KEY (id_peticion),
+                FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil)) """)
             print ("tabla peticiones creada")
 
         except pymysql.Error as er:
@@ -127,16 +130,62 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS filtro_archivos(
-                id_filtro int not null auto_increment
-                                
-                id_perfil int not null,
-                archivo BLOB NOT NULL,
+                id_filtro INT UNIQUE NOT NULL AUTO_INCREMENT,
+                id_peticion INT NOT NULL,            
+                id_perfil INT NOT NULL,
+                fecha VARCHAR (11) NOT NULL,
+                verificado TINYINT NULL,
                             
-                foreign key(id_perfil) references perfil(id_perfil))""")
+                PRIMARY KEY(id_filtro),
+                FOREIGN KEY(id_perfil) REFERENCES perfil(id_perfil))""")
             print("Tabla filtro archivos creada")
             
         except pymysql.Error as er:
-            print("\la tabla filtro archivos no fue creada ")
+            print("\nla tabla filtro archivos no fue creada ")
 
+    def tabla_buzon_quejas(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS buzon_quejas(
+                id_buzon_quejas INT UNIQUE AUTO_INCREMENT NOT NULL,
+                id_perfil INT NOT NULL,
+                mensaje VARCHAR(256) NOT NULL,
+                fecha VARCHAR(11) NOT NULL,
+                hora VARCHAR(12) NOT NULL, 
+
+                PRIMARY KEY(id_buzon_quejas),
+                FOREIGN KEY(id_perfil) REFERENCES perfil(id_perfil))""")
+            print("Tabla buzon quejas creada")
+
+        except pymysql.Error as er:
+            print(f"la tabla buzon quejas no fue creada: ", er)
+
+    def tabla_categorias(self):
+        try:
+            self.cursor.execute(""" 
+            CREATE TABLE IF NOT EXISTS categorias(
+                id_categoria INT UNIQUE AUTO_INCREMENT NOT NULL,
+                categoria VARCHAR (90) NOT NULL,
+                                    
+                PRIMARY KEY(id_categoria) )""")
+            print("Tabla categorias creada") 
+
+        except pymysql.Error as er:
+            print("\nla tabla categorias no fue creada ",er)
+
+    def tabla_subcategorias(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS subcategorias(
+                id_subcategorias INT UNIQUE NOT NULL AUTO_INCREMENT,
+                id_filtro INT NOT NULL,
+                subcategoria VARCHAR (45) NOT NULL,
+                                
+                PRIMARY KEY(id_subcategorias),
+                FOREIGN KEY(id_filtro) REFERENCES filtro_archivos(id_filtro))""")
+            print("la tabla subcategoria creada ")
+
+        except pymysql.Error as er:
+            print("\nla tabla subcategorias no fue creada ",er)
 
 
