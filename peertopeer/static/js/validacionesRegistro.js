@@ -1,5 +1,5 @@
 const form = document.getElementById("form-registro");
-const niveles = document.querySelectorAll("#form-registro .role-selection #nivel");
+const niveles = document.getElementsByName("nivel");
 const nombres = document.getElementById("nombres");
 const apellidos = document.getElementById("apellidos");
 const apodo = document.getElementById("apodo");
@@ -140,21 +140,15 @@ function validarFormulario() {
 
 niveles[0].addEventListener("change", () => {
     niveles[1].checked = false;
-    niveles[1].required = false;
     niveles[2].checked = false;
-    niveles[2].required = false;
 });
 niveles[1].addEventListener("change", () => {
     niveles[0].checked = false;
-    niveles[0].required = false;
     niveles[2].checked = false;
-    niveles[2].required = false;
 });
 niveles[2].addEventListener("change", () => {
     niveles[0].checked = false;
-    niveles[0].required = false;
     niveles[1].checked = false;
-    niveles[1].required = false;
 });
 
 function insertAfter(newElement, existingElement) {
