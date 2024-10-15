@@ -111,7 +111,7 @@ def registro():
 
                                         with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
                                             smtp.login(remitente,password)
-                                            smtp.sendmail(remitente,destinatario,asunto,em.as_string())
+                                            smtp.sendmail(remitente,destinatario,em.as_string())
 
                                     except pymysql.Error as err:
                                         return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
@@ -243,7 +243,7 @@ def acceso():
 
                                     with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
                                         smtp.login(remitente,password)
-                                        smtp.sendmail(asunto,remitente,destinatario,em.as_string())
+                                        smtp.sendmail(remitente,destinatario,em.as_string())
 
                                 except pymysql.Error as err:
                                     return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
