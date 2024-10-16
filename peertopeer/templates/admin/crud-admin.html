@@ -7,7 +7,49 @@
 </head>
 <body>
     <h1>CRUD ADMINISTRADOR</h1>
-    <table>
+    <table border="2px">
+        <thead><tr>
+            <td>Apodo</td>
+            <td>Nivel</td>
+            <td>Nombres</td>
+            <td>Apellido</td>
+            <td>Correo</td>
+            <td>Teléfono</td>
+            <td>Estado de la cuenta</td>
+        </tr></thead>
+
+        <tbody>
+            {% for perfil in perfiles %}
+            <tr>
+                <td> {{perfil[1]}} </td>
+                <td> {{perfil[2]}} </td>
+                <td> {{perfil[3]}} </td>
+                <td> {{perfil[4]}} </td>
+                <td> {{perfil[5]}} </td>
+                <td> {{perfil[6]}} </td>
+                <td> <a href="/changeStatusAccount/{{perfil[0]}}/{{perfil[7]}}">
+                {% if perfil[7] == 1 %}
+                     Desactivar cuenta 
+                {% elif perfil[7] == 0 %}
+                     Activar cuenta
+                {% endif %} </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>
+
+<!--
+INSERT INTO `perfil`(`id_perfil`, `nivel`, `nombres`, `apellidos`, `apodo`, `correo`, `telefono`, `contraseña_encript`, `cuenta_activa`) VALUES (1,'Basico','Anakin','Skywalker','skywito','jedikiller@republic.com','0987654321','dfgsjhwerytre675fdsg','0'), 
+(2,'Basico','Ahsoka','Tano','sabionda','sabionda@republic.com','0987437321','dfdsgy546fsg','0'), 
+(3,'Basico','Padme','Amidala','padme','senadora@republic.com','1234356780','ghjewrt','0'), 
+(4,'Medio superior','Mace','Windu','nigga','master@republic.com','1234554321','fdtryehgfgjhgj','0'), 
+(5,'Medio superior','Yoda','no se','chiquillo','masterYoda@republic.com','1245678345','fdgreyrtyasdf','1'), 
+(6,'Medio superior','Obi-Wan','Kenobi','Ben Kenobi','jediknight@republic.com','1234567890','ooofghrytrydfg','1'), 
+(7,'Superior','El Padre','Father','father','father@force.com','4532567890','weewrwedhytuy','1'), 
+(8,'Superior','La Hija','Daughter','daughter','daughter@force.com','3331234157','fdgfhfghyt','1'), 
+(9,'Superior','El Hijo','Son','son','son@force.com','5677654563','fdsgdgretfdsg','0'),
+(10,'Basico','Luke','Skywalker','rebelde','jedi@rebellion.com','1234560987','ghjfhgjbvnvcnvbn','1')
+-->

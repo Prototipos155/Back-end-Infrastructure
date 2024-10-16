@@ -118,7 +118,7 @@ def registro():
 
                                     session['token'] = token
                                     session['codigoveri'] = codigoveri
-                                    return redirect(url_for('dueñocorreo'))
+                                    return render_template("vericorreo_acceso.html")
 
 
                                 except pymysql.Error as err:
@@ -301,11 +301,41 @@ def vericorreo_acceso():
                 return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
             
         else:
-            return render_template("vericorreo_acceso.html", mensaje1= "no se porque no jala este pedo")
+            return render_template("vericorreo_acceso.html", mensaje1= "Tu código de verificación no coincide")
 
 
 
     return render_template("vericorreo_acceso.html")
+
+
+@app.route('/crudAdmin')
+def crudAdmin():
+    try:
+        cbd.cursor.execute("SELECT id_perfil, apodo, nivel, nombres, apellidos, correo, telefono, cuenta_activa FROM perfil")
+        perfiles = cbd.cursor.fetchall()
+
+    except pymysql.Error as err:
+        print(f"Error al obtener los datos de los perfiles: {err}")
+
+    return render_template("admin/crud-admin.html", perfiles = perfiles)
+
+
+@app.route('/changeStatusAccount/<int:idPerfil>/<int:statusAcc>')
+def changeStatusAccount(idPerfil, statusAcc):
+    try: 
+        if statusAcc == 1:
+            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 0 WHERE id_perfil = %s", (idPerfil))
+            cbd.connection.commit()
+        
+        elif statusAcc == 0:
+            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 1 WHERE id_perfil = %s", (idPerfil))
+            cbd.connection.commit()
+        
+    except pymysql.Error as err:
+        print(f"No se pudo actualizar el estado de la cuenta: {err}")
+
+    return redirect(url_for('crudAdmin'))
+
 
 @app.route ('/archivo', methods=['GET', 'POST'])
 def archivo():
