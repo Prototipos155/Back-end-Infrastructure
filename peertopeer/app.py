@@ -118,7 +118,7 @@ def registro():
 
                                     session['token'] = token
                                     session['codigoveri'] = codigoveri
-                                    return render_template("vericorreo_acceso.html")
+                                    return render_template("vericorreo_registro.html")
 
 
                                 except pymysql.Error as err:
@@ -152,13 +152,13 @@ def vericorreo_registro():
 
             try:
                 payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
-                
-                nivel = payload['nivel'],
-                nombres = payload['nombres'],
-                apellidos = payload['apellidos'],
-                apodo = payload['apodo'],
-                telefono = payload['telefono'],
-                correo = payload['correo'],
+
+                nivel = payload['nivel']
+                nombres = payload['nombres']
+                apellidos = payload['apellidos']
+                apodo = payload['apodo']
+                telefono = payload['telefono']
+                correo = payload['correo']
                 contraseña_encript = payload['contraseña_encript']
                 
                 try:
@@ -170,8 +170,11 @@ def vericorreo_registro():
                 except:
                     return render_template("vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
 
-            except:
-                return render_template("vericorreo_registro.html", mensaje1 = "no se pudo separar el token")
+            except jwt.InvalidTokenError:
+                print("Token inválido.")
+                return render_template("vericorreo_registro.html")
+
+            
             
         else:
             return render_template("vericorreo_registro.html", mensaje1= "no se porque no jala este pedo")
@@ -243,7 +246,7 @@ def acceso():
 
                                     with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
                                         smtp.login(remitente,password)
-                                        smtp.sendmail(remitente,destinatario,asunto,em.as_string())
+                                        smtp.sendmail(remitente,destinatario,em.as_string())
 
                                 except pymysql.Error as err:
                                     return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
@@ -303,9 +306,29 @@ def vericorreo_acceso():
         else:
             return render_template("vericorreo_acceso.html", mensaje1= "Tu código de verificación no coincide")
 
-
-
     return render_template("vericorreo_acceso.html")
+
+
+@app.route ('/archivo', methods=['GET', 'POST'])
+def archivo():
+
+    if request.method in "POST":
+
+        mensaje = request.form.get('mensaje')
+        archivo = request.files['archivo']
+
+        try:
+            binarydata = archivo.read()
+            fecha = datetime.now ().date()
+            hora = datetime.now ().time()
+
+            cbd.cursor.execute("INSERT INTO filtro_archivos (mensaje, archivo, fecha, hora), VALUES (%s, %s, %s, %s)", (mensaje, archivo, fecha, hora))
+            cbd.connection.commit()
+
+        except:
+            return render_template("archivo.html", mensaje1 = "no se pudo guardar el archivo")
+
+    return render_template ("archivo.html")
 
 
 @app.route('/crudAdmin')
@@ -335,12 +358,6 @@ def changeStatusAccount(idPerfil, statusAcc):
         print(f"No se pudo actualizar el estado de la cuenta: {err}")
 
     return redirect(url_for('crudAdmin'))
-
-
-@app.route ('/archivo', methods=['GET', 'POST'])
-def archivo():
-
-    return render_template ("archivo.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

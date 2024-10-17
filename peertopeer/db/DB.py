@@ -135,6 +135,7 @@ class CC():
                 id_peticion INT NOT NULL,            
                 id_perfil INT NOT NULL,
                 fecha VARCHAR (11) NOT NULL,
+                hora VARCHAR (12) NOT NULL,
                 verificado TINYINT NULL,
                             
                 PRIMARY KEY(id_filtro),
@@ -178,7 +179,7 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS subcategorias(
-                id_subcategorias INT UNIQUE NOT NULL AUTO_INCREMENT,
+                id_subcategorias INT UNIQUE AUTO_INCREMENT NOT NULL,
                 id_filtro INT NOT NULL,
                 subcategoria VARCHAR (45) NOT NULL,
                                 
