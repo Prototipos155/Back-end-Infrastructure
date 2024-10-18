@@ -162,7 +162,7 @@ def vericorreo_registro():
                 contraseña_encript = payload['contraseña_encript']
                 
                 try:
-                    cbd.cursor.execute("INSERT INTO perfil (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript) VALUES (%s, %s, %s, %s, %s, %s, %s)", (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript ))
+                    cbd.cursor.execute("INSERT INTO perfil (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript, cuenta_activa) VALUES (%s, %s, %s, %s, %s, %s, %s, 1)", (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript ))
                     cbd.connection.commit()
 
                     return render_template("home.html", mensaje1 = "registro exitoso")
