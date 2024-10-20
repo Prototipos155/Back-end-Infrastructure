@@ -57,75 +57,67 @@ def registro():
 
             cbd.cursor.execute("SELECT telefono FROM perfil WHERE telefono = %s", (telefono,))
             telefono_exist = cbd.cursor.fetchone()
+            if apodo_exist:
+                return render_template("registro.html", mensaje1 = "este apodo ya esta en uso")
 
+            if telefono_exist:
+                return render_template("registro.html", mensaje1 = "este telefono ya esta en uso")
 
+            if correo_exist:
+                return render_template("registro.html", mensaje1 = "este correo ya esta en uso" )
+
+            if not ( contraseña == confirmcontra):
+                return render_template("registro.html", mensaje1 = "las contraseñas que ingresas no coinciden")
             try:
 
-                if apodo_exist:
-                    return render_template("registro.html", mensaje1 = "este apodo ya esta en uso")
-                        
-                else:
-                    if telefono_exist:
-                        return render_template("registro.html", mensaje1 = "este telefono ya esta en uso")
-                                
-                    else:
-                        if correo_exist:
-                            return render_template("registro.html", mensaje1 = "este correo ya esta en uso" )
+                contraseña_encript = generate_password_hash(confirmcontra)
 
-                        else:
-                            if contraseña == confirmcontra:
+                try:
+                    payload = {
+                    'nivel' : nivel,
+                    'nombres' : nombres,
+                    'apellidos' : apellidos,
+                    'apodo' : apodo,
+                    'telefono' : telefono,
+                    'correo' : correo,
+                    'contraseña_encript' : contraseña_encript,
+                    'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
+                        }
 
-                                contraseña_encript = generate_password_hash(confirmcontra)
+                    token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
 
-                                try:
-                                    payload = {
-                                    'nivel' : nivel,
-                                    'nombres' : nombres,
-                                    'apellidos' : apellidos,
-                                    'apodo' : apodo,
-                                    'telefono' : telefono,
-                                    'correo' : correo,
-                                    'contraseña_encript' : contraseña_encript,
-                                    'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
-                                        }
+                    try:
+                        remitente = "peertopeerverificacion@gmail.com"
+                        password = os.getenv("PASSWORD")
+                        destinatario = (f"{correo}")
+                        codigoveri = random.randint(100000, 999999)
 
-                                    token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+                        asunto = "Correo de Verificación"
+                        body = (f"Hola {apodo} el código para verificar que ingresaste un correo que esta en tu propiedad es: {codigoveri}")
+                                                            
+                        em = EmailMessage()
+                        em["From"] = remitente
+                        em["To"] = destinatario
+                        em["Subject"] = asunto
 
-                                    try:
-                                        remitente = "peertopeerverificacion@gmail.com"
-                                        password = os.getenv("PASSWORD")
-                                        destinatario = (f"{correo}")
-                                        codigoveri = random.randint(100000, 999999)
+                        em.set_content(body)
 
-                                        asunto = "Correo de Verificación"
-                                        body = (f"Hola {apodo} el código para verificar que ingresaste un correo que esta en tu propiedad es: {codigoveri}")
-                                                                            
-                                        em = EmailMessage()
-                                        em["From"] = remitente
-                                        em["To"] = destinatario
-                                        em["Subject"] = asunto
+                        context = ssl.create_default_context()
 
-                                        em.set_content(body)
+                        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = context) as smtp:
+                            smtp.login(remitente, password)
+                            smtp.sendmail(remitente, destinatario, em.as_string())
 
-                                        context = ssl.create_default_context()
+                    except pymysql.Error as err:
+                        return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
 
-                                        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = context) as smtp:
-                                            smtp.login(remitente, password)
-                                            smtp.sendmail(remitente, destinatario, em.as_string())
-
-                                    except pymysql.Error as err:
-                                        return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
-
-                                    session['token'] = token
-                                    session['codigoveri'] = codigoveri
-                                    return render_template("vericorreo_registro.html")
+                    session['token'] = token
+                    session['codigoveri'] = codigoveri
+                    return render_template("vericorreo_registro.html")
 
 
-                                except pymysql.Error as err:
-                                    return render_template("registro.html", mensaje1 = "este pedo ya no jalo") 
-                                        
-                            else:
-                                return render_template("registro.html", mensaje1 = "las contraseñas que ingresas no coinciden")
+                except pymysql.Error as err:
+                    return render_template("registro.html", mensaje1 = "este pedo ya no jalo") 
                 
             except pymysql.Error as err:
  
@@ -148,36 +140,32 @@ def vericorreo_registro():
         print(codigo)
         print(codigoveri)
 
-        if str(codigo) == str(codigoveri):
-
-            try:
-                payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
-
-                nivel = payload['nivel']
-                nombres = payload['nombres']
-                apellidos = payload['apellidos']
-                apodo = payload['apodo']
-                telefono = payload['telefono']
-                correo = payload['correo']
-                contraseña_encript = payload['contraseña_encript']
-                
-                try:
-                    cbd.cursor.execute("INSERT INTO perfil (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript, cuenta_activa) VALUES (%s, %s, %s, %s, %s, %s, %s, 1)", (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript ))
-                    cbd.connection.commit()
-
-                    return render_template("home.html", mensaje1 = "registro exitoso")
-                
-                except:
-                    return render_template("vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
-
-            except jwt.InvalidTokenError:
-                print("Token inválido.")
-                return render_template("vericorreo_registro.html")
-
-            
-            
-        else:
+        if not (str(codigo) == str(codigoveri)):
             return render_template("vericorreo_registro.html", mensaje1= "no se porque no jala este pedo")
+
+        try:
+            payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
+
+            nivel = payload['nivel']
+            nombres = payload['nombres']
+            apellidos = payload['apellidos']
+            apodo = payload['apodo']
+            telefono = payload['telefono']
+            correo = payload['correo']
+            contraseña_encript = payload['contraseña_encript']
+            
+            try:
+                cbd.cursor.execute("INSERT INTO perfil (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript, cuenta_activa) VALUES (%s, %s, %s, %s, %s, %s, %s, 1)", (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript ))
+                cbd.connection.commit()
+
+                return render_template("home.html", mensaje1 = "registro exitoso")
+            
+            except:
+                return render_template("vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
+
+        except jwt.InvalidTokenError:
+            print("Token inválido.")
+            return render_template("vericorreo_registro.html")
 
 
     return render_template("vericorreo_registro.html")
@@ -197,76 +185,70 @@ def acceso():
             cbd.cursor.execute("SELECT  id_perfil, nivel, apodo, correo, telefono, contraseña_encript FROM perfil WHERE apodo = %s AND correo = %s", (apodo, correo))
             perfil_exist = cbd.cursor.fetchone()
 
-            if perfil_exist:
-
-                id_perfil = perfil_exist[0]
-                nivel = perfil_exist[1]
-                apodo_exist = perfil_exist[2]
-                correo_exist = perfil_exist[3]
-                telefono_exist = perfil_exist[4]
-                contraseña_encript = perfil_exist[5]     
+            if not perfil_exist:
+                return render_template("acceso.html", mensaje1="NO HAY UN USUARIO ASOCIADO A DICHOS DATOS")
+            
+            id_perfil = perfil_exist[0]
+            nivel = perfil_exist[1]
+            apodo_exist = perfil_exist[2]
+            correo_exist = perfil_exist[3]
+            telefono_exist = perfil_exist[4]
+            contraseña_encript = perfil_exist[5]     
 
             try:
-                if apodo == apodo_exist and correo == correo_exist:
-
-                    print(f"metodo: {request.method} ")
-                    print(contraseña_encript)
-
-                    if contraseña_encript is not None:
-
-                        if check_password_hash(contraseña_encript, contraseña):
-
-                            try:
-                                payload = {
-                                'id_perfil' : id_perfil,
-                                'nivel' : nivel,
-                                'apodo' : apodo,
-                                'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
-                                    }
-
-                                token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
-
-                                try:
-                                    remitente = "peertopeerverificacion@gmail.com"
-                                    password = os.getenv("PASSWORD")
-                                    destinatario = (f"{correo}")
-                                    codigoveri = random.randint(100000, 999999)
-
-                                    asunto = "Correo de Verificación"
-                                    body = (f"Hola {apodo} tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
-                                                                                
-                                    em = EmailMessage()
-                                    em["From"] = remitente
-                                    em["To"] = destinatario
-                                    em["Subject"] = asunto
-
-                                    em.set_content(body)
-
-                                    context = ssl.create_default_context()
-
-                                    with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
-                                        smtp.login(remitente,password)
-                                        smtp.sendmail(remitente,destinatario,em.as_string())
-
-                                except pymysql.Error as err:
-                                    return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
-                            
-                                session['token'] = token
-                                session['codigoveri'] = codigoveri
-                                return redirect(url_for('vericorreo_acceso'))
-
-                            except pymysql.Error as err:
-                                    return render_template ("acceso.html", mensaje1 = f"el token no ha podido ser generado: {err}")
-
-
-                        else:
-                            return render_template("acceso.html", mensaje1="Contraseña incorrecta") 
-                    
-                    else:
-                        return render_template("acceso.html", mensaje1="Contraseña no definida en la base de datos.")
-
-                else:
+                if not(apodo == apodo_exist and correo == correo_exist):
                     return render_template("acceso.html", mensaje1="El apodo y/o correo no coinciden")
+                print(f"metodo: {request.method} ")
+                print(contraseña_encript)
+
+                if not( contraseña_encript is not None):
+                    return render_template("acceso.html", mensaje1="Contraseña no definida en la base de datos.")
+                
+                if not( check_password_hash(contraseña_encript, contraseña)):
+                    return render_template("acceso.html", mensaje1="Contraseña incorrecta")
+                
+                try:
+                    payload = {
+                    'id_perfil' : id_perfil,
+                    'nivel' : nivel,
+                    'apodo' : apodo,
+                    'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
+                        }
+
+                    token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+
+                    try:
+                        remitente = "peertopeerverificacion@gmail.com"
+                        password = os.getenv("PASSWORD")
+                        destinatario = (f"{correo}")
+                        codigoveri = random.randint(100000, 999999)
+
+                        asunto = "Correo de Verificación"
+                        body = (f"Hola {apodo} tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                                                    
+                        em = EmailMessage()
+                        em["From"] = remitente
+                        em["To"] = destinatario
+                        em["Subject"] = asunto
+
+                        em.set_content(body)
+
+                        context = ssl.create_default_context()
+
+                        with smtplib.SMTP_SSL("smtp.gmail.com",465,context = context) as smtp:
+                            smtp.login(remitente,password)
+                            smtp.sendmail(remitente,destinatario,em.as_string())
+
+                    except pymysql.Error as err:
+                        return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
+                
+                    session['token'] = token
+                    session['codigoveri'] = codigoveri
+                    return redirect(url_for('vericorreo_acceso'))
+
+                except pymysql.Error as err:
+                        return render_template ("acceso.html", mensaje1 = f"el token no ha podido ser generado: {err}") 
+
             
             except pymysql.Error as err:
                 return render_template("acceso.html", mensaje1=" no se puede iniciar sesion")
@@ -289,22 +271,20 @@ def vericorreo_acceso():
 
         codigo = request.form.get('codigo')
 
-        if str(codigo) == str(codigoveri):
-
-            try:
-                payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
-                
-                id_perfil = payload['id_perfil'],
-                nivel = payload['nivel'],
-                apodo = payload['apodo']
-                
-                return render_template("home.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo{apodo}")
-
-            except:
-                return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
-            
-        else:
+        if not(str(codigo) == str(codigoveri)):
             return render_template("vericorreo_acceso.html", mensaje1= "Tu código de verificación no coincide")
+
+        try:
+            payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
+            
+            id_perfil = payload['id_perfil'],
+            nivel = payload['nivel'],
+            apodo = payload['apodo']
+            
+            return render_template("home.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo{apodo}")
+
+        except:
+            return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
 
     return render_template("vericorreo_acceso.html")
 
