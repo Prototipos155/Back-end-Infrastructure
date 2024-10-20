@@ -52,7 +52,7 @@ def registro():
         correo = request.form.get('correo')
         contraseña = request.form.get('contraseña')
         confirmcontra = request.form.get('confirmcontra')
-
+  
 
         try:
             cbd.cursor.execute("SELECT apodo FROM perfil WHERE apodo = %s", (apodo,))

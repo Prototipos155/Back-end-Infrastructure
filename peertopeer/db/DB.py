@@ -133,7 +133,7 @@ class CC():
             self.tabla_materia()
             self.tabla_seccion()
             self.tabla_mensajes_from_seccion()
-            self.tabla_peticion()
+            self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
             self.tabla_peticion_has_files()
@@ -152,44 +152,50 @@ class CC():
     
     def tabla_perfil(self):
         try:
+            #self.cursor.execute("""
+            #   create table if not exists perfil(
+            #       id_perfil int primary key not null, nom
+            #)
+            # """)
+
             self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS perfil (
-              `id_perfil` INT NOT NULL AUTO_INCREMENT,
-              `nivel` VARCHAR(15) NOT NULL,
-              `nombres` VARCHAR(50) NOT NULL,
-              `apellidos` VARCHAR(45) NOT NULL,
-              `apodo` VARCHAR(50) NOT NULL,
-              `correo` VARCHAR(100) NOT NULL,
-              `telefono` CHAR(13) NOT NULL,
-              `contraseña_encript` char(162) NOT NULL,
-              cuenta_activa bool not null,
-              PRIMARY KEY (`id_perfil`),
-              UNIQUE INDEX `apodo_UNIQUE` (`apodo` ASC) VISIBLE,
-              UNIQUE INDEX `telefono_UNIQUE` (`telefono` ASC) VISIBLE,
-              UNIQUE INDEX `correo_UNIQUE` (`correo` ASC) VISIBLE)
-            ENGINE = InnoDB
-            DEFAULT CHARACTER SET = utf8mb3""")
+            CREATE TABLE IF NOT EXISTS perfil 
+                (id_perfil int unique auto_increment not null,
+                nivel varchar (20) not null,
+                nombres varchar (40) not null,
+                apellidos varchar (40) not null,
+                apodo varchar(10) unique not null,
+                correo varchar(150) unique not null,
+                telefono varchar(10) unique not null,
+                contraseña_encript varchar(256) not null)""")
             print("la tabla perfil creada ")
+
+
         except pymysql.Error as er:
             print("la tabla perfil no fue creada ",er)
+        # '1', 'superior', 'Martin Alejandro', 'Perez Bernal', 'sal2', 'martnalej@gmail.com', '4491261629', 
+        # 'scrypt:32768:8:1$oKoiiqjn6n7Smym4$ebb71fd4f433ff2ea4c4e64606503e9450e7a598ae0dabc83dcb4e9afd38a0d0d2375eb5788696fee760882c00065be2caaefed4760b43ab84552040ccc0db75'
+        # , '1'
+        # len('scrypt:32768:8:1$oKoiiqjn6n7Smym4$ebb71fd4f433ff2ea4c4e64606503e9450e7a598ae0dabc83dcb4e9afd38a0d0d2375eb5788696fee760882c00065be2caaefed4760b43ab84552040ccc0db75')
+        # 162
 
     def tabla_buzon_quejas(self):
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS buzon_quejas (
-              `id_buzon_quejas` INT NOT NULL AUTO_INCREMENT,
-              `id_perfil` INT NOT NULL,
-              `mensaje` VARCHAR(256) NOT NULL,
-              `fecha` VARCHAR(11) NOT NULL,
-              `hora` VARCHAR(12) NOT NULL,
-              `id_entidad_reportada` INT NOT NULL,
-              `tipoEntidad` INT NOT NULL,
+              id_buzon_quejas INT NOT NULL AUTO_INCREMENT,
+              id_perfil INT NOT NULL,
+              mensaje VARCHAR(256) NOT NULL,
+              fecha VARCHAR(11) NOT NULL,
+              hora VARCHAR(12) NOT NULL,
+              id_entidad_reportada` INT NOT NULL,
+              tipoEntidad INT NOT NULL,
               PRIMARY KEY (`id_buzon_quejas`),
               UNIQUE INDEX `idbuzon_quejas_UNIQUE` (`id_buzon_quejas` ASC) VISIBLE,
-              INDEX `fk_buzon_quejas_perfil1_idx` (`id_perfil` ASC) VISIBLE,
-              CONSTRAINT `fk_buzon_quejas_perfil1`
-                FOREIGN KEY (`id_perfil`)
-                REFERENCES `peertopeer`.`perfil` (`id_perfil`))
+              INDEX fk_buzon_quejas_perfil1_idx (id_perfil ASC) VISIBLE,
+              CONSTRAINT fk_buzon_quejas_perfil1
+                FOREIGN KEY (id_perfil)
+                REFERENCES perfil (id_perfil))
             ENGINE = InnoDB
             DEFAULT CHARACTER SET = utf8mb3""")
             print("la tabla buzon_quejas creada ")
@@ -200,11 +206,11 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS materia (
-              `id_materia` INT NOT NULL AUTO_INCREMENT,
-              `nombre` VARCHAR(30) NOT NULL,
-              `descripcion` VARCHAR(150) NOT NULL,
-              PRIMARY KEY (`id_materia`),
-              UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+              id_materia INT NOT NULL AUTO_INCREMENT,
+              nombre VARCHAR(30) NOT NULL,
+              descripcion VARCHAR(150) NOT NULL,
+              PRIMARY KEY (id_materia),
+              UNIQUE INDEX nombre_UNIQUE (nombre ASC) VISIBLE)
             ENGINE = InnoDB""")
             print("la tabla materia creada ")
         except pymysql.Error as er:
@@ -214,15 +220,15 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS seccion (
-              `id_seccion` INT NOT NULL AUTO_INCREMENT,
-              `nombre` VARCHAR(30) NOT NULL,
-              `descripcion` VARCHAR(150) NOT NULL,
-              `id_materia` INT NOT NULL,
-              PRIMARY KEY (`id_seccion`),
-              INDEX `fk_seccion_materia1_idx` (`id_materia` ASC) VISIBLE,
-              CONSTRAINT `fk_seccion_materia1`
-                FOREIGN KEY (`id_materia`)
-                REFERENCES `peertopeer`.`materia` (`id_materia`)
+              id_seccion INT NOT NULL AUTO_INCREMENT,
+              nombre VARCHAR(30) NOT NULL,
+              descripcion VARCHAR(150) NOT NULL,
+              id_materia INT NOT NULL,
+              PRIMARY KEY (id_seccion),
+              INDEX fk_seccion_materia1_idx (id_materia ASC) VISIBLE,
+              CONSTRAINT fk_seccion_materia1
+                FOREIGN KEY (id_materia)
+                REFERENCES peertopeer.materia (id_materia)
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB""")
@@ -234,23 +240,23 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS mensajes_from_seccion (
-              `id_mensaje` INT NOT NULL AUTO_INCREMENT,
-              `id_seccion` INT NOT NULL,
-              `id_perfil` INT NOT NULL,
-              `mensaje` VARCHAR(256) NOT NULL,
-              `fecha` VARCHAR(11) NOT NULL,
-              `hora` VARCHAR(12) NOT NULL,
-              PRIMARY KEY (`id_mensaje`),
-              INDEX `fk_mensaje_seccion1_idx` (`id_seccion` ASC) VISIBLE,
-              INDEX `fk_mensaje_perfil1_idx` (`id_perfil` ASC) VISIBLE,
-              CONSTRAINT `fk_mensaje_seccion1`
-                FOREIGN KEY (`id_seccion`)
-                REFERENCES `peertopeer`.`seccion` (`id_seccion`)
+              id_mensaje INT NOT NULL AUTO_INCREMENT,
+              id_seccion INT NOT NULL,
+              id_perfil INT NOT NULL,
+              mensaje VARCHAR(256) NOT NULL,
+              fecha VARCHAR(11) NOT NULL,
+              hora VARCHAR(12) NOT NULL,
+              PRIMARY KEY (id_mensaje),
+              INDEX fk_mensaje_seccion1_idx (id_seccion ASC) VISIBLE,
+              INDEX fk_mensaje_perfil1_idx (id_perfil ASC) VISIBLE,
+              CONSTRAINT fk_mensaje_seccion1
+                FOREIGN KEY (id_seccion)
+                REFERENCES peertopeer.seccion (id_seccion)
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION,
-              CONSTRAINT `fk_mensaje_perfil1`
-                FOREIGN KEY (`id_perfil`)
-                REFERENCES `peertopeer`.`perfil` (`id_perfil`)
+              CONSTRAINT fk_mensaje_perfil1
+                FOREIGN KEY (id_perfil)
+                REFERENCES peertopeer.perfil (id_perfil)
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB
@@ -259,25 +265,20 @@ class CC():
         except pymysql.Error as er:
             print("la tabla mensajes_from_seccion no fue creada ",er)
 
-    def tabla_peticion(self):
+    def tabla_peticiones(self):
         try:
             self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS peticion (
-              `id_peticion` INT NOT NULL AUTO_INCREMENT,
-              `id_perfil` INT NOT NULL,
-              `tipo` INT NOT NULL,
-              `mensaje` VARCHAR(200) NULL,
-              `fecha` DATE NOT NULL,
-              `hora` TIME NOT NULL,
-              `verificado` TINYINT NULL,
-              PRIMARY KEY (`id_peticion`),
-              INDEX `fk_peticion_perfil1_idx` (`id_perfil` ASC) VISIBLE,
-              CONSTRAINT `fk_peticion_perfil1`
-                FOREIGN KEY (`id_perfil`)
-                REFERENCES `peertopeer`.`perfil` (`id_perfil`)
-                ON DELETE NO ACTION
-                ON UPDATE NO ACTION)
-            ENGINE = InnoDB""")
+            CREATE TABLE IF NOT EXISTS peticiones (
+              id_peticiones INT NOT NULL AUTO_INCREMENT,
+              id_perfil INT NOT NULL,
+              tipo INT NOT NULL,
+              mensaje VARCHAR(200) NULL,
+              fecha DATE NOT NULL,
+              hora TIME NOT NULL,
+              verificado TINYINT NULL,
+              PRIMARY KEY(id_peticiones),
+               FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil)
+            )""") 
             print("la tabla peticion creada ")
         except pymysql.Error as er:
             print("la tabla peticion no fue creada ",er)
@@ -286,11 +287,9 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS documentos (
-              `id_documento` INT NOT NULL AUTO_INCREMENT,
-              `documento` BLOB NOT NULL,
-              `hash` char(64) unique,
-              PRIMARY KEY (`id_documento`))
-            ENGINE = InnoDB""")
+              id_documento INT NOT NULL AUTO_INCREMENT,
+              documento BLOB NOT NULL,
+              PRIMARY KEY (id_documento))""")
             print("la tabla documentos creada ")
         except pymysql.Error as er:
             print("la tabla documentos no fue creada ",er)
@@ -299,60 +298,57 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS links (
-              `id_link` INT NOT NULL AUTO_INCREMENT,
-              `link` VARCHAR(256) NOT NULL,
-              PRIMARY KEY (`id_link`),
-              UNIQUE INDEX `link_UNIQUE` (`link` ASC) VISIBLE)
-            ENGINE = InnoDB""")
+              id_link INT NOT NULL AUTO_INCREMENT,
+              link VARCHAR(256) NOT NULL,
+              PRIMARY KEY (id_link))""")
             print("la tabla links creada ")
         except pymysql.Error as er:
             print("la tabla links no fue creada ",er)
 
-    def tabla_peticion_has_files(self):
+    """def tabla_peticion_has_files(self):
         try:
-            self.cursor.execute("""
+            self.cursor.execute(
             CREATE TABLE IF NOT EXISTS peticion_has_files (
-              `id_archivo` INT NOT NULL AUTO_INCREMENT,
-              `id_peticion` INT NOT NULL,
-              `id_material` INT NOT NULL,
-              `tipo` TINYINT NOT NULL,
-              `verificado` TINYINT NULL,
-              PRIMARY KEY (`id_archivo`),
-              INDEX `fk_peticion_has_files_peticion1_idx` (`id_peticion` ASC) VISIBLE,
-              CONSTRAINT `fk_peticion_has_files_peticion1`
-                FOREIGN KEY (`id_peticion`)
-                REFERENCES `peertopeer`.`peticion` (`id_peticion`)
+              id_archivo INT NOT NULL AUTO_INCREMENT,
+              id_peticion INT NOT NULL,
+              id_material INT NOT NULL,
+              tipo TINYINT NOT NULL,
+              verificado TINYINT NULL,
+              PRIMARY KEY (id_archivo),
+              INDEX fk_peticion_has_files_peticion1_idx (id_peticion ASC) VISIBLE,
+              CONSTRAINT fk_peticion_has_files_peticion1
+                FOREIGN KEY (id_peticion)
+                REFERENCES peertopeer.peticion (id_peticion)
                 ON DELETE NO ACTION
-                ON UPDATE NO ACTION)
-            ENGINE = InnoDB""")
+                ON UPDATE NO ACTION))
             print("la tabla peticion_has_files creada ")
         except pymysql.Error as er:
-            print("la tabla peticion_has_files no fue creada ",er)
+            print("la tabla peticion_has_files no fue creada ",er)"""
 
-    def tabla_seccion_has_files(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS seccion_has_files (
-              `id_seccion_file` INT NOT NULL AUTO_INCREMENT,
-              `id_seccion` INT NOT NULL,
-              `id_archivo` INT NOT NULL,
-              PRIMARY KEY (`id_seccion_file`),
-              INDEX `fk_seccion_has_files_seccion1_idx` (`id_seccion` ASC) VISIBLE,
-              INDEX `fk_seccion_has_files_peticion_has_files1_idx` (`id_archivo` ASC) VISIBLE,
-              CONSTRAINT `fk_seccion_has_files_seccion1`
-                FOREIGN KEY (`id_seccion`)
-                REFERENCES `peertopeer`.`seccion` (`id_seccion`)
-                ON DELETE NO ACTION
-                ON UPDATE NO ACTION,
-              CONSTRAINT `fk_seccion_has_files_peticion_has_files1`
-                FOREIGN KEY (`id_archivo`)
-                REFERENCES `peertopeer`.`peticion_has_files` (`id_archivo`)
-                ON DELETE NO ACTION
-                ON UPDATE NO ACTION)
-            ENGINE = InnoDB""")
-            print("la tabla seccion_has_files creada ")
-        except pymysql.Error as er:
-            print("la tabla seccion_has_files no fue creada ",er)
+    # def tabla_seccion_has_files(self):
+    #     try:
+    #         self.cursor.execute("""
+    #         CREATE TABLE IF NOT EXISTS seccion_has_files (
+    #           `id_seccion_file` INT NOT NULL AUTO_INCREMENT,
+    #           `id_seccion` INT NOT NULL,
+    #           `id_archivo` INT NOT NULL,
+    #           PRIMARY KEY (`id_seccion_file`),
+    #           INDEX `fk_seccion_has_files_seccion1_idx` (`id_seccion` ASC) VISIBLE,
+    #           INDEX `fk_seccion_has_files_peticion_has_files1_idx` (`id_archivo` ASC) VISIBLE,
+    #           CONSTRAINT `fk_seccion_has_files_seccion1`
+    #             FOREIGN KEY (`id_seccion`)
+    #             REFERENCES `peertopeer`.`seccion` (`id_seccion`)
+    #             ON DELETE NO ACTION
+    #             ON UPDATE NO ACTION,
+    #           CONSTRAINT `fk_seccion_has_files_peticion_has_files1`
+    #             FOREIGN KEY (`id_archivo`)
+    #             REFERENCES `peertopeer`.`peticion_has_files` (`id_archivo`)
+    #             ON DELETE NO ACTION
+    #             ON UPDATE NO ACTION)
+    #         ENGINE = InnoDB""")
+    #         print("la tabla seccion_has_files creada ")
+    #     except pymysql.Error as er:
+    #         print("la tabla seccion_has_files no fue creada ",er)
 
     def tabla_motivos_de_quejas(self):
         try:
