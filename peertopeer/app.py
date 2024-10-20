@@ -3,23 +3,29 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 
 from db.DB import CC
+from utiles.token import crear_token
 
 import pymysql
-import jwt
 import os
 import ssl
 import smtplib
 import random
+import jwt
 
 
-cbd = CC()
 load_dotenv()
+cbd = CC()
+ct = crear_token()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("PASSWORD1")
+
+contraseña = os.getenv("PASSWORD2")
+
 
 @app.route('/')
 def home():
@@ -87,9 +93,9 @@ def registro():
                                     'correo' : correo,
                                     'contraseña_encript' : contraseña_encript,
                                     'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
-                                        }
+                                    }
 
-                                    token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+                                    tokenregistro = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
 
                                     try:
                                         remitente = "peertopeerverificacion@gmail.com"
@@ -116,12 +122,13 @@ def registro():
                                     except pymysql.Error as err:
                                         return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
 
-                                    session['token'] = token
                                     session['codigoveri'] = codigoveri
-                                    return render_template("vericorreo_registro.html")
+                                    session['tokenregistro'] = tokenregistro
 
+                                    return render_template ("vericorreo_registro.html", mensaje1="ingrese el codigo que le enviamos por correo")
 
                                 except pymysql.Error as err:
+                                    print(err)
                                     return render_template("registro.html", mensaje1 = "este pedo ya no jalo") 
                                         
                             else:
@@ -140,7 +147,7 @@ def registro():
 def vericorreo_registro():
 
     codigoveri = session.get('codigoveri')
-    token = session.get('token')
+    tokenregistro = session.get('tokenregistro')
     
     if request.method in "POST":
 
@@ -151,7 +158,7 @@ def vericorreo_registro():
         if str(codigo) == str(codigoveri):
 
             try:
-                payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
+                payload = jwt.decode(tokenregistro, os.getenv("PASSWORD2"), algorithms=['HS256'])
 
                 nivel = payload['nivel']
                 nombres = payload['nombres']
@@ -167,7 +174,8 @@ def vericorreo_registro():
 
                     return render_template("home.html", mensaje1 = "registro exitoso")
                 
-                except:
+                except pymysql.Error as er:
+                    print(er)
                     return render_template("vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
 
             except jwt.InvalidTokenError:
@@ -224,7 +232,7 @@ def acceso():
                                 'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
                                     }
 
-                                token = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+                                tokenacceso = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
 
                                 try:
                                     remitente = "peertopeerverificacion@gmail.com"
@@ -251,7 +259,7 @@ def acceso():
                                 except pymysql.Error as err:
                                     return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
                             
-                                session['token'] = token
+                                session['tokenacceso'] = tokenacceso
                                 session['codigoveri'] = codigoveri
                                 return redirect(url_for('vericorreo_acceso'))
 
@@ -283,7 +291,7 @@ def acceso():
 def vericorreo_acceso():
 
     codigoveri = session.get('codigoveri')
-    token = session.get('token')
+    tokenacceso = session.get('tokenacceso')
     
     if request.method in "POST":
 
@@ -292,7 +300,7 @@ def vericorreo_acceso():
         if str(codigo) == str(codigoveri):
 
             try:
-                payload = jwt.decode(token, os.getenv("PASSWORD2"), algorithms=['HS256'])
+                payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
                 
                 id_perfil = payload['id_perfil'],
                 nivel = payload['nivel'],
@@ -314,19 +322,40 @@ def archivo():
 
     if request.method in "POST":
 
-        mensaje = request.form.get('mensaje')
-        archivo = request.files['archivo']
+        tokenacceso = session.get('tokenacceso')
 
         try:
-            binarydata = archivo.read()
+            payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
+
+            id_tupla = payload['id_perfil'],
+            nivel = payload['nivel'],
+            apodo = payload['apodo']
+
+            id_perfil = id_tupla[0]
+
+        except jwt.InvalidTokenError:
+            return render_template("archivo.html", mensaje1 = "no pudo obtener el token")
+
+
+        mensaje = request.form.get('mensaje')
+        archivoblob = request.files['archivo']
+
+        try:
+            archivo = archivoblob.read()
+
             fecha = datetime.now ().date()
             hora = datetime.now ().time()
+            print(id_perfil)
+            print(fecha)
+            print(hora)
 
-            cbd.cursor.execute("INSERT INTO filtro_archivos (mensaje, archivo, fecha, hora), VALUES (%s, %s, %s, %s)", (mensaje, archivo, fecha, hora))
+            cbd.cursor.execute("INSERT INTO peticiones (id_perfil, mensaje, archivo, fecha, hora) VALUES (%s,%s, %s, %s, %s)", (id_perfil, mensaje, archivo, fecha, hora))
             cbd.connection.commit()
 
-        except:
-            return render_template("archivo.html", mensaje1 = "no se pudo guardar el archivo")
+            return render_template ("home.html", mensaje1 = "la peticion se envio correctamente")
+
+        except pymysql.Error as er:
+            return render_template("archivo.html", mensaje1 = f"no se pudo guardar el archivo: {er}")
 
     return render_template ("archivo.html")
 
