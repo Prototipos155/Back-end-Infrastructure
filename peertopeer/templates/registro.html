@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
+
 <div class="container">
     <h2 class="form-title">Complete los siguientes campos para su registro en P2P:</h2>
 
@@ -11,19 +12,19 @@
             
             <label class="radio" for="checkbox1">
                 <span class="label">Básico</span>
-                <input type="radio" name="nivel"  id="basico" value="Basico">
+                <input type="radio" name="nivel" {% if datos.0=="basico" %}checked="true"{% endif %} id="basico" value="basico">
                 <span class="checkmark"></span>
             </label>
 
             <label class="radio" for="checkbox2">
                 <span class="label">Medio Superior</span>
-                <input type="radio" name="nivel" id="medio-superior" value="Medio superior">
+                <input type="radio" name="nivel" {% if datos.0=="medio superior" %}checked="true"{% endif %} id="medio-superior" value="medio superior">
                 <span class="checkmark"></span>
             </label>
 
             <label class="radio" for="checkbox2">
                 <span class="label">Superior</span>
-                <input type="radio" name="nivel" id="superior" value="Superior">
+                <input type="radio" name="nivel" {% if datos.0=="superior" %}checked="true"{% endif %} id="superior" value="superior">
                 <span class="checkmark"></span>
             </label>
 
@@ -31,33 +32,31 @@
         </div>
 
         <label for="nombres">Nombre(s):</label>
-        <input class='input' type="text" name="nombres" id="nombres" placeholder="Ingrese sus nombres" required>
+        <input value="{{datos.1}}" class='input' type="text" name="nombres" id="nombres" placeholder="Ingrese sus nombres" required>
 
         <label for="apellidos">Apellido(s):</label>
-        <input class='input' type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" required>
+        <input value="{{datos.2}}" class='input' type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" required>
 
         <label for="apodo">Nombre de usuario:</label>
-        <input class='input' type="text" name="apodo" id="apodo" placeholder="Ingrese un nombre de usuario" required>
+        <input value="{{datos.3}}" class='input' type="text" name="apodo" id="apodo" placeholder="Ingrese un nombre de usuario" required>
 
         <label for="telefono">Teléfono:</label>
-        <input class='input' type="text" name="telefono" id="telefono" placeholder="Ingrese su número de teléfono" required>
+        <input value="{{datos.4}}" class='input' type="text" name="telefono" id="telefono" placeholder="Ingrese su número de teléfono" required>
 
         <label for="correo">Correo:</label>
-        <input class='input' type="email" name="correo" id="correo" placeholder="Ingrese su correo institucional" required>
+        <input value="{{datos.5}}" class='input' type="email" name="correo" id="correo" placeholder="Ingrese su correo institucional" required>
 
         <label for="contraseña">Contraseña:</label>
-        <input class='input' type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
+        <input value="{{datos.6}}" class='input' type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
 
         <label for="confirmcontra">Confirmar contraseña:</label>
-        <input class='input' type="password" name="confirmcontra" id="confirmcontra" placeholder="Confirme su contraseña"  required>
+        <input value="{{datos.7}}" class='input' type="password" name="confirmcontra" id="confirmcontra" placeholder="Confirme su contraseña"  required>
 
         <center>
         <button type="submit" id="registrarse" class="btn-registrarse">Confirmar registro</button>
         </center>
 
     </form>
-
-    <a href="/crudAdmin">Ir a crud del admin</a>
 </div>
 
 <script src="../static/js/validacionesRegistro.js"></script>
