@@ -1,20 +1,32 @@
-const nav = document.querySelector(".nav"),
-  searchIcon = document.querySelector("#searchIcon"),
-  navOpenBtn = document.querySelector(".navOpenBtn"),
-  navCloseBtn = document.querySelector(".navCloseBtn");
-searchIcon.addEventListener("click", () => {
-  nav.classList.toggle("openSearch");
-  nav.classList.remove("openNav");
-  if (nav.classList.contains("openSearch")) {
-    return searchIcon.classList.replace("bx-search", "bx-chevron-left");
+const toggleButton = document.getElementById('toggle-btn')
+const sidebar = document.getElementById('sidebar')
+const form= document.getElementsByClassName('container')
+
+function toggleSidebar(){
+  sidebar.classList.toggle('close')
+  toggleButton.classList.toggle('rotate')
+  form.classList.toggle('expand')
+  closeAllSubMenus()
+}
+
+function toggleSubMenu(button){
+
+  if(!button.nextElementSibling.classList.contains('show')){
+    closeAllSubMenus()
   }
-  searchIcon.classList.replace("bx-chevron-left", "bx-search");
-});
-navOpenBtn.addEventListener("click", () => {
-  nav.classList.add("openNav");
-  nav.classList.remove("openSearch");
-  searchIcon.classList.replace("bx-chevron-left", "bx-search");
-});
-navCloseBtn.addEventListener("click", () => {
-  nav.classList.remove("openNav");
-});
+
+  button.nextElementSibling.classList.toggle('show')
+  button.classList.toggle('rotate')
+
+  if(sidebar.classList.contains('close')){
+    sidebar.classList.toggle('close')
+    toggleButton.classList.toggle('rotate')
+  }
+}
+
+function closeAllSubMenus(){
+  Array.from(sidebar.getElementsByClassName('show')).forEach(ul => {
+    ul.classList.remove('show')
+    ul.previousElementSibling.classList.remove('rotate')
+  })
+}

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<br><br><br>
+
+<form method="post" enctype="multipart/form-data">
+    
+    <input type="text" name="mensaje" width="20%" height="20%">
+    <input type="file" name="archivo">
+    <button type="submit" >Enviar</button>
+
+</form>
+
+{% endblock %}
