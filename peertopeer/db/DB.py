@@ -136,8 +136,8 @@ class CC():
             self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
-            self.tabla_peticion_has_files()
-            self.tabla_seccion_has_files()
+            #self.tabla_peticion_has_files()
+            #self.tabla_seccion_has_files()
             self.tabla_motivos_de_quejas()
             self.tabla_queja_has_motivos()
             self.tabla_queja_has_razon_extra()
@@ -167,7 +167,8 @@ class CC():
                 apodo varchar(10) unique not null,
                 correo varchar(150) unique not null,
                 telefono varchar(10) unique not null,
-                contraseña_encript varchar(256) not null)""")
+                contraseña_encript varchar(256) not null,
+                cuenta_activa TINYINT not null)""")
             print("la tabla perfil creada ")
 
 
