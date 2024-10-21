@@ -335,6 +335,22 @@ button.btn-registrarse:hover {
   background-color: var(--hover);
 }
 
+button.btn-registrarse1 {
+  width: 10%;
+  padding: 1em;
+  background-color: var(--primary);
+  color: var(--secondary);
+  border: none;
+  border-radius: 0.5em;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.btn-registrarse1:hover {
+  background-color: var(--hover);
+}
 
 .container {
   border-radius: 1em;

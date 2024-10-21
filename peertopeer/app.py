@@ -16,9 +16,7 @@ import smtplib
 import random
 import jwt
 
-r=load_dotenv("./peertopeer/utiles/.env")
-# r=load_dotenv()
-# print("r=",r)
+r=load_dotenv("./utiles/.env")
 cbd = CC()
 ct = crear_token()
 
@@ -340,13 +338,13 @@ def archivo():
 
             return render_template ("home.html", mensaje1 = "la peticion se envio correctamente")
 
-        except pymysql.Error as er:
-            return render_template("archivo.html", mensaje1 = f"no se pudo guardar el archivo: {er}")
+        except pymysql.Error as err:
+            return render_template("archivo.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
 
     return render_template ("archivo.html")
 
 
-@app.route('/crudAdmin')
+@app.route('/crudadmin')
 def crudAdmin():
     try:
         cbd.cursor.execute("SELECT id_perfil, apodo, nivel, nombres, apellidos, correo, telefono, cuenta_activa FROM perfil")
@@ -372,7 +370,7 @@ def changeStatusAccount(idPerfil, statusAcc):
     except pymysql.Error as err:
         print(f"No se pudo actualizar el estado de la cuenta: {err}")
 
-    return redirect(url_for('crudAdmin'))
+    return redirect(url_for('crudadmin'))
 
 if __name__ == "__main__":
     app.run(debug=True)
