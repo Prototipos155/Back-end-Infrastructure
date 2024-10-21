@@ -101,7 +101,6 @@ class CC():
     def tabla_perfil(self):
         try:
             self.cursor.execute("""
-<<<<<<< HEAD
             CREATE TABLE IF NOT EXISTS perfil (
                 id_perfil INT UNIQUE AUTO_INCREMENT NOT NULL,
                                 
@@ -208,11 +207,11 @@ class CC():
                 id_peticiones INT UNIQUE AUTO_INCREMENT NOT NULL, 
                 id_perfil INT NOT NULL,
                                     
-                tipo INT NOT NULL,
                 mensaje VARCHAR(200) NULL,
+                archivo MEDIUMBLOB NULL,
+                link VARCHAR(256) NULL,
                 fecha DATE NOT NULL,
                 hora TIME NOT NULL,
-                verificado TINYINT NULL,
                                     
                 PRIMARY KEY(id_peticiones),
                 FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil))""") 
@@ -228,7 +227,7 @@ class CC():
             CREATE TABLE IF NOT EXISTS documentos (
               id_documento INT UNIQUE AUTO_INCREMENT NOT NULL,
                                 
-              documento BLOB NOT NULL,
+              documento MEDIUMBLOB NOT NULL,
                                 
               PRIMARY KEY (id_documento))""")
             

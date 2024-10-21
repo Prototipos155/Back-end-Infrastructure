@@ -16,7 +16,7 @@ import smtplib
 import random
 import jwt
 
-r=load_dotenv("./utiles/.env")
+r=load_dotenv("./peertopeer/utiles/.env")
 cbd = CC()
 ct = crear_token()
 
@@ -293,7 +293,7 @@ def vericorreo_acceso():
             nivel = payload['nivel'],
             apodo = payload['apodo']
             
-            return render_template("home.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo{apodo}")
+            return render_template("home.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo: {apodo}")
 
         except:
             return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
@@ -322,6 +322,7 @@ def archivo():
 
 
         mensaje = request.form.get('mensaje')
+        link = request.form.get('link').strip()
         archivoblob = request.files['archivo']
 
         try:
@@ -333,7 +334,7 @@ def archivo():
             print(fecha)
             print(hora)
 
-            cbd.cursor.execute("INSERT INTO peticiones (id_perfil, mensaje, archivo, fecha, hora) VALUES (%s,%s, %s, %s, %s)", (id_perfil, mensaje, archivo, fecha, hora))
+            cbd.cursor.execute("INSERT INTO peticiones (id_perfil, mensaje, archivo, link, fecha, hora) VALUES (%s, %s, %s, %s, %s, %s)", (id_perfil, mensaje, archivo, link, fecha, hora))
             cbd.connection.commit()
 
             return render_template ("home.html", mensaje1 = "la peticion se envio correctamente")
@@ -344,8 +345,8 @@ def archivo():
     return render_template ("archivo.html")
 
 
-@app.route('/crudadmin')
-def crudAdmin():
+@app.route('/crudusuariosadmin')
+def crudusuariosadmin():
     try:
         cbd.cursor.execute("SELECT id_perfil, apodo, nivel, nombres, apellidos, correo, telefono, cuenta_activa FROM perfil")
         perfiles = cbd.cursor.fetchall()
@@ -370,7 +371,54 @@ def changeStatusAccount(idPerfil, statusAcc):
     except pymysql.Error as err:
         print(f"No se pudo actualizar el estado de la cuenta: {err}")
 
-    return redirect(url_for('crudAdmin'))
+    return redirect(url_for('crudusuariosadmin'))
+
+@app.route('/crudpeticionesadmin')
+def crudpeticionesadmin():
+    try:
+        cbd.cursor.execute("SELECT pet.id_peticiones, pet.id_perfil, per.apodo, per.correo, pet.mensaje, pet.archivo, pet.link, pet.fecha, pet.hora FROM perfil per JOIN peticiones pet ON per.id_perfil = pet.id_perfil")
+        peticiones = cbd.cursor.fetchall()
+
+    except pymysql.Error as err:
+        print(f"Error al obtener los datos de los perfiles: {err}")
+
+    return render_template("admin/crud-peticiones-admin.html", peticiones = peticiones)
+
+@app.route('/rechazarpeticion/<int:idpeticion>')
+def rechazarpeticion(idpeticion):
+    try:
+        cbd.cursor.execute("DELETE FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+        cbd.connection.commit()
+
+    except pymysql.Error as err:
+        print(f"Error al eliminar la petición de la tabla: {err}")
+    
+    return redirect(url_for("crudpeticionesadmin"))
+
+@app.route('/aceptarpeticion/<int:idpeticion>')
+def aceptarpeticion(idpeticion):
+    try:
+        cbd.cursor.execute("SELECT archivo, link FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+        datos = cbd.cursor.fetchone()
+        archivo = datos[0]
+        link = datos[1]
+
+        if archivo != b'' and archivo != "":
+            cbd.cursor.execute("INSERT INTO documentos (documento) SELECT archivo FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+            cbd.connection.commit()
+
+        if link != "":
+            cbd.cursor.execute("INSERT INTO links (link) SELECT link FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+            cbd.connection.commit()
+
+        cbd.cursor.execute("DELETE FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+        cbd.connection.commit()
+
+    except pymysql.Error as err:
+        print(f"Error al mover la petición de la tabla: {err}")
+
+    return redirect(url_for("crudpeticionesadmin"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

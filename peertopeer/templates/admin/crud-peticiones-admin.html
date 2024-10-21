@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crud de peticiones del administrador</title>
+</head>
+<body>
+    <h1>CRUD DE PETICIONES DEL ADMINISTRADOR</h1> 
+
+    <table border="2px">
+        <thead><tr>
+            <td>Apodo del usuario</td>
+            <td>Correo del usuario</td>
+            <td>Mensaje</td>
+            <td>Archivo</td>
+            <td>Link</td>
+            <td>Fecha de la petición</td>
+            <td>Hora de la petición</td>
+            <td colspan="2">Acciones</td>
+        </tr></thead>
+
+        <tbody>
+            {% for peticion in peticiones %}
+            <tr name="fila">
+                <td> {{peticion[2]}} </td>
+                <td> {{peticion[3]}} </td>
+                <td> {{peticion[4]}} </td>
+                <td> Archivo </td>
+                <td> {{peticion[6]}} </td>
+                <td> {{peticion[7]}} </td>
+                <td> {{peticion[8]}} </td>
+                <td><a href="/aceptarpeticion/{{peticion[0]}}">Aceptar petición</a></td>
+                <td><a href="/rechazarpeticion/{{peticion[0]}}">Rechazar petición</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
