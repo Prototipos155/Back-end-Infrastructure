@@ -21,6 +21,7 @@
 
     <table border="2px">
         <thead><tr>
+            <td>ID del usuario</td>
             <td>Apodo</td>
             <td>Nivel</td>
             <td>Nombres</td>
@@ -33,6 +34,7 @@
         <tbody>
             {% for perfil in perfiles %}
             <tr name="fila">
+                <td> {{perfil[0]}} </td>
                 <td> {{perfil[1]}} </td>
                 <td> {{perfil[2]}} </td>
                 <td> {{perfil[3]}} </td>
