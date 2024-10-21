@@ -7,7 +7,6 @@ from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 
 from db.DB import CC
-from utiles.token import crear_token
 
 import pymysql
 import os
@@ -18,7 +17,6 @@ import jwt
 
 r=load_dotenv("./peertopeer/utiles/.env")
 cbd = CC()
-ct = crear_token()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("PASSWORD1")
@@ -26,14 +24,15 @@ app.secret_key = os.getenv("PASSWORD1")
 contraseña = os.getenv("PASSWORD2")
 
 @app.route('/')
-def home():
+def inicio():
 
-    return render_template("home.html")
+    return render_template("inicio.html")
 
-@app.route ('/iniciarSesion')
-def iniciarSesion():
-    return render_template("iniciosesi.html")
-    
+
+@app.route('/acceso-registro')
+def acceso_registro():
+
+    return render_template("acceso-registro.html")   
 
 @app.route ('/registro', methods=['GET','POST'])
 def registro():
@@ -124,20 +123,20 @@ def registro():
                     session['codigoveri'] = codigoveri
                     session['tokenregistro'] = tokenregistro
 
-                    return render_template ("vericorreo_registro.html", mensaje1="ingrese el codigo que le enviamos por correo")
+                    return render_template ("acceso/vericorreo_registro.html", mensaje1="ingrese el codigo que le enviamos por correo")
 
                 except pymysql.Error as err:
                     print(err)
-                    return render_template("registro.html", mensaje1 = "este pedo ya no jalo") 
+                    return render_template("acceso/registro.html", mensaje1 = "este pedo ya no jalo") 
                                 
             except pymysql.Error as err:
  
-                return render_template("registro.html", mensaje = "las comprobaciones no jalaron")
+                return render_template("acceso/registro.html", mensaje = "las comprobaciones no jalaron")
                     
         except pymysql.Error as err:
-            return render_template("home.html", mensaje = "este pedo ya no jalo")
+            return render_template("inicio.html", mensaje = "este pedo ya no jalo")
         
-    return render_template ("registro.html",datos=("","","","","","",""))
+    return render_template ("acceso/registro.html",datos=("","","","","","",""))
 
 @app.route ('/vericorreo_registro', methods=['GET', 'POST'])
 def vericorreo_registro():
@@ -169,21 +168,21 @@ def vericorreo_registro():
                 cbd.cursor.execute("INSERT INTO perfil (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript, cuenta_activa) VALUES (%s, %s, %s, %s, %s, %s, %s, 1)", (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
 
-                return render_template("home.html", mensaje1 = "registro exitoso")
+                return render_template("inicio.html", mensaje1 = "registro exitoso")
                 
             except pymysql.Error as er:
                 print(er)
-                return render_template("vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
+                return render_template("acceso/vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
 
         except jwt.InvalidTokenError:
             print("Token inválido.")
-            return render_template("vericorreo_registro.html")
+            return render_template("acceso/vericorreo_registro.html")
 
 
-    return render_template("vericorreo_registro.html")
+    return render_template("acceso/vericorreo_registro.html")
 
-@app.route ('/acceso', methods=['GET', 'POST'])
-def acceso():
+@app.route ('/iniciar_sesion', methods=['GET', 'POST'])
+def iniciar_sesion():
 
     print(f"metodo en uso: {request.method}")
 
@@ -198,7 +197,7 @@ def acceso():
             perfil_exist = cbd.cursor.fetchone()
 
             if not perfil_exist:
-                return render_template("acceso.html", mensaje1="NO HAY UN USUARIO ASOCIADO A DICHOS DATOS")
+                return render_template("iniciar_sesion.html", mensaje1="NO HAY UN USUARIO ASOCIADO A DICHOS DATOS")
             
             id_perfil = perfil_exist[0]
             nivel = perfil_exist[1]
@@ -209,15 +208,15 @@ def acceso():
 
             try:
                 if not(apodo == apodo_exist and correo == correo_exist):
-                    return render_template("acceso.html", mensaje1="El apodo y/o correo no coinciden")
+                    return render_template("iniciar_sesion.html", mensaje1="El apodo y/o correo no coinciden")
                 print(f"metodo: {request.method} ")
                 print(contraseña_encript)
 
                 if not( contraseña_encript is not None):
-                    return render_template("acceso.html", mensaje1="Contraseña no definida en la base de datos.")
+                    return render_template("iniciar_sesion.html", mensaje1="Contraseña no definida en la base de datos.")
                 
                 if not( check_password_hash(contraseña_encript, contraseña)):
-                    return render_template("acceso.html", mensaje1="Contraseña incorrecta")
+                    return render_template("iniciar_sesion.html", mensaje1="Contraseña incorrecta")
                 
                 try:
                     payload = {
@@ -252,26 +251,26 @@ def acceso():
                             smtp.sendmail(remitente,destinatario,em.as_string())
 
                     except pymysql.Error as err:
-                        return render_template ("acceso.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
+                        return render_template ("iniciar_sesion.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
                 
                     session['tokenacceso'] = tokenacceso
                     session['codigoveri'] = codigoveri
                     return redirect(url_for('vericorreo_acceso'))
 
                 except pymysql.Error as err:
-                        return render_template ("acceso.html", mensaje1 = f"el token no ha podido ser generado: {err}") 
+                        return render_template ("iniciar_sesion.html", mensaje1 = f"el token no ha podido ser generado: {err}") 
 
             
             except pymysql.Error as err:
-                return render_template("acceso.html", mensaje1=" no se puede iniciar sesion")
+                return render_template("iniciar_sesion.html", mensaje1=" no se puede iniciar sesion")
 
 
         except pymysql.Error as err:
             print(f"no jala:{err}")
-            return render_template("acceso.html", mensaje1="esta madre no jalo: ")
+            return render_template("iniciar_sesion.html", mensaje1="esta madre no jalo: ")
 
 
-    return render_template ("acceso.html" )
+    return render_template ("acceso/iniciar_sesion.html" )
 
 @app.route ('/vericorreo_acceso', methods=['GET', 'POST'])
 def vericorreo_acceso():
@@ -293,12 +292,12 @@ def vericorreo_acceso():
             nivel = payload['nivel'],
             apodo = payload['apodo']
             
-            return render_template("home.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo: {apodo}")
+            return render_template("inicio.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo: {apodo}")
 
         except:
             return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
 
-    return render_template("vericorreo_acceso.html")
+    return render_template("acceso/vericorreo_acceso.html")
 
 
 @app.route ('/archivo', methods=['GET', 'POST'])
@@ -337,7 +336,7 @@ def archivo():
             cbd.cursor.execute("INSERT INTO peticiones (id_perfil, mensaje, archivo, link, fecha, hora) VALUES (%s, %s, %s, %s, %s, %s)", (id_perfil, mensaje, archivo, link, fecha, hora))
             cbd.connection.commit()
 
-            return render_template ("home.html", mensaje1 = "la peticion se envio correctamente")
+            return render_template ("inicio.html", mensaje1 = "la peticion se envio correctamente")
 
         except pymysql.Error as err:
             return render_template("archivo.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
