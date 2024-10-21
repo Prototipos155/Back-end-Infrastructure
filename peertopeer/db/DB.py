@@ -94,7 +94,6 @@ class CC():
             self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
-            self.tabla_motivos_de_quejas()
 
         except pymysql.Error as err:
             print("\n error al intentar crear las tablas " .format(err))
@@ -102,6 +101,7 @@ class CC():
     def tabla_perfil(self):
         try:
             self.cursor.execute("""
+<<<<<<< HEAD
             CREATE TABLE IF NOT EXISTS perfil (
                 id_perfil INT UNIQUE AUTO_INCREMENT NOT NULL,
                                 

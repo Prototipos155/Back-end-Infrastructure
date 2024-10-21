@@ -353,7 +353,7 @@ def crudAdmin():
     except pymysql.Error as err:
         print(f"Error al obtener los datos de los perfiles: {err}")
 
-    return render_template("admin/crud-admin.html", perfiles = perfiles)
+    return render_template("admin/crud-usuarios-admin.html", perfiles = perfiles)
 
 
 @app.route('/changeStatusAccount/<int:idPerfil>/<int:statusAcc>')
@@ -370,7 +370,7 @@ def changeStatusAccount(idPerfil, statusAcc):
     except pymysql.Error as err:
         print(f"No se pudo actualizar el estado de la cuenta: {err}")
 
-    return redirect(url_for('crudadmin'))
+    return redirect(url_for('crudAdmin'))
 
 if __name__ == "__main__":
     app.run(debug=True)
