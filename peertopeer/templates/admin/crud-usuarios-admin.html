@@ -69,7 +69,7 @@
             if (e.target.matches('#buscador')) {
 
                 filas.forEach( fila => {
-                let data = `${fila.children[0].innerText} ${fila.children[2].innerText} ${fila.children[3].innerText}`; 
+                let data = `${fila.children[1].innerText} ${fila.children[3].innerText} ${fila.children[4].innerText}`; 
 
                 data.toLowerCase().includes(e.target.value.toLowerCase()) 
                 ? fila.classList.remove("filtro") 

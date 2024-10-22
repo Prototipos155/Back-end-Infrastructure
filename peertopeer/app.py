@@ -14,6 +14,7 @@ import ssl
 import smtplib
 import random
 import jwt
+import magic
 
 r=load_dotenv("./peertopeer/utiles/.env")
 cbd = CC()
@@ -197,7 +198,7 @@ def iniciar_sesion():
             perfil_exist = cbd.cursor.fetchone()
 
             if not perfil_exist:
-                return render_template("iniciar_sesion.html", mensaje1="NO HAY UN USUARIO ASOCIADO A DICHOS DATOS")
+                return render_template("acceso/iniciar_sesion.html", mensaje1="NO HAY UN USUARIO ASOCIADO A DICHOS DATOS")
             
             id_perfil = perfil_exist[0]
             nivel = perfil_exist[1]
@@ -208,15 +209,15 @@ def iniciar_sesion():
 
             try:
                 if not(apodo == apodo_exist and correo == correo_exist):
-                    return render_template("iniciar_sesion.html", mensaje1="El apodo y/o correo no coinciden")
+                    return render_template("acceso/iniciar_sesion.html", mensaje1="El apodo y/o correo no coinciden")
                 print(f"metodo: {request.method} ")
                 print(contraseña_encript)
 
                 if not( contraseña_encript is not None):
-                    return render_template("iniciar_sesion.html", mensaje1="Contraseña no definida en la base de datos.")
+                    return render_template("acceso/iniciar_sesion.html", mensaje1="Contraseña no definida en la base de datos.")
                 
                 if not( check_password_hash(contraseña_encript, contraseña)):
-                    return render_template("iniciar_sesion.html", mensaje1="Contraseña incorrecta")
+                    return render_template("acceso/iniciar_sesion.html", mensaje1="Contraseña incorrecta")
                 
                 try:
                     payload = {
@@ -251,23 +252,23 @@ def iniciar_sesion():
                             smtp.sendmail(remitente,destinatario,em.as_string())
 
                     except pymysql.Error as err:
-                        return render_template ("iniciar_sesion.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
+                        return render_template ("acceso/iniciar_sesion.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
                 
                     session['tokenacceso'] = tokenacceso
                     session['codigoveri'] = codigoveri
                     return redirect(url_for('vericorreo_acceso'))
 
                 except pymysql.Error as err:
-                        return render_template ("iniciar_sesion.html", mensaje1 = f"el token no ha podido ser generado: {err}") 
+                        return render_template ("acceso/iniciar_sesion.html", mensaje1 = f"el token no ha podido ser generado: {err}") 
 
             
             except pymysql.Error as err:
-                return render_template("iniciar_sesion.html", mensaje1=" no se puede iniciar sesion")
+                return render_template("acceso/iniciar_sesion.html", mensaje1=" no se puede iniciar sesion")
 
 
         except pymysql.Error as err:
             print(f"no jala:{err}")
-            return render_template("iniciar_sesion.html", mensaje1="esta madre no jalo: ")
+            return render_template("acceso/iniciar_sesion.html", mensaje1="esta madre no jalo: ")
 
 
     return render_template ("acceso/iniciar_sesion.html" )
@@ -283,7 +284,7 @@ def vericorreo_acceso():
         codigo = request.form.get('codigo')
 
         if not(str(codigo) == str(codigoveri)):
-            return render_template("vericorreo_acceso.html", mensaje1= "Tu código de verificación no coincide")
+            return render_template("acceso/vericorreo_acceso.html", mensaje1= "Tu código de verificación no coincide")
 
         try:
             payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
@@ -295,7 +296,7 @@ def vericorreo_acceso():
             return render_template("inicio.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo: {apodo}")
 
         except:
-            return render_template("vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
+            return render_template("acceso/vericorreo_acceso.html", mensaje1 = "no se pudo separar el token")
 
     return render_template("acceso/vericorreo_acceso.html")
 
