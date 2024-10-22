@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
-<div class="container">
+<div class="container"> 
 
     <form action="/registro" name="form-registro" id="form-registro" class="form-registro" method="post">
         <div class="datos">
@@ -32,7 +31,7 @@
         
                 </div>
             </fieldset>
-            <fieldset class="">
+            <fieldset >
 
                 <label for="nombres">Nombre(s):</label>
                 <input value="{{datos.1}}" class='input' type="text" name="nombres" id="nombres" placeholder="Ingrese sus nombres" required>
@@ -65,15 +64,15 @@
 
             </fieldset>
 
+            
+        </div>
+        <div class="buttons">
             <center>
                 <button type="submit" id="registrarse" class="btn-registrarse">Confirmar registro</button>
                 </center>
 
-        </div>
-        <div class="buttons">
-
-            <button id="atras" class="siguiente">Atras</button>
-            <button id="siguiente" class="siguiente">Siguiente</button>
+            <button id="atras" class="mover">Atras</button>
+            <button id="siguiente" class="mover">Siguiente</button>
         </div>
 
     </form>
@@ -81,61 +80,108 @@
 
 <script src="../static/js/validacionesRegistro.js"></script>
 <script>
-    // let c=0;
-    // for(let boton of document.querySelectorAll(".buttons.siguiente")){
-    //     boton.addEventListener("click",(e,c)=>{
-    //         cambiarField(e,c)
-    //     })
-    // }
-    // let fields=document.querySelectorAll(".datos fieldset")
-    // function cambiarField(e,direccion){
-    //     (e!=undefined)?e.preventDefault():null;
-    //     direccion=(direccion==0)?-1:1;
-    //     console.log("modo=",direccion)
-    //     //0=atras
-    //     //1=siguiente
+    let c=1;
+    for(let boton of document.querySelectorAll(".buttons .mover")){
+        console.log(c)
+        boton.onclick=(e)=>{
+            e.preventDefault()
+            console.log("click")
+            cambiarField(e,2)
+        }
+        boton.direccion=c
+        c=-1
+    }
+    let fields=document.querySelectorAll(".datos fieldset")
+    window.iniciaCambio=false
+    
+    function cambiarField(e,modo=1){
+        if(window.iniciaCambio==true){
+            alert("ya hay un proceso en curso")
+            return
+        }
+        window.iniciaCambio=true
+        direccion=e.target.direccion
+        //0=atras       fieldset----->
+        //1=siguiente   <-----fieldset        
         
-        
-    //     let index=0;
-    //     for (index;index<fields.length;index++){
-    //         if(fields[index].classList.contains("fieldactive")){
-    //             //encontro el fieldset en visualizacion
-    //             break
-    //         }
-    //     }
-    //     console.log("index=",index)
-    //     fields[index+direccion].classList.add("fieldactive")
-    //     for(let indexAnimation=0;indexAnimation<3000;indexAnimation+=1){
-    //         fields[index].style.translate=`${direccion*(100/indexAnimation)}%`
-    //     }
-    // }
-    let currentField = 0;
-        const fields = document.querySelectorAll('fieldset');
-
-        // Mostrar el primer campo
-        fields[currentField].style.display = 'inline-block';
-
-        document.getElementById('siguiente').addEventListener('click', function() {
-            // Ocultar el campo actual
-            currentField++;
-
-            // Si hay más campos, mostrar el siguiente
-            if (currentField < fields.length) {
-                fields[currentField].style.display = 'inline-block';
-            } else {
-                // Si no hay más campos, se puede desactivar el botón
-                this.disabled = true;
-                this.textContent = 'Fin del registro';
+        let index=0;
+        for (index;index<fields.length;index++){
+            if(fields[index].classList.contains("fieldactive")){
+                //encontro el fieldset en visualizacion
+                break
             }
-            fields[currentField].style.translate="-100%"
-            fields[currentField-1].style.translate="-100%"
-            setTimeout(()=>{
-                fields[currentField-1].style.display = 'none';
+        }
 
-                // Incrementar el índice del campo actual
+        if(index-direccion <0 || index-direccion>fields.length-1){
+            alert("NO TE SALGAS DE LOS LIMITES")
+            window.iniciaCambio=false
+            return
+        }
+
+        console.log("index=",index)
+        if(direccion==1 && modo==1){
+            fields[index].style.translate="-100%"
+            fields[index].offsetHeight;
+        }
+        
+        fields[index-direccion].classList.add("fieldactive")
+        if(modo==2){
+            fields[index-direccion].style.translate=`${direccion*-100}%`
+            fields[index].offsetHeight;
+            fields[index].classList.remove("fieldactive")
+        }
+        
+        fields[index-direccion].classList.add("animacion")
+        if(modo==1){
+            fields[index].classList.add("animacion")
+            fields[index].style.translate=(direccion!=1)?`${direccion*100}%`:"0";
+        }
+
+        setTimeout(e=>{
+            fields[index-direccion].style.translate=(direccion==1 || modo==2)?"0%":`${direccion*100}%`;
+        },50)
+        setTimeout((e)=>{
+            window.iniciaCambio=false
+            if(modo==1){
+                fields[index].classList.remove("fieldactive")
+                fields[index].classList.remove("animacion")
+            }
+            fields[index-direccion].classList.remove("animacion")
+            if(direccion==1 && modo==1){
+                fields[index].style.translate=""
+            }else{
+                fields[index-direccion].style.translate=""
+            }
+        },2100)
+
+    }
+    // let currentField = 0;
+    //     const fields = document.querySelectorAll('fieldset');
+
+    //     // Mostrar el primer campo
+    //     fields[currentField].style.display = 'inline-block';
+
+    //     document.getElementById('siguiente').addEventListener('click', function() {
+    //         // Ocultar el campo actual
+    //         currentField++;
+
+    //         // Si hay más campos, mostrar el siguiente
+    //         if (currentField < fields.length) {
+    //             fields[currentField].style.display = 'inline-block';
+    //         } else {
+    //             // Si no hay más campos, se puede desactivar el botón
+    //             this.disabled = true;
+    //             this.textContent = 'Fin del registro';
+    //         }
+    //         fields[currentField].style.translate="-100%"
+    //         fields[currentField-1].style.translate="-100%"
+    //         setTimeout(()=>{
+    //             fields[currentField-1].style.display = 'none';
+
+    //             // Incrementar el índice del campo actual
                 
-            },5000)
+    //         },5000)
             
-        });
+    //     });
 </script>
 {% endblock %}
