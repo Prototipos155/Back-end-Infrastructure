@@ -1,63 +1,187 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
-<div class="container">
-    <h2 class="form-title">Complete los siguientes campos para su registro en P2P:</h2>
+<div class="container"> 
 
     <form action="/registro" name="form-registro" id="form-registro" class="form-registro" method="post">
-        <h4>¿Qué desea ser?</h4>
-        <div class="role-selection" id="role-selection">
+        <div class="datos">
+            <fieldset class="fieldactive">
+
+                <h3>¿En que nivel de estudios se encuentra?</h3>
+
+                <div class="role-selection" id="role-selection">
+
+                    <label class="radio" for="checkbox1">
+                        <span class="label">Básico</span>
+                        <input type="radio" name="nivel" {% if datos.0=="basico" %}checked="true"{% endif %} id="basico" value="Basico">
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <label class="radio" for="checkbox2">
+                        <span class="label">Medio Superior</span>
+                        <input type="radio" name="nivel" {% if datos.0=="medio superior" %}checked="true"{% endif %} id="medio-superior" value="Medio superior">
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <label class="radio" for="checkbox2">
+                        <span class="label">Superior</span>
+                        <input type="radio" name="nivel" {% if datos.0=="superior" %}checked="true"{% endif %} id="superior" value="Superior">
+                        <span class="checkmark"></span>
+                    </label>
+        
+                </div>
+            </fieldset>
+            <fieldset >
+
+                <label for="nombres">Nombre(s):</label>
+                <input value="{{datos.1}}" class='input' type="text" name="nombres" id="nombres" placeholder="Ingrese sus nombres" required>
+
+                <label for="apellidos">Apellido(s):</label>
+                <input value="{{datos.2}}" class='input' type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" required>
+            
+            </fieldset>
+            <fieldset>
+
+                <label for="apodo">Nombre de usuario:</label>
+                <input value="{{datos.3}}" class='input' type="text" name="apodo" id="apodo" placeholder="Ingrese un nombre de usuario" required>
+            
+            </fieldset>
+            <fieldset>
+
+                <label for="telefono">Teléfono:</label>
+                <input value="{{datos.4}}" class='input' type="text" name="telefono" id="telefono" placeholder="Ingrese su número de teléfono" required>
+
+                <label for="correo">Correo:</label>
+                <input value="{{datos.5}}" class='input' type="email" name="correo" id="correo" placeholder="Ingrese su correo institucional" required>
+            
+            </fieldset>
+            <fieldset>
+                <label for="contraseña">Contraseña:</label>
+                <input value="{{datos.6}}" class='input' type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
+
+                <label for="confirmcontra">Confirmar contraseña:</label>
+                <input value="{{datos.7}}" class='input' type="password" name="confirmcontra" id="confirmcontra" placeholder="Confirme su contraseña"  required>
+
+            </fieldset>
 
             
-            <label class="radio" for="checkbox1">
-                <span class="label">Básico</span>
-                <input type="radio" name="nivel" {% if datos.0=="basico" %}checked="true"{% endif %} id="basico" value="basico">
-                <span class="checkmark"></span>
-            </label>
-
-            <label class="radio" for="checkbox2">
-                <span class="label">Medio Superior</span>
-                <input type="radio" name="nivel" {% if datos.0=="medio superior" %}checked="true"{% endif %} id="medio-superior" value="medio superior">
-                <span class="checkmark"></span>
-            </label>
-
-            <label class="radio" for="checkbox2">
-                <span class="label">Superior</span>
-                <input type="radio" name="nivel" {% if datos.0=="superior" %}checked="true"{% endif %} id="superior" value="superior">
-                <span class="checkmark"></span>
-            </label>
-
-
         </div>
+        <div class="buttons">
+            <center>
+                <button type="submit" id="registrarse" class="btn-registrarse">Confirmar registro</button>
+                </center>
 
-        <label for="nombres">Nombre(s):</label>
-        <input value="{{datos.1}}" class='input' type="text" name="nombres" id="nombres" placeholder="Ingrese sus nombres" required>
-
-        <label for="apellidos">Apellido(s):</label>
-        <input value="{{datos.2}}" class='input' type="text" name="apellidos" id="apellidos" placeholder="Ingrese sus apellidos" required>
-
-        <label for="apodo">Nombre de usuario:</label>
-        <input value="{{datos.3}}" class='input' type="text" name="apodo" id="apodo" placeholder="Ingrese un nombre de usuario" required>
-
-        <label for="telefono">Teléfono:</label>
-        <input value="{{datos.4}}" class='input' type="text" name="telefono" id="telefono" placeholder="Ingrese su número de teléfono" required>
-
-        <label for="correo">Correo:</label>
-        <input value="{{datos.5}}" class='input' type="email" name="correo" id="correo" placeholder="Ingrese su correo institucional" required>
-
-        <label for="contraseña">Contraseña:</label>
-        <input value="{{datos.6}}" class='input' type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
-
-        <label for="confirmcontra">Confirmar contraseña:</label>
-        <input value="{{datos.7}}" class='input' type="password" name="confirmcontra" id="confirmcontra" placeholder="Confirme su contraseña"  required>
-
-        <center>
-        <button type="submit" id="registrarse" class="btn-registrarse">Confirmar registro</button>
-        </center>
+            <button id="atras" class="mover">Atras</button>
+            <button id="siguiente" class="mover">Siguiente</button>
+        </div>
 
     </form>
 </div>
 
 <script src="../static/js/validacionesRegistro.js"></script>
+<script>
+    let c=1;
+    for(let boton of document.querySelectorAll(".buttons .mover")){
+        console.log(c)
+        boton.onclick=(e)=>{
+            e.preventDefault()
+            console.log("click")
+            cambiarField(e,2)
+        }
+        boton.direccion=c
+        c=-1
+    }
+    let fields=document.querySelectorAll(".datos fieldset")
+    window.iniciaCambio=false
+    
+    function cambiarField(e,modo=1){
+        if(window.iniciaCambio==true){
+            alert("ya hay un proceso en curso")
+            return
+        }
+        window.iniciaCambio=true
+        direccion=e.target.direccion
+        //0=atras       fieldset----->
+        //1=siguiente   <-----fieldset        
+        
+        let index=0;
+        for (index;index<fields.length;index++){
+            if(fields[index].classList.contains("fieldactive")){
+                //encontro el fieldset en visualizacion
+                break
+            }
+        }
+
+        if(index-direccion <0 || index-direccion>fields.length-1){
+            alert("NO TE SALGAS DE LOS LIMITES")
+            window.iniciaCambio=false
+            return
+        }
+
+        console.log("index=",index)
+        if(direccion==1 && modo==1){
+            fields[index].style.translate="-100%"
+            fields[index].offsetHeight;
+        }
+        
+        fields[index-direccion].classList.add("fieldactive")
+        if(modo==2){
+            fields[index-direccion].style.translate=`${direccion*-100}%`
+            fields[index].offsetHeight;
+            fields[index].classList.remove("fieldactive")
+        }
+        
+        fields[index-direccion].classList.add("animacion")
+        if(modo==1){
+            fields[index].classList.add("animacion")
+            fields[index].style.translate=(direccion!=1)?`${direccion*100}%`:"0";
+        }
+
+        setTimeout(e=>{
+            fields[index-direccion].style.translate=(direccion==1 || modo==2)?"0%":`${direccion*100}%`;
+        },50)
+        setTimeout((e)=>{
+            window.iniciaCambio=false
+            if(modo==1){
+                fields[index].classList.remove("fieldactive")
+                fields[index].classList.remove("animacion")
+            }
+            fields[index-direccion].classList.remove("animacion")
+            if(direccion==1 && modo==1){
+                fields[index].style.translate=""
+            }else{
+                fields[index-direccion].style.translate=""
+            }
+        },2100)
+
+    }
+    // let currentField = 0;
+    //     const fields = document.querySelectorAll('fieldset');
+
+    //     // Mostrar el primer campo
+    //     fields[currentField].style.display = 'inline-block';
+
+    //     document.getElementById('siguiente').addEventListener('click', function() {
+    //         // Ocultar el campo actual
+    //         currentField++;
+
+    //         // Si hay más campos, mostrar el siguiente
+    //         if (currentField < fields.length) {
+    //             fields[currentField].style.display = 'inline-block';
+    //         } else {
+    //             // Si no hay más campos, se puede desactivar el botón
+    //             this.disabled = true;
+    //             this.textContent = 'Fin del registro';
+    //         }
+    //         fields[currentField].style.translate="-100%"
+    //         fields[currentField-1].style.translate="-100%"
+    //         setTimeout(()=>{
+    //             fields[currentField-1].style.display = 'none';
+
+    //             // Incrementar el índice del campo actual
+                
+    //         },5000)
+            
+    //     });
+</script>
 {% endblock %}
