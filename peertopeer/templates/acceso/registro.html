@@ -99,6 +99,8 @@
             alert("ya hay un proceso en curso")
             return
         }
+        console.log("modo=",modo)
+        
         window.iniciaCambio=true
         direccion=e.target.direccion
         //0=atras       fieldset----->
@@ -119,15 +121,18 @@
         }
 
         console.log("index=",index)
-        if(direccion==1 && modo==1){
+        if(direccion==1 &&( modo==1 || modo==3)){
+            console.log("es reversa y debo reacomodar el field actual para colocarlo en el centro")
             fields[index].style.translate="-100%"
             fields[index].offsetHeight;
         }
         
         fields[index-direccion].classList.add("fieldactive")
-        if(modo==2){
+        if(modo==2 || modo==3){
             fields[index-direccion].style.translate=`${direccion*-100}%`
             fields[index].offsetHeight;
+        }
+        if(modo==2){
             fields[index].classList.remove("fieldactive")
         }
         
@@ -136,20 +141,35 @@
             fields[index].classList.add("animacion")
             fields[index].style.translate=(direccion!=1)?`${direccion*100}%`:"0";
         }
+        if(modo==3){
+            console.log("se añadio desaparecer")
+            fields[index].classList.add("desaparecer")
+            fields[index].style.opacity="0"
+        }
 
         setTimeout(e=>{
-            fields[index-direccion].style.translate=(direccion==1 || modo==2)?"0%":`${direccion*100}%`;
+            console.log("translate del elemento que sigue")
+            fields[index-direccion].style.translate=(direccion==1 || modo==2 )?"0%":`${direccion*100}%`;
         },50)
         setTimeout((e)=>{
             window.iniciaCambio=false
-            if(modo==1){
+                
+            if(modo==1 || modo==3){
                 fields[index].classList.remove("fieldactive")
+            }
+            if(modo==3){
+                console.log("debe quitar deaparecer")
+                fields[index].classList.remove("desaparecer")
+                console.log(fields[index].classList)
+                fields[index].style.opacity=1;
+            }
+            if(modo==1){
                 fields[index].classList.remove("animacion")
             }
             fields[index-direccion].classList.remove("animacion")
             if(direccion==1 && modo==1){
                 fields[index].style.translate=""
-            }else{
+            }else {
                 fields[index-direccion].style.translate=""
             }
         },2100)
