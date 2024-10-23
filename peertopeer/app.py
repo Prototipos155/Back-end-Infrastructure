@@ -14,7 +14,7 @@ import ssl
 import smtplib
 import random
 import jwt
-import magic
+import filetype
 
 r=load_dotenv("./peertopeer/utiles/.env")
 cbd = CC()
@@ -305,6 +305,24 @@ def vericorreo_acceso():
 def archivo():
 
     if request.method in "POST":
+        MAX_FILE_SIZE = 16*1024*1024
+        mime_permitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'video/mp4', 'video/x-msvideo',
+                           'video/quicktime', 'application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                           'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+
+        mensaje = request.form.get('mensaje')
+        link = request.form.get('link').strip()
+        archivoblob = request.files['archivo']
+
+        try:
+            kind = filetype.guess(archivoblob)
+            print(f"\n{archivoblob, kind.mime, kind.extension}\n")
+
+            if kind is None or kind.mime not in mime_permitidos:
+                return render_template ("archivo.html", mensaje1 = "Sólo archivos PDF, imágenes, videos, txt y docs office")
+        
+        except Exception as err:
+            return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes, videos, txt y docs office; {err}")
 
         tokenacceso = session.get('tokenacceso')
 
@@ -320,10 +338,6 @@ def archivo():
         except jwt.InvalidTokenError:
             return render_template("archivo.html", mensaje1 = "no pudo obtener el token")
 
-
-        mensaje = request.form.get('mensaje')
-        link = request.form.get('link').strip()
-        archivoblob = request.files['archivo']
 
         try:
             archivo = archivoblob.read()
