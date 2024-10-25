@@ -1,57 +1,57 @@
 {% extends "layout.html" %}
 {% block content %}
-        
-    <div class="container">
 
-        <div class="">
+<div class="container">
+
+    <div class="">
+
+        {% if mensaje %}
+        {{mensaje}}
+        {% endif %}
+
+        <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
 
             <h1>Inicio de sesion</h1>
 
-            {% if mensaje %}
-            {{mensaje}}
-            {% endif %}
+            <div class="datos">
+                <fieldset class="fieldactive">
 
-            <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
-                <div class="datos">
-                    <fieldset class="fieldactive">
+                    <h3>Ingrese el correo con el que se registro:</h3>
 
-                        <h3>Ingrese el correo con el que se registro:</h3>
+                    <div>
+                        <input type="email" name="correo" id="correo" required>
+                    </div>
 
-                        <div>
-                            <input type="email" name="correo" id="correo" required>
-                        </div>
+                </fieldset>
 
-                    </fieldset>
+                <fieldset class="">
 
-                    <fieldset class="">
+                    <h3>Ingrese el apodo con el que se registro:</h3>
 
-                        <h3>Ingrese el apodo con el que se registro:</h3>
-                    
-                        <div>
-                            <input type="text" name="apodo" id="apodo" required>
-                        </div>
+                    <div>
+                        <input type="text" name="apodo" id="apodo" required>
+                    </div>
 
-                    </fieldset>
+                </fieldset>
 
-                    <fieldset class="">
+                <fieldset class="">
 
-                        <h3>Ingrese la contraseña con la que se registro:</h3>
+                    <h3>Ingrese la contraseña con la que se registro:</h3>
 
-                        <div>
-                            <input type="text" name="contraseña" id="contraseña"  required> 
-                        </div>
+                    <div>
+                        <input type="text" name="contraseña" id="contraseña" required>
+                    </div>
 
-                    </fieldset>
-                </div>
-                <div class="botones">
-    
-                    <button type="submit">Enviar</button>
-    
-                    <button id="atras" class="mover">Atras</button>
-                    <button id="siguiente" class="mover">Siguiente</button>
-                    <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
-                </div>
-            </form>
-        </div>
-{% endblock %}
+                </fieldset>
+            </div>
+            <div class="botones">
 
+                <button type="submit">Enviar</button>
+
+                <button id="atras" class="mover">Atras</button>
+                <button id="siguiente" class="mover">Siguiente</button>
+                <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
+            </div>
+        </form>
+    </div>
+    {% endblock %}
