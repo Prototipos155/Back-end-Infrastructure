@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<br><br><br>
+
+<form action="/vericorreo_registro" name="form-vericorreo_registro" class="form-registro" method="post">
+
+    <h3 class="form-title">Ingrese el codigo que fue enviado por el correo que nos proporciono:</h3>
+
+    <br><br><br>
+
+    <input type="text" name="codigo" class="input">
+    <button type="submit" class="btn-registrarse1">Verificar</button>
+
+</form>
+
+{% endblock %}

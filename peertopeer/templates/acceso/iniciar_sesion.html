@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<body>
+
+    <div class="container">
+
+        <div class="datos">
+
+            <h1>Inicio de sesion</h1>
+
+            {% if mensaje %}
+            {{mensaje}}
+            {% endif %}
+
+            <div class="datos">
+
+                <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
+
+                    <fieldset class="fieldactive">
+
+                        <h3>Ingrese el correo con el que se registro:</h3>
+
+                        <div>
+                            <input type="email" name="correo" id="correo" required>
+                        </div>
+
+                    </fieldset>
+
+                    <fieldset class="fieldactive">
+
+                        <h3>Ingrese el apodo con el que se registro:</h3>
+                    
+                        <div>
+                            <input type="text" name="apodo" id="apodo" required>
+                        </div>
+
+                    </fieldset>
+
+                    <fieldset class="fieldactive">
+
+                        <h3>Ingrese la contraseña con la que se registro:</h3>
+
+                        <div>
+                            <input type="text" name="contraseña" id="contraseña"  required> 
+                        </div>
+
+                    </fieldset>
+            </div>
+            <div class="botones">
+
+                <button type="submit">Enviar</button>
+
+                <button id="atras" class="mover">Atras</button>
+                <button id="siguiente" class="mover">Siguiente</button>
+                <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
+            </div>
+
+            </form>
+        </div>
+</body>
+
+{% endblock %}

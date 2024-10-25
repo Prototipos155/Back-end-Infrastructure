@@ -18,6 +18,8 @@ window.onload = () => {form.addEventListener("submit", (e) => {
 
 function validarFormulario() {
     let valido = true;
+    const nombresRegex = /[^a-zA-Z\s]/;
+    const apodoRegex = /[^\w.-]/;
     const correoRegex = /^[\w.]+@[a-zA-Z0-9]+\.+[a-zA-Z.]{1,}$/;
     const contraseñaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-])([\w!#.-]|[^\s]){8,}$/;
 
@@ -35,13 +37,14 @@ function validarFormulario() {
         document.getElementById("msgNivel").remove();
     }
 
-    if (nombres.value.trim() == '' || nombres.value.trim().length < 3 || nombres.value.trim().length > 40) {
+    if (nombres.value.trim() == '' || nombres.value.trim().length < 3 || nombres.value.trim().length > 50 
+        || nombresRegex.test(nombres.value.trim())) {
         valido = false;
         if (!document.getElementById("msgNombres")) {
             let msgNombres = document.createElement('span');
             msgNombres.id = "msgNombres";
             msgNombres.className = "msgsValidaciones";
-            msgNombres.textContent = "Campo obligatorio, debe contener entre 3 y 40 caracteres";
+            msgNombres.textContent = "Campo obligatorio, debe contener entre 3 y 50 caracteres, sin caracteres especiales";
             form.children["nombres"].parentNode.insertBefore(msgNombres, form.children["nombres"]);
         }
 
@@ -49,13 +52,14 @@ function validarFormulario() {
         document.getElementById("msgNombres").remove();
     }
 
-    if (apellidos.value.trim() == '' || apellidos.value.trim().length < 3 || apellidos.value.trim().length > 40) {
+    if (apellidos.value.trim() == '' || apellidos.value.trim().length < 3 || apellidos.value.trim().length > 50 
+        || nombresRegex.test(apellidos.value.trim())) {
         valido = false;
         if (!document.getElementById("msgApellidos")) {
             let msgApellidos = document.createElement('span');
             msgApellidos.id = "msgApellidos";
             msgApellidos.className = "msgsValidaciones";
-            msgApellidos.textContent = "Campo obligatorio, debe contener entre 3 y 40 caracteres";
+            msgApellidos.textContent = "Campo obligatorio, debe contener entre 3 y 50 caracteres, sin caracteres especiales";
             form.children["apellidos"].parentNode.insertBefore(msgApellidos, form.children["apellidos"]);
         }
 
@@ -63,13 +67,14 @@ function validarFormulario() {
         document.getElementById("msgApellidos").remove();
     }
 
-    if (apodo.value.trim() == '' || apodo.value.trim().length < 1 || apodo.value.trim().length > 20) {
+    if (apodo.value.trim() == '' || apodo.value.trim().length < 1 || apodo.value.trim().length > 20
+        || apodoRegex.test(apodo.value.trim())) {
         valido = false;
         if (!document.getElementById("msgApodo")) {
             let msgApodo = document.createElement('span');
             msgApodo.id = "msgApodo";
             msgApodo.className = "msgsValidaciones";
-            msgApodo.textContent = "Campo obligatorio, debe contener entre 1 y 20 caracteres";
+            msgApodo.textContent = "Campo obligatorio, debe contener entre 1 y 20 caracteres, sin espacios";
             form.children["apodo"].parentNode.insertBefore(msgApodo, form.children["apodo"]);
         }
 
@@ -77,13 +82,13 @@ function validarFormulario() {
         document.getElementById("msgApodo").remove();
     }
 
-    if (telefono.value.trim() === '' || telefono.value.trim().length != 10 || isNaN(telefono.value.trim())) {
+    if (telefono.value.trim() === '' || telefono.value.trim().length < 10  || telefono.value.trim().length > 13 || isNaN(telefono.value.trim())) {
         valido = false;
         if (!document.getElementById("msgTelefono")) {
             let msgTelefono = document.createElement('span');
             msgTelefono.id = "msgTelefono";
             msgTelefono.className = "msgsValidaciones";
-            msgTelefono.textContent = "Campo obligatorio, debe ser un número de teléfono de 10 dígitos";
+            msgTelefono.textContent = "Campo obligatorio, debe ser un número de teléfono de entre 10 y 13 dígitos";
             form.children["telefono"].parentNode.insertBefore(msgTelefono, form.children["telefono"]);
         }
 

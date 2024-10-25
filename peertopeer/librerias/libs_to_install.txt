@@ -1,5 +1,0 @@
-NOTA: por cada renglon solo debe haber una libreria
-Ingresa Las Librerias a partir de la siguiente linea:
-flask-WTF
-python-dotenv
-PyJWT
