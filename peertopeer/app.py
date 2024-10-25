@@ -1,12 +1,11 @@
 from flask import Flask, render_template,redirect, request, session, url_for
-from flask_wtf.csrf import CSRFProtect
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 
 from db.DB import CC
+from utiles.hash import Encrypt
 
 import pymysql
 import os
@@ -16,8 +15,9 @@ import random
 import jwt
 import filetype
 
-r=load_dotenv("./peertopeer/utiles/.env")
+load_dotenv()
 cbd = CC()
+encriptado = Encrypt()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("PASSWORD1")
@@ -30,12 +30,7 @@ def inicio():
     return render_template("inicio.html")
 
 
-@app.route('/acceso-registro')
-def acceso_registro():
-
-    return render_template("acceso-registro.html")   
-
-@app.route ('/registro', methods=['GET','POST'])
+@app.route ('/registro',  methods=['GET', 'POST'])
 def registro():
 
     print(f"metodo en uso: {request.method}")
@@ -75,10 +70,11 @@ def registro():
                 mensaje = "las contraseñas que ingresas no coinciden"
             
             if(mensaje!=""):
-                return render_template("registro.html",mensaje1=mensaje,datos=(nivel,nombres,apellidos,apodo,telefono,correo,contraseña,confirmcontra))
-            try:
+                return render_template("acceso/registro.html",mensaje1=mensaje,datos=(nivel,nombres,apellidos,apodo,telefono,correo,contraseña,confirmcontra))
+            try:   
+                confirmcontra1 = str(confirmcontra)
 
-                contraseña_encript = generate_password_hash(confirmcontra)
+                contraseña_encript = encriptado.encrypt_gcm(confirmcontra1)
 
                 try:
                     payload = {
@@ -90,9 +86,8 @@ def registro():
                     'correo' : correo,
                     'contraseña_encript' : contraseña_encript,
                     'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
-                        }
+                    }
 
-                    # print(f"payload={payload}")
                     print(f'psw={os.getenv("PASSWORD2")}')
                     tokenregistro = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
 
@@ -119,7 +114,7 @@ def registro():
                             smtp.sendmail(remitente, destinatario, em.as_string())
 
                     except pymysql.Error as err:
-                        return render_template ("registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
+                        return render_template ("acceso/registro.html", mensaje1 = f"el correo no ha podido ser enviado: {err}")
 
                     session['codigoveri'] = codigoveri
                     session['tokenregistro'] = tokenregistro
@@ -137,7 +132,8 @@ def registro():
         except pymysql.Error as err:
             return render_template("inicio.html", mensaje = "este pedo ya no jalo")
         
-    return render_template ("acceso/registro.html",datos=("","","","","","",""))
+        
+    return render_template ("acceso/registro.html")
 
 @app.route ('/vericorreo_registro', methods=['GET', 'POST'])
 def vericorreo_registro():
@@ -169,7 +165,7 @@ def vericorreo_registro():
                 cbd.cursor.execute("INSERT INTO perfil (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript, cuenta_activa) VALUES (%s, %s, %s, %s, %s, %s, %s, 1)", (nivel, nombres, apellidos, apodo, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
 
-                return render_template("inicio.html", mensaje1 = "registro exitoso")
+                return render_template("acceso/iniciar_sesion.html", mensaje1 = "registro exitoso")
                 
             except pymysql.Error as er:
                 print(er)
@@ -210,13 +206,11 @@ def iniciar_sesion():
             try:
                 if not(apodo == apodo_exist and correo == correo_exist):
                     return render_template("acceso/iniciar_sesion.html", mensaje1="El apodo y/o correo no coinciden")
-                print(f"metodo: {request.method} ")
-                print(contraseña_encript)
 
-                if not( contraseña_encript is not None):
+                if not(contraseña_encript is not None):
                     return render_template("acceso/iniciar_sesion.html", mensaje1="Contraseña no definida en la base de datos.")
-                
-                if not( check_password_hash(contraseña_encript, contraseña)):
+
+                if not(encriptado.verify_gcm(contraseña, contraseña_encript)):
                     return render_template("acceso/iniciar_sesion.html", mensaje1="Contraseña incorrecta")
                 
                 try:
@@ -225,7 +219,7 @@ def iniciar_sesion():
                     'nivel' : nivel,
                     'apodo' : apodo,
                     'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
-                        }
+                    }
 
                     tokenacceso = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
 
@@ -292,6 +286,10 @@ def vericorreo_acceso():
             id_perfil = payload['id_perfil'],
             nivel = payload['nivel'],
             apodo = payload['apodo']
+
+            session['id_perfil'] = id_perfil
+            session['nivel'] = nivel
+            session['apodo'] = apodo
             
             return render_template("inicio.html", mensaje1 =f"id: {id_perfil}   nivel: {nivel}  apodo: {apodo}")
 
@@ -300,8 +298,21 @@ def vericorreo_acceso():
 
     return render_template("acceso/vericorreo_acceso.html")
 
+@app.route ('/logout', methods=['GET', 'POST'])
+def logout():
 
-@app.route ('/archivo', methods=['GET', 'POST'])
+    session.clear()
+    return render_template("inicio.html", mensaje1 = "has cerrado sesion")
+
+@app.after_request
+def apply_csp(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["X-Frame-Options"] = "DENY"
+    
+    return response
+
+@app.route ('/peticiones', methods=['GET', 'POST'])
 def archivo():
 
     if request.method in "POST":
@@ -324,19 +335,11 @@ def archivo():
         except Exception as err:
             return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes, videos, txt y docs office; {err}")
 
-        tokenacceso = session.get('tokenacceso')
+        if 'id_perfil' in session:
+            id_perfil = session['id_perfil']
 
-        try:
-            payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
-
-            id_tupla = payload['id_perfil'],
-            nivel = payload['nivel'],
-            apodo = payload['apodo']
-
-            id_perfil = id_tupla[0]
-
-        except jwt.InvalidTokenError:
-            return render_template("archivo.html", mensaje1 = "no pudo obtener el token")
+        else:
+            return render_template("peticiones.html", mensaje1= "Necesitas iniciar sesion para subir archivos")
 
 
         try:
@@ -354,9 +357,9 @@ def archivo():
             return render_template ("inicio.html", mensaje1 = "la peticion se envio correctamente")
 
         except pymysql.Error as err:
-            return render_template("archivo.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
+            return render_template("peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
 
-    return render_template ("archivo.html")
+    return render_template ("peticiones.html")
 
 
 @app.route('/crudusuariosadmin')
@@ -371,15 +374,19 @@ def crudusuariosadmin():
     return render_template("admin/crud-usuarios-admin.html", perfiles = perfiles)
 
 
-@app.route('/changeStatusAccount/<int:idPerfil>/<int:statusAcc>')
-def changeStatusAccount(idPerfil, statusAcc):
+@app.route('/changeStatusAccount/<int:statusAcc>')
+def changeStatusAccount(statusAcc):
+
+    if 'id_perfil' in session:
+            id_perfil = session['id_perfil']
+
     try: 
         if statusAcc == 1:
-            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 0 WHERE id_perfil = %s", (idPerfil))
+            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 0 WHERE id_perfil = %s", (id_perfil))
             cbd.connection.commit()
         
         elif statusAcc == 0:
-            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 1 WHERE id_perfil = %s", (idPerfil))
+            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 1 WHERE id_perfil = %s", (id_perfil))
             cbd.connection.commit()
         
     except pymysql.Error as err:
@@ -392,16 +399,26 @@ def crudpeticionesadmin():
     try:
         cbd.cursor.execute("SELECT pet.id_peticiones, pet.id_perfil, per.apodo, per.correo, pet.mensaje, pet.archivo, pet.link, pet.fecha, pet.hora FROM perfil per JOIN peticiones pet ON per.id_perfil = pet.id_perfil")
         peticiones = cbd.cursor.fetchall()
+        
+        id_peticiones = peticiones[0]
+        id_perfil_peticion = peticiones[0]
 
+        session['peticiones'] = id_peticiones
+        session['id_perfil_peticion'] = id_perfil_peticion
+        
     except pymysql.Error as err:
         print(f"Error al obtener los datos de los perfiles: {err}")
 
-    return render_template("admin/crud-peticiones-admin.html", peticiones = peticiones)
+    return render_template("admin/crud-peticiones-admin.html")
 
-@app.route('/rechazarpeticion/<int:idpeticion>')
-def rechazarpeticion(idpeticion):
+@app.route('/rechazarpeticion')
+def rechazarpeticion():
+
+    if  'id_perfil_peticion' in session:
+        id_perfil_peticion = session['id_perfil_peticion']
+
     try:
-        cbd.cursor.execute("DELETE FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+        cbd.cursor.execute("DELETE FROM peticiones WHERE id_peticiones = %s", (id_perfil_peticion))
         cbd.connection.commit()
 
     except pymysql.Error as err:
@@ -433,6 +450,12 @@ def aceptarpeticion(idpeticion):
 
     return redirect(url_for("crudpeticionesadmin"))
 
+def status_401(error):
+    return redirect(url_for('inicio.html'))
+
+
+def status_404(error):
+    return "<h1>Página no encontrada</h1>", 404
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run (host='127.0.0.1', port=5000, ssl_context=('adhoc'))

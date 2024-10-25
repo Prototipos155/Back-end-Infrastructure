@@ -2,14 +2,14 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio</title>
-    <link rel="stylesheet" href="/static/styles/style.css" />
-    <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
-    <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
-    <!-- <script type="text/javascript" src="/static/js/design.js" defer></script> -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio</title>
+  <link rel="stylesheet" href="/static/styles/style.css" />
+  <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
+  <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
+  <!-- <script type="text/javascript" src="/static/js/design.js" defer></script> -->
 
 
 </head>
@@ -20,7 +20,7 @@
     <ul>
 
       <li>
-      <span class="nombre-proyecto">PeerToPeer</span>
+        <span class="nombre-proyecto">PeerToPeer</span>
         </button>
       </li>
 
@@ -28,26 +28,28 @@
         <a href="/">
           <span>Inicio</span>
         </a>
-      </li>  
+      </li>
 
       <li>
-        <li><a href="/iniciar_sesion">Registrate o Inicia Sesion</a></li>
-        <li><a href="/archivo">Archivo</a></li>
-        <li><a href="/crudusuariosadmin">Crud de usuarios Admin</a></li>
-        <li><a href="/crudpeticionesadmin">Crud de peticiones Admin</a></li>
+      <li><a href="/iniciar_sesion">Registrate o Inicia Sesion</a></li>
+      <li><a href="/registro">Registrate o Inicia Sesion</a></li>
+      <li><a href="/peticiones">Archivo</a></li>
+      <li><a href="/crudusuariosadmin">Crud de usuarios Admin</a></li>
+      <li><a href="/crudpeticionesadmin">Crud de peticiones Admin</a></li>
       </li>
     </ul>
     {% if mensaje1 %}
-        {{mensaje1}}
-        {% endif %}
+    {{mensaje1}}
+    {% endif %}
   </nav>
-    <main>
+  <main>
     {% block content %}
 
     {% endblock %}
-    </main>
+  </main>
 
 
 </body>
+<script src="/static/js/diseño.js"></script>
 
 </html>

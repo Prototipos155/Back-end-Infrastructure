@@ -3,3 +3,8 @@ Ingresa Las Librerias a partir de la siguiente linea:
 flask-WTF
 python-dotenv
 PyJWT
+filetype
+pycryptodome
+flask
+pymysql
+cryptography

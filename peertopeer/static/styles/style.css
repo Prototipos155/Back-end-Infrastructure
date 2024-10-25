@@ -1,9 +1,9 @@
 @font-face {
-  font-family: 'Mifuente' ;
+  font-family: 'Mifuente';
   src: url('../fuentes/Raleway-light.ttf') format('truetype');
 }
 
-body{
+body {
   width: 100%;
   height: 100%;
   margin: 0%;
@@ -16,7 +16,7 @@ nav {
   margin-top: 0;
   margin-bottom: 3%;
   padding: 2%;
-  background-color: antiquewhite;
+  background-color: #01351693;
   overflow-wrap: break-word;
 
   .nombre-proyecto {
@@ -27,60 +27,120 @@ nav {
 
   ul {
     list-style: none;
-    padding: 0; 
-    display:flex;
+    padding: 0;
+    display: flex;
     flex-direction: row;
     overflow: hidden;
   }
 
-  li{
+  li {
     padding: 1%;
   }
 
   a {
     text-decoration: none;
-    color: black;
+    color: #f2f2f2;
   }
 }
 
-.container{
+.container {
   display: flex;
   justify-content: center;
+  text-wrap: nowrap;
+  width: auto;
 }
 
-.form-registro{
-  width: 90%;
+.form-inicio_sesi {
+  width: 100%;
   justify-content: center;
   flex-direction: row;
-  
-  .datos{
-    text-wrap: nowrap; 
+
+  /*.datos {
+    text-wrap: nowrap;
     overflow: hidden;
     padding: 1%;
     display: flex;
-    fieldset{  
+    align-items: center;
+    width: 100%;*/
+
+
+    fieldset {
       text-wrap: wrap;
-      display: none;      
+      display: none;
       box-sizing: border-box;
       height: 40vh;
-      width: 100%; 
-      flex:none;
+      width: 100%;
+      flex: none;
+      margin: 1%;
+      background-color: #2d3839;
+      border-radius: 3%;
+      border-color: none;
+      align-items: center;
+      /* transition: opacity 2s ease-in; */
+    }
+
+    .fieldactive {
+      display: block;
+
+    }
+  /*}*/
+
+  input {
+    background-color: #2d3839;
+    border: .3 solid #ccc;
+    padding: 2%;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 90%;
+  }
+
+  .animacion {
+    transition: translate 2s ease-in;
+  }
+
+  .desaparecer {
+    transition: opacity 2s ease-in;
+
+  }
+}
+
+
+.form-registro {
+  width: 90%;
+  justify-content: center;
+  flex-direction: row;
+
+  .datos {
+    text-wrap: nowrap;
+    overflow: hidden;
+    padding: 1%;
+    display: flex;
+
+    fieldset {
+      text-wrap: wrap;
+      display: none;
+      box-sizing: border-box;
+      height: 40vh;
+      width: 100%;
+      flex: none;
       margin: 1%;
       /* transition: opacity 2s ease-in; */
     }
-  
-    .fieldactive{ 
+
+    .fieldactive {
       display: block;
-      
+
     }
+
     /* box-sizing: border-box; */
   }
 }
 
-.animacion{
+.animacion {
   transition: translate 2s ease-in;
 }
-.desaparecer{
+
+.desaparecer {
   transition: opacity 2s ease-in;
 
 }

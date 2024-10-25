@@ -1,37 +1,63 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<body><br><br><br>
+<body>
 
+    <div class="container">
 
-<form action="/iniciar_sesion" id="acceso_form" method="post">
+        <div class="datos">
 
-    <h1>Inicie sesion</h1>
+            <h1>Inicio de sesion</h1>
 
-    {% if mensaje %}
-        {{mensaje}}
-        {% endif %}
+            {% if mensaje %}
+            {{mensaje}}
+            {% endif %}
 
-<div>
-    <label>Ingrese su correo</label>
-    <input type="email" name="correo" id="correo" required>
-</div>
+            <div class="datos">
 
-<div>
-    <label>Ingrese su apodo</label>
-    <input type="text" name="apodo" id="apodo" required>
-</div>
+                <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
 
-<div>
-    <label>Ingrese su contraseña</label>
-    <input type="text" name="contraseña" id="contraseña" required>
-</div>
+                    <fieldset class="fieldactive">
 
-<button type="submit">Enviar</button>
+                        <h3>Ingrese el correo con el que se registro:</h3>
 
-</form>
+                        <div>
+                            <input type="email" name="correo" id="correo" required>
+                        </div>
 
-<button><a href="/registro">Registrate si aun no lo has hecho</a></button>
+                    </fieldset>
 
+                    <fieldset class="fieldactive">
+
+                        <h3>Ingrese el apodo con el que se registro:</h3>
+                    
+                        <div>
+                            <input type="text" name="apodo" id="apodo" required>
+                        </div>
+
+                    </fieldset>
+
+                    <fieldset class="fieldactive">
+
+                        <h3>Ingrese la contraseña con la que se registro:</h3>
+
+                        <div>
+                            <input type="text" name="contraseña" id="contraseña"  required> 
+                        </div>
+
+                    </fieldset>
+            </div>
+            <div class="botones">
+
+                <button type="submit">Enviar</button>
+
+                <button id="atras" class="mover">Atras</button>
+                <button id="siguiente" class="mover">Siguiente</button>
+                <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
+            </div>
+
+            </form>
+        </div>
 </body>
+
 {% endblock %}
