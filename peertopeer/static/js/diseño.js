@@ -1,3 +1,4 @@
+console.log("uniste diseño")
 let c=1;
     for(let boton of document.querySelectorAll(".botones .mover")){
         console.log(c)
