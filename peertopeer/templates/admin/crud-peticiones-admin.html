@@ -41,7 +41,8 @@
                 <td> {{peticion[2]}} </td>
                 <td> {{peticion[3]}} </td>
                 <td> {{peticion[4]}} </td>
-                <td> Archivo </td>
+                <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Ver archivo</a> 
+                {% else %} No hay archivo {% endif %}</td>
                 <td> {{peticion[6]}} </td>
                 <td> {{peticion[7]}} </td>
                 <td> {{peticion[8]}} </td>
@@ -60,9 +61,9 @@
             document.getElementById("buscador").value = "";
             filas.forEach (fila => {
                 fila.classList.remove("filtro");
-            })
+            });
             botonX.classList.add("cleanBar");
-        })
+        });
 
         document.addEventListener("keyup", (e) => {
             if (e.target.matches('#buscador')) {
@@ -75,9 +76,9 @@
                 : fila.classList.add("filtro");
 
                 botonX.style.display = e.target.value ? botonX.classList.remove("cleanBar") : botonX.classList.add("cleanBar");
-                })
+                });
             }
-        })
+        });
     </script>
 </body>
 </html>

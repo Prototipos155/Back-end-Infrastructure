@@ -209,6 +209,7 @@ class CC():
                                     
                 mensaje VARCHAR(200) NULL,
                 archivo MEDIUMBLOB NULL,
+                nombre_archivo varchar(256) NULL,
                 link VARCHAR(256) NULL,
                 fecha DATE NOT NULL,
                 hora TIME NOT NULL,
@@ -228,6 +229,7 @@ class CC():
               id_documento INT UNIQUE AUTO_INCREMENT NOT NULL,
                                 
               documento MEDIUMBLOB NOT NULL,
+              nombre_archivo varchar(256) NULL,
                                 
               PRIMARY KEY (id_documento))""")
             

@@ -1,4 +1,6 @@
 from flask import Flask, render_template,redirect, request, session, url_for
+from flask_wtf.csrf import CSRFProtect
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
@@ -14,6 +16,7 @@ import smtplib
 import random
 import jwt
 import filetype
+import io
 
 load_dotenv()
 cbd = CC()
@@ -335,14 +338,52 @@ def archivo():
         except Exception as err:
             return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes, videos, txt y docs office; {err}")
 
-        if 'id_perfil' in session:
-            id_perfil = session['id_perfil']
-
-        else:
-            return render_template("peticiones.html", mensaje1= "Necesitas iniciar sesion para subir archivos")
-
+        tokenacceso = session.get('tokenacceso')
 
         try:
+            payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
+
+            id_tupla = payload['id_perfil'],
+            nivel = payload['nivel'],
+            apodo = payload['apodo']
+
+            id_perfil = id_tupla[0]
+
+        except jwt.InvalidTokenError:
+            return render_template("archivo.html", mensaje1 = "no pudo obtener el token")
+
+        TAMAÑO_MAXIMO_ARCHIVOS = 16*1024*1024
+        mime_permitidos = ['application/pdf']
+        # 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        # 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+
+        mensaje = request.form.get('mensaje')
+        link = request.form.get('link')
+        archivoblob = request.files['archivo']
+        print("Nombre archivo: ",archivoblob.filename)
+
+        if link.strip() == "" and not archivoblob:
+            return render_template ("archivo.html", mensaje1 = "Debe enviar un link o archivo")
+        
+        if archivoblob:
+            if len(archivoblob.read()) <= TAMAÑO_MAXIMO_ARCHIVOS :
+                try:
+                    tipoarchivo = filetype.guess(archivoblob)
+                    print(f"\n{archivoblob, tipoarchivo.mime, tipoarchivo.extension}\n")
+
+                    if tipoarchivo is None or not (tipoarchivo.mime in mime_permitidos or tipoarchivo.mime.startswith('image')
+                            or tipoarchivo.mime.startswith('video')):
+                        return render_template ("archivo.html", mensaje1 = "Sólo archivos PDF, imágenes y videos")
+                
+                except Exception as err:
+                    return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes y videos")
+            
+            else:
+                return render_template ("archivo.html", mensaje1 = "No se permiten archivos mayores a 16MB")
+
+        try:
+            archivoblob.seek(0)
+            nombrearchivo = archivoblob.filename
             archivo = archivoblob.read()
 
             fecha = datetime.now ().date()
@@ -351,7 +392,7 @@ def archivo():
             print(fecha)
             print(hora)
 
-            cbd.cursor.execute("INSERT INTO peticiones (id_perfil, mensaje, archivo, link, fecha, hora) VALUES (%s, %s, %s, %s, %s, %s)", (id_perfil, mensaje, archivo, link, fecha, hora))
+            cbd.cursor.execute("INSERT INTO peticiones (id_perfil, mensaje, archivo, nombre_archivo, link, fecha, hora) VALUES (%s, %s, %s, %s, %s, %s, %s)", (id_perfil, mensaje, archivo, nombrearchivo, link.strip(), fecha, hora))
             cbd.connection.commit()
 
             return render_template ("inicio.html", mensaje1 = "la peticion se envio correctamente")
@@ -360,6 +401,27 @@ def archivo():
             return render_template("peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
 
     return render_template ("peticiones.html")
+
+@app.route('/verarchivo/<int:idpeticion>')
+def verarchivo(idpeticion):
+    try:
+        cbd.cursor.execute("SELECT archivo, nombre_archivo FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+        archivo = cbd.cursor.fetchone()
+
+        if archivo:
+            archivobinario = io.BytesIO(archivo[0])
+            tipomime = filetype.guess(archivo[0])
+            nombrearchivo = archivo[1]
+            print("\nTipo archivo: ",tipomime.mime, " Nombre: ", nombrearchivo)
+
+            return Response(archivobinario, headers={"Content-Disposition": f"inline; filename=\"{nombrearchivo}\""}, mimetype=tipomime.mime)
+        
+        else:
+            return render_template("inicio.html", mensaje1 = f"No se pudo obtener el archivo")
+
+    except pymysql.Error as err:
+        print("Error: ", err)
+        return redirect(url_for('crudpeticionesadmin'))
 
 
 @app.route('/crudusuariosadmin')
@@ -429,13 +491,14 @@ def rechazarpeticion():
 @app.route('/aceptarpeticion/<int:idpeticion>')
 def aceptarpeticion(idpeticion):
     try:
-        cbd.cursor.execute("SELECT archivo, link FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+        cbd.cursor.execute("SELECT archivo, nombre_archivo, link FROM peticiones WHERE id_peticiones = %s", (idpeticion))
         datos = cbd.cursor.fetchone()
         archivo = datos[0]
-        link = datos[1]
+        nombrearchivo = datos[1]
+        link = datos[2]
 
         if archivo != b'' and archivo != "":
-            cbd.cursor.execute("INSERT INTO documentos (documento) SELECT archivo FROM peticiones WHERE id_peticiones = %s", (idpeticion))
+            cbd.cursor.execute("INSERT INTO documentos (documento, nombre_archivo) SELECT archivo, nombre_archivo FROM peticiones WHERE id_peticiones = %s", (idpeticion))
             cbd.connection.commit()
 
         if link != "":
