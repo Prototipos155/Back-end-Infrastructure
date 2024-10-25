@@ -34,22 +34,27 @@
                     </fieldset>
 
                     <fieldset class="">
+                        <section>
 
-                        <h3>Ingrese la contraseña con la que se registro:</h3>
+                            <h3>Ingrese la contraseña con la que se registro:</h3>
+                            
+                            <div>
+                                <input type="text" name="contraseña" id="contraseña"  required> 
+                            </div>
+                        </section>
 
-                        <div>
-                            <input type="text" name="contraseña" id="contraseña"  required> 
-                        </div>
+                        <button type="submit" class="boton">Enviar</button>
 
                     </fieldset>
                 </div>
-                <div class="botones">
-    
-                    <button type="submit">Enviar</button>
-    
-                    <button id="atras" class="mover">Atras</button>
-                    <button id="siguiente" class="mover">Siguiente</button>
-                    <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
+                <div >
+                    <div class="botones">
+                        <button id="atras" class="mover">Atras</button>
+                        <button id="siguiente" class="mover fin">Siguiente</button>
+                    </div>
+                    <div class="centrar-texto">
+                        <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
+                    </div>
                 </div>
             </form>
         </div>
