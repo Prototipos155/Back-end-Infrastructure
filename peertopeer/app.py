@@ -398,9 +398,14 @@ def archivo():
             return render_template ("inicio.html", mensaje1 = "la peticion se envio correctamente")
 
         except pymysql.Error as err:
-            return render_template("peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
+            return render_template("biblioteca/peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
 
-    return render_template ("peticiones.html")
+    return render_template ("biblioteca/peticiones.html")
+
+@app.route('/inicio_biblioteca')
+def inicio_biblioteca():
+
+    return render_template("/inicio_biblioteca.html")
 
 @app.route('/verarchivo/<int:idpeticion>')
 def verarchivo(idpeticion):

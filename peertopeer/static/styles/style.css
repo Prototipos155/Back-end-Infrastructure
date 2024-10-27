@@ -2,7 +2,8 @@
   font-family: 'Mifuente';
   src: url('../fuentes/Raleway-Regular.ttf') format('truetype');
 }
-*{
+
+* {
   box-sizing: border-box;
 }
 
@@ -11,22 +12,22 @@ body {
   height: 100%;
   margin: 0%;
   font-family: 'Mifuente';
-  background-color: #f7f7f7;
+  background-color: #f2f2f2;
 }
 
 nav {
   width: 100%;
   height: auto;
   margin: 0;
-  padding: .2%;
-  background-color: #3c3c3c;
+  background-color: #201e1a;
   overflow-wrap: break-word;
   box-sizing: border-box;
 
   .nombre-proyecto {
-    font-size: 4vh;
+    font-size: 3vh;
     text-align: justify;
     overflow-wrap: break-word;
+    color: #f2f2f2;
   }
 
   ul {
@@ -34,17 +35,61 @@ nav {
     padding: 0;
     display: flex;
     flex-direction: row;
-    overflow: hidden;
     margin: 0;
+    font-size: 100%;
   }
 
   li {
     padding: 1%;
     text-align: center;
-    margin-top: 1%;
-    height: 1%;
+    align-items: center;
+    margin: 1% 0 1%;
+    height: 30%;
     width: auto;
   }
+
+  .menu_desplegable {
+    width: auto;
+    height: auto;
+    border: 0;
+    font-family: 'Mifuente';
+    background-color: #201e1a;
+    color: #f2f2f2;
+  }
+
+  .dropdown {
+    background-color: #0a0c0d67;
+    font-family: 'Mifuente';
+    color: #ffffff;
+    display: inline-block;
+    position: relative;
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    min-width: 250%;
+    overflow: auto;
+    background-color: #201e1a;
+    color: #f2f2f2;
+    z-index: 1;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .dropdown-content a {
+    display: block;
+    padding: 5%;
+    text-decoration: none;
+  }
+
+  .dropdown-content a:hover {
+    color: #f2f2f2;
+    background-color: #1a3a4f;
+  }
+
 
   a {
     text-decoration: none;
@@ -54,128 +99,180 @@ nav {
 
 .container {
   display: flex;
+  align-items: center;
   justify-content: center;
   text-wrap: nowrap;
   width: auto;
 }
 
-.form-inicio_sesi{
-  .datos{
-    align-items: center;
-    width: 100%;
-
-    fieldset{
-      background-color: #2d3839;
-      border-radius: 3%;
-      border-color: none;
-      align-items: center;
-      color:white;
-    }
-  } 
-}
-.form-inicio_sesi, .form-registro {
+.form-inicio_sesi,
+.form-registro {
   width: 100%;
-  /* width:80%; */
   justify-content: center;
   flex-direction: row;
-
-  .datos {
-    text-wrap: nowrap;
-    overflow: hidden;
-    display: flex;
-    padding: 1%;
-    font-size: calc(min(3.5vw, 3.5vh));
-    
-    fieldset {
-      text-wrap: wrap;
-      display: none;
-      min-height: 40vh;
-      width: 100%;
-      flex: none;
-      margin: 0;
-      text-align: center;padding: 0%;
-      border: none;
-      background-color: #1d2529;
-      /* transition: opacity 2s ease-in; */
-    }
-
-    .fieldactive {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  .botones{
-    display: flex;
-    justify-content: center;
-    text-wrap: wrap;
-    .fin{
-      margin-right: 0px;
-    }
-    button{
-      margin-right: 10%;
-    }
-  }
-  .boton, .botones button{
-    min-width:calc(min(20vw,20vh));
-    min-height: calc(min(5vw,5vh));
-      display: block;
-      padding: 0%;
-    
-  }
-
-  label{
-    color: #f2f2f2;
-    margin: 1%;
-  }
-
-  input {
-    background-color: #ffffff;
-    border: none;
-    font-size: auto;
-    width: 90%;
-    height: 15%;
-    margin: 1%;
-  }
-
-  .animacion {
-    transition: translate 2s ease-in;
-  }
-
-  .desaparecer {
-    transition: opacity 2s ease-in;
-
-  }
-}
-/* .animacion {
-  transition: translate 2s ease-in;
+  text-align: center;
 }
 
-.desaparecer {
-  transition: opacity 2s ease-in;
-} */
+.datos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  height: 100vh;
+  font-size: calc(min(3.5vw, 3.5vh));
+}
 
-.role-selection{
+.datos fieldset {
+  transition: transform 0.5s ease;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 80%;
+  min-height: 45vh;
+  padding: 4%;
+  border-radius: 28px;
+  border: none;
+  background-color: #2b4d5b;
+  color: #f2f2f2;
+}
+
+.fieldactive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.izquierda,
+.derecha {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width:100%;
-  .radio{
-    display:block;
-    width:50%;
-    margin-top:1vh;
-    .label{
-      display: block;
-      width:70%;
-      float:left;
-    }
-    input{
-      width:10%;
-    }
-  }
+  color: #fc0000;
 }
-.centrar-texto{
+
+.derecha input {
+  background-color: #ac0000;
+  border-radius: 7px;
+  border: none;
+  width: 90%;
+  height: 6vh;
+  margin: 1%;
+  font-size: 1em;
+}
+
+.derecha .inicio_sesion {
+  border-radius: 3px;
+  border: none;
+  margin-top: 1%;
+  padding: 1%;
+  background-color: #201e1a;
+  color: #f2f2f2;
+  cursor: pointer;
+}
+
+.botones {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.botones #atras,
+.botones #siguiente,
+.botones #registrarse {
+  border-radius: 3px;
+  border: none;
+  background-color: #201e1a;
+  color: #f2f2f2;
+}
+
+.texto {
+  color: #f2f2f2;
+  font-size: 80%;
+}
+
+.animacion {
+  transition: translateX(0);
+}
+
+.desaparecer {
+  transition: opacity .2s ease-in;
+}
+
+.role-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.role-selection .radio {
+  display: block;
+  width: 50%;
+  margin-top: 1vh;
+}
+
+.role-selection .radio .label {
+  display: block;
+  width: 70%;
+  float: left;
+}
+
+.role-selection .radio input {
+  width: 10%;
+}
+
+
+.centrar-texto {
   text-align: center;
+
+  a {
+    text-decoration: none;
+    color: #f2f2f2;
+  }
+
+  #btn-cambio {
+    border-radius: 3px;
+    border: none;
+    margin-top: 1%;
+    padding: 1%;
+    background-color: #201e1a;
+  }
+
+}
+
+.peticiones {
+  align-items: center;
+  text-align: center;
+  background-color: #4d5459;
+  width: 95%;
+  padding: 2%;
+
+  .titulo {
+    font-size: 100%;
+  }
+
+  .input {
+    background-color: #1a3a4f;
+    color: #ffffff;
+    border-radius: 7px;
+    border: none;
+    width: 80%;
+    height: 6vh;
+    margin: 1%;
+    font-size: 1em;
+  }
+
+  .enviar, .archivo {
+    border-radius: 3px;
+    border: none;
+    margin-top: 1%;
+    padding: 1%;
+    background-color: #201e1a;
+    color: #f2f2f2;
+    cursor: pointer;
+  }
+
 }

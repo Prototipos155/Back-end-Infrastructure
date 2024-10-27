@@ -29,10 +29,24 @@
           <span>Inicio</span>
         </a>
       </li>
-
       <li>
-      <li><a href="/iniciar_sesion">Acceso</a></li>
-      <li><a href="/peticiones">Archivo</a></li>
+        <div class="dropdown">
+          <button class="menu_desplegable">Acceso</button>
+          <div class="dropdown-content">
+            <a href="/iniciar_sesion">Inicio de Sesion</a>
+            <a href="/registro">Registro</a>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="dropdown">
+          <button class="menu_desplegable">Biblioteca</button>
+          <div class="dropdown-content">
+            <a href="/peticiones">Peticiones</a>
+            <a href="/inicio_biblioteca">Biblioteca</a>
+          </div>
+        </div>
+      </li>
       <li><a href="/crudusuariosadmin">Crud de usuarios Admin</a></li>
       <li><a href="/crudpeticionesadmin">Crud de peticiones Admin</a></li>
       </li>
