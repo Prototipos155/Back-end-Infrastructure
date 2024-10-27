@@ -1,26 +1,17 @@
 console.log("uniste diseño")
 let c=1;
+let datos=document.querySelector(".datos");
+let transDuration=getComputedStyle(datos).getPropertyValue("--TransitionDuration").split("s")[0]*1000
+
 for(let boton of document.querySelectorAll(".botones .mover")){
     console.log(c)
+    boton.duracion=transDuration;
+
     boton.addEventListener("click",e=>{
         e.preventDefault()
         console.log("click")
         cambiarField(e,2)
     })
-    // boton.addEventListener("dblclick",e=>{
-    //     e.preventDefault()
-        // let terminar=false;
-        // while (!terminar){
-        //     let skip=prompt("Cuantas paginas desea saltar?")
-        //     mover=(direccion==0)?-1:1;
-        //     mover=fields.length+(skip*mover)
-        //     if(accion<0 || accion > fields.length-1){
-        //         alert("se sale de los limites")
-        //     }else{
-        //         terminar=true
-        //     }
-        // }
-    // })
     boton.direccion=c
     c=-1
 }
@@ -34,9 +25,10 @@ function cambiarField(e,modo=1){
     //1=siguiente   <-----fieldset    
     if(window.iniciaCambio==true){
         // alert("ya hay un proceso en curso")
-        
+        console.log("ya hay otro proceso en curso")        
         return
     }
+    console.log(e.target.duracion)
     window.iniciaCambio=true
     
     let index=obtenerCampoActivo();
@@ -72,7 +64,7 @@ function cambiarField(e,modo=1){
 
     setTimeout(e=>{
         fields[index-direccion].style.translate=(direccion==1 || modo==2)?"0%":`${direccion*100}%`;
-    },50)
+    },parseInt(e.target.duracion/100))
     setTimeout((e)=>{
         window.iniciaCambio=false
         if(modo==1){
@@ -85,7 +77,7 @@ function cambiarField(e,modo=1){
         }else{
             fields[index-direccion].style.translate=""
         }
-    },2100)
+    },parseInt(e.target.duracion))
 
 }
 function obtenerCampoActivo(){
