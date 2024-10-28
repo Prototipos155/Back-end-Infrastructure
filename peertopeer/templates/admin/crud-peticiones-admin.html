@@ -1,21 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crud de peticiones del administrador</title>
-    <style> 
-        .filtro {
-        display: none;
-        }
+{% extends "layout.html" %}
 
-        .cleanBar {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <h1>CRUD DE PETICIONES DEL ADMINISTRADOR</h1> 
+{% block content %}
+<style> 
+    .filtro {
+    display: none;
+    }
+
+    .cleanBar {
+        display: none;
+    }
+</style>
+
+    <h1>Crud de peticiones de administrador</h1> 
 
     <input type="text" name="buscador" id="buscador" placeholder="Buscar..."> <i class="cleanBar">X</i> <br><br>
 
@@ -41,9 +37,10 @@
                 <td> {{peticion[2]}} </td>
                 <td> {{peticion[3]}} </td>
                 <td> {{peticion[4]}} </td>
-                <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Ver archivo</a> 
+                <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Abrir archivo</a> 
                 {% else %} No hay archivo {% endif %}</td>
-                <td> {{peticion[6]}} </td>
+                <td> {% if peticion[6] %} <a href="{{peticion[6]}}" target="_blank">Abrir link</a> 
+                    {% else %} No hay link {% endif %} </td>
                 <td> {{peticion[7]}} </td>
                 <td> {{peticion[8]}} </td>
                 <td><a href="/aceptarpeticion/{{peticion[0]}}">Aceptar petición</a></td>
@@ -80,5 +77,4 @@
             }
         });
     </script>
-</body>
-</html>
+{% endblock %}

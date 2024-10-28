@@ -1,21 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crud de usuarios del administrador</title>
-    <style> 
-        .filtro {
-        display: none;
-        }
+{% extends "layout.html" %}
 
-        .cleanBar {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <h1>CRUD ADMINISTRADOR</h1> 
+{% block content %}
+<style> 
+    .filtro {
+    display: none;
+    }
+
+    .cleanBar {
+        display: none;
+    }
+</style>
+    <h1>Crud de usuarios de administrador</h1> 
 
     <input type="text" name="buscador" id="buscador" placeholder="Buscar..."> <i class="cleanBar">X</i> <br><br>
 
@@ -80,8 +75,7 @@
             }
         })
     </script>
-</body>
-</html>
+{% endblock %}
 
 <!--
 INSERT INTO `perfil`(`id_perfil`, `nivel`, `nombres`, `apellidos`, `apodo`, `correo`, `telefono`, `contraseña_encript`, `cuenta_activa`) VALUES (1,'Basico','Anakin','Skywalker','skywito','jedikiller@republic.com','0987654321','dfgsjhwerytre675fdsg','0'), 
