@@ -2,17 +2,16 @@
 
 {% block content %}
 
-    <title class="titleName">Crud de peticiones del administrador</title>
-    
-    <section class="crud">
+<div class="crud">
 
-    
-        <h1>CRUD DE PETICIONES DEL ADMINISTRADOR</h1> 
 
-        <input type="text" name="buscador" id="buscador" placeholder="Buscar..."> <i class="cleanBar">X</i> <br><br>
+    <h1>CRUD DE PETICIONES DEL ADMINISTRADOR</h1>
 
-        <table border="2px">
-            <thead><tr>
+    <input type="text" name="buscador" id="buscador" placeholder="Buscar..."> <i class="cleanBar">X</i> <br><br>
+
+    <table>
+        <thead>
+            <tr>
                 <td>ID petición</td>
                 <td>ID usuario</td>
                 <td>Apodo del usuario</td>
@@ -23,7 +22,8 @@
                 <td>Fecha de la petición</td>
                 <td>Hora de la petición</td>
                 <td colspan="2">Acciones</td>
-            </tr></thead>
+            </tr>
+        </thead>
 
         <tbody>
             {% for peticion in peticiones %}
@@ -33,9 +33,9 @@
                 <td> {{peticion[2]}} </td>
                 <td> {{peticion[3]}} </td>
                 <td> {{peticion[4]}} </td>
-                <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Abrir archivo</a> 
-                {% else %} No hay archivo {% endif %}</td>
-                <td> {% if peticion[6] %} <a href="{{peticion[6]}}" target="_blank">Abrir link</a> 
+                <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Abrir archivo</a>
+                    {% else %} No hay archivo {% endif %}</td>
+                <td> {% if peticion[6] %} <a href="{{peticion[6]}}" target="_blank">Abrir link</a>
                     {% else %} No hay link {% endif %} </td>
                 <td> {{peticion[7]}} </td>
                 <td> {{peticion[8]}} </td>
@@ -45,32 +45,33 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 
-    <script>
-        const filas = document.getElementsByName("fila");
-        const botonX = document.querySelector(".cleanBar");
+<script>
+    const filas = document.getElementsByName("fila");
+    const botonX = document.querySelector(".cleanBar");
 
-        botonX.addEventListener("click", () => {
-            document.getElementById("buscador").value = "";
-            filas.forEach (fila => {
-                fila.classList.remove("filtro");
-            });
-            botonX.classList.add("cleanBar");
+    botonX.addEventListener("click", () => {
+        document.getElementById("buscador").value = "";
+        filas.forEach(fila => {
+            fila.classList.remove("filtro");
         });
+        botonX.classList.add("cleanBar");
+    });
 
-        document.addEventListener("keyup", (e) => {
-            if (e.target.matches('#buscador')) {
+    document.addEventListener("keyup", (e) => {
+        if (e.target.matches('#buscador')) {
 
-                filas.forEach( fila => {
-                let data = `${fila.children[2].innerText} ${fila.children[3].innerText}`; 
+            filas.forEach(fila => {
+                let data = `${fila.children[2].innerText} ${fila.children[3].innerText}`;
 
-                data.toLowerCase().includes(e.target.value.toLowerCase()) 
-                ? fila.classList.remove("filtro") 
-                : fila.classList.add("filtro");
+                data.toLowerCase().includes(e.target.value.toLowerCase())
+                    ? fila.classList.remove("filtro")
+                    : fila.classList.add("filtro");
 
                 botonX.style.display = e.target.value ? botonX.classList.remove("cleanBar") : botonX.classList.add("cleanBar");
-                });
-            }
-        });
-    </script>
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -190,7 +190,7 @@ nav {
 .derecha #enviar:hover {
   color: #68757a;
   background-color: #120e11;
-  width: 35%;
+  width: 30%;
 }
 
 .botones {
@@ -202,7 +202,6 @@ nav {
 .botones button, .boton-1{
   height: 8vh;
   width: calc(min(30vh,30vw));
-  font-size: calc(max((min(30vh,30vw) / 10), 20px));
   text-wrap: wrap;
 }
 
@@ -323,8 +322,53 @@ nav {
 }
 
 .crud {
-  .filtro {
-    display: none;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  flex-direction: row;
+  text-align: center;
+  height: 100%;
+  width: 200%;
+
+  #buscador{
+    background-color: #1a3a4f;
+    width: 70%;
+    padding: 1%;
+    border-radius: 6px;
+    border: none;
+    border-color: none;
+    color: #f2f2f2;
+  }
+
+  table{
+    background-color: #333a3f;
+    color: #f2f2f2;
+    font-size: 100%;
+    border-radius: 8px;
+    border: none;
+    padding: 2%;
+    margin-left: 5%;
+    width: 90%;
+    height: auto;
+  }
+
+  tr{
+    border-color: #333a3f;
+    background-color: #120e11;
+  }
+
+  td{
+    border: 1%;
+    border-radius: 5px;
+    padding: 1%;
+    border-color: #333a3f;
+    background-color: #120e11;
+    text-align: center;
+  }
+
+  a{
+    text-decoration: none;
+    color: #f2f2f2;
   }
 
   .cleanBar {
