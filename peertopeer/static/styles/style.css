@@ -121,8 +121,8 @@ nav {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  height: 80vh;
-  font-size: calc(min(3.5vw, 3.5vh));
+  height: 60vh;
+  font-size: calc(max((min(3.5vw, 3.5vh)),15px));
   --TransitionDuration:1s;
 }
 
@@ -137,7 +137,7 @@ nav {
   border: none;
   background-color: #2b4d5b;
   color: #f2f2f2;
-
+  word-break: break-word;
 }
 
 .fieldactive { 
@@ -161,6 +161,32 @@ nav {
   text-wrap: wrap;
   min-height:100%;
 }
+.izquierda {
+  label{
+    text-transform: uppercase;
+  }
+}
+/* .derecha{
+  border-left: 2px solid black;
+} */
+fieldset{
+  position: relative;
+}
+/* fieldset::before{
+  position: absolute;
+  content: "";
+  border:2px solid black;
+  height: 100%;
+  left: 50%;
+  top:11%;
+}
+.Fieldbutton::before{
+  top:1%;
+  height: 60%;
+} */
+.todo{
+  flex:100%;
+}
 
 .derecha input {
   background-color: #ac0000;
@@ -181,11 +207,17 @@ nav {
   color: #f2f2f2;
   cursor: pointer;
 }
-
 .botones {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  gap:5%;
+}
+.botones button, .boton-1{
+  height: 8vh;
+  width: calc(min(30vh,30vw));
+  font-size: calc(max((min(30vh,30vw) / 10), 20px));
+  text-wrap: wrap;
 }
 
 .botones #atras,
@@ -196,7 +228,10 @@ nav {
   background-color: #201e1a;
   color: #f2f2f2;
 }
-
+#registrarse{
+  flex:100% !important;
+  margin-top: 2%;
+}
 .texto {
   color: #f2f2f2;
   font-size: 80%;
