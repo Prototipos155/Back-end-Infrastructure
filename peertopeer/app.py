@@ -302,8 +302,8 @@ def vericorreo_acceso():
 
     return render_template("acceso/vericorreo_acceso.html")
 
-@app.route ('/logout', methods=['GET', 'POST'])
-def logout():
+@app.route ('/cerrarsesion', methods=['GET', 'POST'])
+def cerrarsesion():
 
     session.clear()
     return render_template("inicio.html", mensaje1 = "has cerrado sesion")
