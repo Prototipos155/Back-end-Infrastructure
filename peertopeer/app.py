@@ -332,7 +332,7 @@ def archivo():
             id_perfil = id_tupla[0]
 
         except jwt.InvalidTokenError:
-            return render_template("biblioteca/peticiones.html", mensaje1 = "no pudo obtener el token")
+            return render_template("biblioteca/peticiones.html", mensaje1 = "Al parece no ha iniciado session")
 
         TAMAÑO_MAXIMO_ARCHIVOS = 16*1024*1024
         mime_permitidos = ['application/pdf']
