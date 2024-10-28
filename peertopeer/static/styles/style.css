@@ -197,6 +197,13 @@ nav {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  gap:5%;
+}
+.botones button, .boton-1{
+  height: 8vh;
+  width: calc(min(30vh,30vw));
+  font-size: calc(max((min(30vh,30vw) / 10), 20px));
+  text-wrap: wrap;
 }
 
 .botones #atras,
@@ -209,7 +216,10 @@ nav {
   background-color: #201e1a;
   color: #f2f2f2;
 }
-
+#registrarse{
+  flex:100% !important;
+  margin-top: 2%;
+}
 .texto {
   color: #f2f2f2;
   font-size: 80%;
