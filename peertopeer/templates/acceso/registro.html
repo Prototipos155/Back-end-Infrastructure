@@ -4,82 +4,128 @@
 <div class="container">
 
     <form action="/registro" name="form-registro" id="form-registro" class="form-registro" method="post">
+
         <div class="datos">
             <fieldset class="fieldactive">
 
-                <h3>¿En que nivel de estudios se encuentra?</h3>
+                <div class="izquierda">
+                    <h3>Registro</h3>
+                    <p>Nivel de estudios:</p>
+                </div>
 
-                <div class="role-selection" id="role-selection">
+                <div class="derecha">
 
-                    <label class="radio" for="checkbox1">
-                        <span class="label">Básico</span>
-                        <input type="radio" name="nivel" checked="true" id="basico" value="basico">
-                        <span class="checkmark"></span>
-                    </label>
+                    <div class="texto">Marque el nivel de estudios al que pertenece:</div>
 
-                    <label class="radio" for="checkbox2">
-                        <span class="label">Medio Superior</span>
-                        <input type="radio" name="nivel" checked="true" id="medio-superior" value="medio superior">
-                        <span class="checkmark"></span>
-                    </label>
+                    <div class="role-selection" id="role-selection">
 
-                    <label class="radio" for="checkbox2">
-                        <span class="label">Superior</span>
-                        <input type="radio" name="nivel" checked="true" id="superior" value="superior">
-                        <span class="checkmark"></span>
-                    </label>
+                        <label class="radio" for="checkbox1">
+                            <span class="label">Básico</span>
+                            <input type="radio" name="nivel" checked="true" id="basico" value="basico">
+                            <span class="checkmark"></span>
+                        </label>
+
+                        <label class="radio" for="checkbox2">
+                            <span class="label">Medio Superior</span>
+                            <input type="radio" name="nivel" checked="true" id="medio-superior" value="medio superior">
+                            <span class="checkmark"></span>
+                        </label>
+
+                        <label class="radio" for="checkbox2">
+                            <span class="label">Superior</span>
+                            <input type="radio" name="nivel" checked="true" id="superior" value="superior">
+                            <span class="checkmark"></span>
+                        </label>
+
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+
+                <div class="izquierda">
+                    <h3>Registro</h3>
+                    <p>Nombre(s) y apellido(s):</p>
+                </div>
+
+                <div class="derecha">
+
+                    <div class="texto">Ingrese su nombre(s) y apellido(s) de pila:</div>
+
+                    <input class='input' type="text" name="nombres" id="nombres" required>
+
+                    <input class='input' type="text" name="apellidos" id="apellidos" required>
+                </div>
+            </fieldset>
+            <fieldset>
+
+                <div class="izquierda">
+                    <h3>Registro</h3>
+                    <p>Nombre de usuario:</p>
+                </div>
+
+                <div class="derecha">
+
+                    <div class="texto">Ingrese el nombre de usuario que le gustaria que se mostrara:</div>
+
+                    <input class='input' type="text" name="apodo" id="apodo" required>
 
                 </div>
             </fieldset>
             <fieldset>
 
-                <label for="nombres">Nombre(s):</label>
-                <input class='input' type="text" name="nombres" id="nombres"
-                    placeholder="Ingrese sus nombres" required>
+                <div class="izquierda">
+                    <h3>Registro</h3>
+                    <p>Numero de telefono y correo electrónico:</p>
+                </div>
 
-                <label for="apellidos">Apellido(s):</label>
-                <input class='input' type="text" name="apellidos" id="apellidos"
-                    placeholder="Ingrese sus apellidos" required>
+                <div class="derecha">
 
+                    <div class="texto">Ingrese un numero de teléfono y correo electrónico que sean de su propiedad</div>
+
+                    <input class='input' type="text" name="telefono" id="telefono" required>
+
+                    <input class='input' type="email" name="correo" id="correo" required>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+
+                <div class="izquierda">
+                    <h3>Registro</h3>
+                    <p>Contraseña:</p>
+                </div>
+
+                <div class="derecha">
+
+                    <div class="texto">Ingrese su contraseña:</div>
+
+                    <input class='input' type="password" name="contraseña" id="contraseña" required>
+
+                </div>
             </fieldset>
             <fieldset>
 
-                <label for="apodo">Nombre de usuario:</label>
-                <input class='input' type="text" name="apodo" id="apodo"
-                    placeholder="Ingrese un nombre de usuario" required>
+                <div class="izquierda">
+                    <h3>Registro</h3>
+                    <p>Confirme su contraseña:</p>
+                </div>
 
-            </fieldset>
-            <fieldset>
+                <div class="derecha">
 
-                <label for="telefono">Teléfono:</label>
-                <input class='input' type="text" name="telefono" id="telefono"
-                    placeholder="Ingrese su número de teléfono" required>
+                    <div class="texto">Confirme su contraseña</div>
 
-                <label for="correo">Correo:</label>
-                <input class='input' type="email" name="correo" id="correo"
-                    placeholder="Ingrese su correo institucional" required>
+                    <input class='input' type="password" name="confirmcontra" id="confirmcontra" required>
 
-            </fieldset>
-            <fieldset>
-                <label for="contraseña">Contraseña:</label>
-                <input class='input' type="password" name="contraseña" id="contraseña"
-                    placeholder="Ingrese su contraseña" required>
-
-                <label for="confirmcontra">Confirmar contraseña:</label>
-                <input class='input' type="password" name="confirmcontra" id="confirmcontra"
-                    placeholder="Confirme su contraseña" required>
-
+                    <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
+                </div>
             </fieldset>
 
 
         </div>
         <div class="botones">
-            <center>
-                <button type="submit" id="registrarse" class="btn-registrarse">Confirmar registro</button>
-            </center>
 
             <button id="atras" class="mover">Atras</button>
-            <button id="siguiente" class="mover">Siguiente</button>
+            <button id="siguiente" class="mover fin">Siguiente</button>
         </div>
 
     </form>

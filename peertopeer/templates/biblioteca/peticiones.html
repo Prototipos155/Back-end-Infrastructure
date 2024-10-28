@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data" class="peticiones">
+
+    <h1>Peticiones</h1>
+
+    <div class="texto">Comentanos, que nos quisieras que agregaramos (o puedes aqui especificar rasgos del archivo que
+        subes):</div>
+
+    <input type="text" name="mensaje" class="input" placeholder="Mensaje...">
+
+    <div class="texto">Aqui puede ingresar el link en dado caso que tengas uno:</div>
+
+    <input type="text" name="link" id="link" class="input" placeholder="Link">
+
+    <div class="texto">Ingrese su archivo para enriquecer nuestra biblioteca:</div>
+
+
+    <input type="file" name="archivo" id="archivo" class="archivo">
+    <button type="submit" id="enviar">Enviar</button>
+
+</form>
+<!-- pdfs, imágenes, documentos de office, videos, txt -->
+{% endblock %}

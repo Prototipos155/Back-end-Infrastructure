@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+<form method="post" enctype="multipart/form-data" class="peticiones">
+
+    <h1>Convierta sus archivos de Office a PDF</h1>
+
+    <div class="titulo">Seleccione su archivo a convertir</div>
+
+    <input type="file" name="archivo" id="archivo" class="archivo">
+    <button type="submit" id="enviar">Convertir archivo</button>
+
+</form>
+
+{% endblock %}

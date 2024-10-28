@@ -1,4 +1,4 @@
-from flask import Flask, render_template,redirect, request, session, url_for
+from flask import Flask, render_template,redirect, request, session, url_for,Response, send_file
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
@@ -11,6 +11,7 @@ from utiles.hash import Encrypt
 
 import pymysql
 import os
+import subprocess
 import ssl
 import smtplib
 import random
@@ -301,8 +302,8 @@ def vericorreo_acceso():
 
     return render_template("acceso/vericorreo_acceso.html")
 
-@app.route ('/logout', methods=['GET', 'POST'])
-def logout():
+@app.route ('/cerrarsesion', methods=['GET', 'POST'])
+def cerrarsesion():
 
     session.clear()
     return render_template("inicio.html", mensaje1 = "has cerrado sesion")
@@ -319,25 +320,6 @@ def apply_csp(response):
 def archivo():
 
     if request.method in "POST":
-        MAX_FILE_SIZE = 16*1024*1024
-        mime_permitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'video/mp4', 'video/x-msvideo',
-                           'video/quicktime', 'application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                           'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
-
-        mensaje = request.form.get('mensaje')
-        link = request.form.get('link').strip()
-        archivoblob = request.files['archivo']
-
-        try:
-            kind = filetype.guess(archivoblob)
-            print(f"\n{archivoblob, kind.mime, kind.extension}\n")
-
-            if kind is None or kind.mime not in mime_permitidos:
-                return render_template ("archivo.html", mensaje1 = "Sólo archivos PDF, imágenes, videos, txt y docs office")
-        
-        except Exception as err:
-            return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes, videos, txt y docs office; {err}")
-
         tokenacceso = session.get('tokenacceso')
 
         try:
@@ -350,7 +332,7 @@ def archivo():
             id_perfil = id_tupla[0]
 
         except jwt.InvalidTokenError:
-            return render_template("archivo.html", mensaje1 = "no pudo obtener el token")
+            return render_template("biblioteca/peticiones.html", mensaje1 = "no pudo obtener el token")
 
         TAMAÑO_MAXIMO_ARCHIVOS = 16*1024*1024
         mime_permitidos = ['application/pdf']
@@ -360,10 +342,9 @@ def archivo():
         mensaje = request.form.get('mensaje')
         link = request.form.get('link')
         archivoblob = request.files['archivo']
-        print("Nombre archivo: ",archivoblob.filename)
 
         if link.strip() == "" and not archivoblob:
-            return render_template ("archivo.html", mensaje1 = "Debe enviar un link o archivo")
+            return render_template ("biblioteca/peticiones.html", mensaje1 = "Debe enviar un link o archivo")
         
         if archivoblob:
             if len(archivoblob.read()) <= TAMAÑO_MAXIMO_ARCHIVOS :
@@ -373,13 +354,13 @@ def archivo():
 
                     if tipoarchivo is None or not (tipoarchivo.mime in mime_permitidos or tipoarchivo.mime.startswith('image')
                             or tipoarchivo.mime.startswith('video')):
-                        return render_template ("archivo.html", mensaje1 = "Sólo archivos PDF, imágenes y videos")
+                        return render_template ("biblioteca/peticiones.html", mensaje1 = "Sólo archivos PDF, imágenes y videos")
                 
                 except Exception as err:
-                    return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes y videos")
+                    return render_template ("biblioteca/peticiones.html", mensaje1 = f"Sólo archivos PDF, imágenes y videos")
             
             else:
-                return render_template ("archivo.html", mensaje1 = "No se permiten archivos mayores a 16MB")
+                return render_template ("biblioteca/peticiones.html", mensaje1 = "No se permiten archivos mayores a 16MB")
 
         try:
             archivoblob.seek(0)
@@ -398,9 +379,13 @@ def archivo():
             return render_template ("inicio.html", mensaje1 = "la peticion se envio correctamente")
 
         except pymysql.Error as err:
-            return render_template("peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
+            return render_template("biblioteca/peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
 
-    return render_template ("peticiones.html")
+    return render_template ("biblioteca/peticiones.html")
+
+@app.route('/inicio_biblioteca')
+def inicio_biblioteca():
+    return render_template("biblioteca/inicio_biblioteca.html")
 
 @app.route('/verarchivo/<int:idpeticion>')
 def verarchivo(idpeticion):
@@ -412,12 +397,13 @@ def verarchivo(idpeticion):
             archivobinario = io.BytesIO(archivo[0])
             tipomime = filetype.guess(archivo[0])
             nombrearchivo = archivo[1]
-            print("\nTipo archivo: ",tipomime.mime, " Nombre: ", nombrearchivo)
+            archivobinario.name = nombrearchivo
+            print("\nTipo archivo: ",tipomime.mime, " Nombre: ", archivobinario.name)
 
             return Response(archivobinario, headers={"Content-Disposition": f"inline; filename=\"{nombrearchivo}\""}, mimetype=tipomime.mime)
         
         else:
-            return render_template("inicio.html", mensaje1 = f"No se pudo obtener el archivo")
+            return render_template("inicio.html", mensaje1 = "No se pudo obtener el archivo")
 
     except pymysql.Error as err:
         print("Error: ", err)
@@ -462,16 +448,16 @@ def crudpeticionesadmin():
         cbd.cursor.execute("SELECT pet.id_peticiones, pet.id_perfil, per.apodo, per.correo, pet.mensaje, pet.archivo, pet.link, pet.fecha, pet.hora FROM perfil per JOIN peticiones pet ON per.id_perfil = pet.id_perfil")
         peticiones = cbd.cursor.fetchall()
         
-        id_peticiones = peticiones[0]
-        id_perfil_peticion = peticiones[0]
+        #id_peticiones = peticiones[0]
+        #id_perfil_peticion = peticiones[0]
 
-        session['peticiones'] = id_peticiones
-        session['id_perfil_peticion'] = id_perfil_peticion
+        #session['peticiones'] = id_peticiones
+        #session['id_perfil_peticion'] = id_perfil_peticion
         
     except pymysql.Error as err:
         print(f"Error al obtener los datos de los perfiles: {err}")
 
-    return render_template("admin/crud-peticiones-admin.html")
+    return render_template("admin/crud-peticiones-admin.html", peticiones = peticiones)
 
 @app.route('/rechazarpeticion')
 def rechazarpeticion():
@@ -512,6 +498,36 @@ def aceptarpeticion(idpeticion):
         print(f"Error al mover la petición de la tabla: {err}")
 
     return redirect(url_for("crudpeticionesadmin"))
+
+@app.route('/convertirarchivos', methods=['GET', 'POST'])
+def convertirarchivos():
+    if request.method in "POST":
+        mime_permitidos = ['application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+        
+        archivo = request.files['file']
+        if archivo:
+            try:
+                mime = filetype.guess(archivo)
+                if mime is None or mime not in mime_permitidos:
+                    return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Sólo documentos Office")
+                
+            except Exception as err:
+                return render_template ("biblioteca/convertirarchivos.html", mensaje1 = f"Sólo documentos Office")
+            
+        else:
+            return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Suba un archivo para su conversión") 
+
+        rutaarchivo = os.path.join('/tmp/', archivo.filename)
+        archivo.save(rutaarchivo)
+
+        rutapdf = rutaarchivo.rsplit('.', 1)[0] + ".pdf"
+        subprocess.run(['unoconv', '-f', 'pdf', rutaarchivo])
+        #os.remove(rutaarchivo)
+
+        return send_file(rutapdf, as_attachment=True)      
+
+    return render_template("biblioteca/convertirarchivos.html")
 
 def status_401(error):
     return redirect(url_for('inicio.html'))

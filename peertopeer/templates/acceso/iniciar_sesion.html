@@ -1,63 +1,75 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<body>
+<div class="container">
 
-    <div class="container">
+    {% if mensaje %}
+    {{mensaje}}
+    {% endif %}
+
+    <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
 
         <div class="datos">
 
-            <h1>Inicio de sesion</h1>
+            <fieldset class="fieldactive">
 
-            {% if mensaje %}
-            {{mensaje}}
-            {% endif %}
+                <div class="izquierda">
+                    <h3>Inicio de sesion</h3>
+                    <p>Correo Electronico:</p>
+                </div>
 
-            <div class="datos">
+                <div class="derecha">
 
-                <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
+                    <div class="texto"> Ingrese un correo electronico que sea de su propiedad para evitar problemas
+                        posteriormente</div>
 
-                    <fieldset class="fieldactive">
+                    <input type="email" name="correo" id="correo"  required>
 
-                        <h3>Ingrese el correo con el que se registro:</h3>
+                </div>
+            </fieldset>
 
-                        <div>
-                            <input type="email" name="correo" id="correo" required>
-                        </div>
+            <fieldset class="">
 
-                    </fieldset>
+                <div class="izquierda">
+                    <h3>Inicio de sesion</h3>
+                    <p>Apodo:</p>
+                </div>
 
-                    <fieldset class="fieldactive">
+                <div class="derecha">
 
-                        <h3>Ingrese el apodo con el que se registro:</h3>
-                    
-                        <div>
-                            <input type="text" name="apodo" id="apodo" required>
-                        </div>
+                    <div class="texto">Ingrese el apodo con el que se registro</div>
 
-                    </fieldset>
+                    <input type="text" name="apodo" id="apodo" required>
 
-                    <fieldset class="fieldactive">
+                </div>
+            </fieldset>
 
-                        <h3>Ingrese la contraseña con la que se registro:</h3>
+            <fieldset class="">
 
-                        <div>
-                            <input type="text" name="contraseña" id="contraseña"  required> 
-                        </div>
+                <div class="izquierda">
+                    <h3>Inicio de sesion</h3>
+                    <p>Contraseña:</p>
+                </div>
 
-                    </fieldset>
-            </div>
-            <div class="botones">
+                <div class="derecha">
 
-                <button type="submit">Enviar</button>
+                    <div class="texto">Ingrese la contraseña con la que se registro</div>
 
-                <button id="atras" class="mover">Atras</button>
-                <button id="siguiente" class="mover">Siguiente</button>
-                <button><a href="/registro">Registrate si aun no lo has hecho</a></button>
-            </div>
+                    <input type="text" name="contraseña" id="contraseña" required>
 
-            </form>
+                    <button type="submit" id="enviar" class="btn-inicio_sesion">Enviar</button>
+                </div>
+            </fieldset>
         </div>
-</body>
-
+        <div>
+            <div class="botones">
+                <button id="atras" class="mover">Atras</button>
+                <button id="siguiente" class="mover fin">Siguiente</button>
+            </div>
+            <div class="centrar-texto">
+                <button id="btn-cambio"><a href="/registro">Registrate si aun no lo has hecho</a></button>
+            </div>
+        </div>
+    </form>
+</div>
 {% endblock %}
