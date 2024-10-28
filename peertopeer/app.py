@@ -1,4 +1,4 @@
-from flask import Flask, render_template,redirect, request, session, url_for,Response
+from flask import Flask, render_template,redirect, request, session, url_for,Response, send_file
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
@@ -11,6 +11,7 @@ from utiles.hash import Encrypt
 
 import pymysql
 import os
+import subprocess
 import ssl
 import smtplib
 import random
@@ -341,7 +342,6 @@ def archivo():
         mensaje = request.form.get('mensaje')
         link = request.form.get('link')
         archivoblob = request.files['archivo']
-        print("Nombre archivo: ",archivoblob.filename)
 
         if link.strip() == "" and not archivoblob:
             return render_template ("biblioteca/peticiones.html", mensaje1 = "Debe enviar un link o archivo")
@@ -397,12 +397,13 @@ def verarchivo(idpeticion):
             archivobinario = io.BytesIO(archivo[0])
             tipomime = filetype.guess(archivo[0])
             nombrearchivo = archivo[1]
-            print("\nTipo archivo: ",tipomime.mime, " Nombre: ", nombrearchivo)
+            archivobinario.name = nombrearchivo
+            print("\nTipo archivo: ",tipomime.mime, " Nombre: ", archivobinario.name)
 
             return Response(archivobinario, headers={"Content-Disposition": f"inline; filename=\"{nombrearchivo}\""}, mimetype=tipomime.mime)
         
         else:
-            return render_template("inicio.html", mensaje1 = f"No se pudo obtener el archivo")
+            return render_template("inicio.html", mensaje1 = "No se pudo obtener el archivo")
 
     except pymysql.Error as err:
         print("Error: ", err)
@@ -498,8 +499,34 @@ def aceptarpeticion(idpeticion):
 
     return redirect(url_for("crudpeticionesadmin"))
 
-@app.route('/convertirarchivos')
+@app.route('/convertirarchivos', methods=['GET', 'POST'])
 def convertirarchivos():
+    if request.method in "POST":
+        mime_permitidos = ['application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+        
+        archivo = request.files['file']
+        if archivo:
+            try:
+                mime = filetype.guess(archivo)
+                if mime is None or mime not in mime_permitidos:
+                    return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Sólo documentos Office")
+                
+            except Exception as err:
+                return render_template ("biblioteca/convertirarchivos.html", mensaje1 = f"Sólo documentos Office")
+            
+        else:
+            return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Suba un archivo para su conversión") 
+
+        rutaarchivo = os.path.join('/tmp/', archivo.filename)
+        archivo.save(rutaarchivo)
+
+        rutapdf = rutaarchivo.rsplit('.', 1)[0] + ".pdf"
+        subprocess.run(['unoconv', '-f', 'pdf', rutaarchivo])
+        #os.remove(rutaarchivo)
+
+        return send_file(rutapdf, as_attachment=True)      
+
     return render_template("biblioteca/convertirarchivos.html")
 
 def status_401(error):
