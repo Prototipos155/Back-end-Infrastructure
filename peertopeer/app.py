@@ -319,25 +319,6 @@ def apply_csp(response):
 def archivo():
 
     if request.method in "POST":
-        MAX_FILE_SIZE = 16*1024*1024
-        mime_permitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'video/mp4', 'video/x-msvideo',
-                           'video/quicktime', 'application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                           'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
-
-        mensaje = request.form.get('mensaje')
-        link = request.form.get('link').strip()
-        archivoblob = request.files['archivo']
-
-        try:
-            kind = filetype.guess(archivoblob)
-            print(f"\n{archivoblob, kind.mime, kind.extension}\n")
-
-            if kind is None or kind.mime not in mime_permitidos:
-                return render_template ("archivo.html", mensaje1 = "Sólo archivos PDF, imágenes, videos, txt y docs office")
-        
-        except Exception as err:
-            return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes, videos, txt y docs office; {err}")
-
         tokenacceso = session.get('tokenacceso')
 
         try:
@@ -350,7 +331,7 @@ def archivo():
             id_perfil = id_tupla[0]
 
         except jwt.InvalidTokenError:
-            return render_template("archivo.html", mensaje1 = "no pudo obtener el token")
+            return render_template("biblioteca/peticiones.html", mensaje1 = "no pudo obtener el token")
 
         TAMAÑO_MAXIMO_ARCHIVOS = 16*1024*1024
         mime_permitidos = ['application/pdf']
@@ -363,7 +344,7 @@ def archivo():
         print("Nombre archivo: ",archivoblob.filename)
 
         if link.strip() == "" and not archivoblob:
-            return render_template ("archivo.html", mensaje1 = "Debe enviar un link o archivo")
+            return render_template ("biblioteca/peticiones.html", mensaje1 = "Debe enviar un link o archivo")
         
         if archivoblob:
             if len(archivoblob.read()) <= TAMAÑO_MAXIMO_ARCHIVOS :
@@ -373,13 +354,13 @@ def archivo():
 
                     if tipoarchivo is None or not (tipoarchivo.mime in mime_permitidos or tipoarchivo.mime.startswith('image')
                             or tipoarchivo.mime.startswith('video')):
-                        return render_template ("archivo.html", mensaje1 = "Sólo archivos PDF, imágenes y videos")
+                        return render_template ("biblioteca/peticiones.html", mensaje1 = "Sólo archivos PDF, imágenes y videos")
                 
                 except Exception as err:
-                    return render_template ("archivo.html", mensaje1 = f"Sólo archivos PDF, imágenes y videos")
+                    return render_template ("biblioteca/peticiones.html", mensaje1 = f"Sólo archivos PDF, imágenes y videos")
             
             else:
-                return render_template ("archivo.html", mensaje1 = "No se permiten archivos mayores a 16MB")
+                return render_template ("biblioteca/peticiones.html", mensaje1 = "No se permiten archivos mayores a 16MB")
 
         try:
             archivoblob.seek(0)
@@ -404,8 +385,7 @@ def archivo():
 
 @app.route('/inicio_biblioteca')
 def inicio_biblioteca():
-
-    return render_template("/inicio_biblioteca.html")
+    return render_template("biblioteca/inicio_biblioteca.html")
 
 @app.route('/verarchivo/<int:idpeticion>')
 def verarchivo(idpeticion):
@@ -467,16 +447,16 @@ def crudpeticionesadmin():
         cbd.cursor.execute("SELECT pet.id_peticiones, pet.id_perfil, per.apodo, per.correo, pet.mensaje, pet.archivo, pet.link, pet.fecha, pet.hora FROM perfil per JOIN peticiones pet ON per.id_perfil = pet.id_perfil")
         peticiones = cbd.cursor.fetchall()
         
-        id_peticiones = peticiones[0]
-        id_perfil_peticion = peticiones[0]
+        #id_peticiones = peticiones[0]
+        #id_perfil_peticion = peticiones[0]
 
-        session['peticiones'] = id_peticiones
-        session['id_perfil_peticion'] = id_perfil_peticion
+        #session['peticiones'] = id_peticiones
+        #session['id_perfil_peticion'] = id_perfil_peticion
         
     except pymysql.Error as err:
         print(f"Error al obtener los datos de los perfiles: {err}")
 
-    return render_template("admin/crud-peticiones-admin.html")
+    return render_template("admin/crud-peticiones-admin.html", peticiones = peticiones)
 
 @app.route('/rechazarpeticion')
 def rechazarpeticion():
@@ -517,6 +497,10 @@ def aceptarpeticion(idpeticion):
         print(f"Error al mover la petición de la tabla: {err}")
 
     return redirect(url_for("crudpeticionesadmin"))
+
+@app.route('/convertirarchivos')
+def convertirarchivos():
+    return render_template("biblioteca/convertirarchivos.html")
 
 def status_401(error):
     return redirect(url_for('inicio.html'))

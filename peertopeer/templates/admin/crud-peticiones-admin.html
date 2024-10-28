@@ -25,26 +25,26 @@
                 <td colspan="2">Acciones</td>
             </tr></thead>
 
-            <tbody>
-                {% for peticion in peticiones %}
-                <tr name="fila">
-                    <td> {{peticion[0]}} </td>
-                    <td> {{peticion[1]}} </td>
-                    <td> {{peticion[2]}} </td>
-                    <td> {{peticion[3]}} </td>
-                    <td> {{peticion[4]}} </td>
-                    <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Ver archivo</a> 
-                    {% else %} No hay archivo {% endif %}</td>
-                    <td> {{peticion[6]}} </td>
-                    <td> {{peticion[7]}} </td>
-                    <td> {{peticion[8]}} </td>
-                    <td><a href="/aceptarpeticion/{{peticion[0]}}">Aceptar petición</a></td>
-                    <td><a href="/rechazarpeticion/{{peticion[0]}}">Rechazar petición</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
+        <tbody>
+            {% for peticion in peticiones %}
+            <tr name="fila">
+                <td> {{peticion[0]}} </td>
+                <td> {{peticion[1]}} </td>
+                <td> {{peticion[2]}} </td>
+                <td> {{peticion[3]}} </td>
+                <td> {{peticion[4]}} </td>
+                <td> {% if peticion[5] %} <a href="/verarchivo/{{peticion[0]}}" target="_blank">Abrir archivo</a> 
+                {% else %} No hay archivo {% endif %}</td>
+                <td> {% if peticion[6] %} <a href="{{peticion[6]}}" target="_blank">Abrir link</a> 
+                    {% else %} No hay link {% endif %} </td>
+                <td> {{peticion[7]}} </td>
+                <td> {{peticion[8]}} </td>
+                <td><a href="/aceptarpeticion/{{peticion[0]}}">Aceptar petición</a></td>
+                <td><a href="/rechazarpeticion/{{peticion[0]}}">Rechazar petición</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <script>
         const filas = document.getElementsByName("fila");
