@@ -102,12 +102,11 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS perfil (
-                id_perfil INT UNIQUE AUTO_INCREMENT NOT NULL,
-                                
-                nivel VARCHAR (20) NOT NULL,
+                id_usuario INT UNIQUE AUTO_INCREMENT NOT NULL,
+                rol VARCHAR (15) NOT NULL, 
                 nombres VARCHAR (50) NOT NULL,
                 apellidos VARCHAR (50) NOT NULL,
-                apodo VARCHAR(20) UNIQUE NOT NULL,
+                nombre_usuario VARCHAR(20) UNIQUE NOT NULL,
                 correo VARCHAR(150) UNIQUE NOT NULL,
                 telefono VARCHAR(13) UNIQUE NOT NULL,
                 contraseña_encript VARCHAR (256) NOT NULL,
@@ -123,14 +122,14 @@ class CC():
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS buzon_quejas (
                 id_buzon_quejas INT UNIQUE AUTO_INCREMENT NOT NULL,
-                id_perfil INT NOT NULL,
+                id_usuario INT NOT NULL,
                                 
                 mensaje VARCHAR(256) NOT NULL,
                 fecha DATETIME NOT NULL,
                 hora DATETIME NOT NULL,
                                 
                 PRIMARY KEY (id_buzon_quejas),
-                FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil))""")
+                FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario))""")
             
             print("la tabla buzon_quejas creada ")
 
@@ -177,21 +176,21 @@ class CC():
             CREATE TABLE IF NOT EXISTS mensajes_from_seccion (
               id_mensaje INT NOT NULL AUTO_INCREMENT,
               id_seccion INT NOT NULL,
-              id_perfil INT NOT NULL,
+              id_usuario INT NOT NULL,
               mensaje VARCHAR(256) NOT NULL,
               fecha VARCHAR(11) NOT NULL,
               hora VARCHAR(12) NOT NULL,
               PRIMARY KEY (id_mensaje),
               INDEX fk_mensaje_seccion1_idx (id_seccion ASC) VISIBLE,
-              INDEX fk_mensaje_perfil1_idx (id_perfil ASC) VISIBLE,
+              INDEX fk_mensaje_perfil1_idx (id_usuario ASC) VISIBLE,
               CONSTRAINT fk_mensaje_seccion1
                 FOREIGN KEY (id_seccion)
                 REFERENCES peertopeer.seccion (id_seccion)
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION,
               CONSTRAINT fk_mensaje_perfil1
-                FOREIGN KEY (id_perfil)
-                REFERENCES peertopeer.perfil (id_perfil)
+                FOREIGN KEY (id_usuario)
+                REFERENCES peertopeer.perfil (id_usuario)
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB
@@ -205,7 +204,7 @@ class CC():
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS peticiones (
                 id_peticiones INT UNIQUE AUTO_INCREMENT NOT NULL, 
-                id_perfil INT NOT NULL,
+                id_usuario INT NOT NULL,
                                     
                 mensaje VARCHAR(200) NULL,
                 archivo MEDIUMBLOB NULL,
@@ -215,7 +214,7 @@ class CC():
                 hora TIME NOT NULL,
                                     
                 PRIMARY KEY(id_peticiones),
-                FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil))""") 
+                FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario))""") 
             
             print("la tabla peticones creada ")
 
@@ -362,10 +361,10 @@ class CC():
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS bloqueados (
               id_bloqueo` INT NOT NULL AUTO_INCREMENT,
-              id_perfil_bloqueado INT NOT NULL,
+              id_usuario_bloqueado INT NOT NULL,
                                 
               PRIMARY KEY (id_bloqueo),
-              FOREIGN KEY (id_perfil) REFERENCES perfil(id_perfil)""")
+              FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario)""")
             print("la tabla bloqueados creada ")
         except pymysql.Error as err:
             print("la tabla bloqueados no fue creada ",err)
@@ -414,7 +413,7 @@ class CC():
                 ON UPDATE NO ACTION,
               CONSTRAINT `fk_pregunta_has_respuestas_perfil1`
                 FOREIGN KEY (`id_salvador`)
-                REFERENCES `peertopeer`.`perfil` (`id_perfil`)
+                REFERENCES `peertopeer`.`perfil` (`id_usuario`)
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB""")

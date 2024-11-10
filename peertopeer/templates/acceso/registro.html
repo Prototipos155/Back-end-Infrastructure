@@ -2,136 +2,98 @@
 
 {% block content %}
 <div class="container">
-
     <form action="/registro" name="form-registro" id="form-registro" class="form-registro" method="post">
+
 
         <div class="datos">
             <fieldset class="fieldactive">
-
-                <div class="izquierda">
-                    <h3>Registro</h3>
-                    <p>Nivel de estudios:</p>
-                </div>
-
-                <div class="derecha">
-
-                    <div class="texto">Marque el nivel de estudios al que pertenece:</div>
-
-                    <div class="role-selection" id="role-selection">
-
-                        <label class="radio" for="checkbox1">
-                            <span class="label">Básico</span>
-                            <input type="radio" name="nivel" checked="true" id="basico" value="basico">
-                            <span class="checkmark"></span>
-                        </label>
-
-                        <label class="radio" for="checkbox2">
-                            <span class="label">Medio Superior</span>
-                            <input type="radio" name="nivel" checked="true" id="medio-superior" value="medio superior">
-                            <span class="checkmark"></span>
-                        </label>
-
-                        <label class="radio" for="checkbox2">
-                            <span class="label">Superior</span>
-                            <input type="radio" name="nivel" checked="true" id="superior" value="superior">
-                            <span class="checkmark"></span>
-                        </label>
-
-                    </div>
-                </div>
-            </fieldset>
-            <fieldset>
-
                 <div class="izquierda">
                     <h3>Registro</h3>
                     <p>Nombre(s) y apellido(s):</p>
                 </div>
-
                 <div class="derecha">
-
                     <div class="texto">Ingrese su nombre(s) y apellido(s) de pila:</div>
-
-                    <input class='input' type="text" name="nombres" id="nombres" required>
-
-                    <input class='input' type="text" name="apellidos" id="apellidos" required>
+                    <input class="input" type="text" name="nombres" id="nombres"
+                        value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" required>
+                    <input class="input" type="text" name="apellidos" id="apellidos"
+                        value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}" required>
                 </div>
             </fieldset>
-            <fieldset>
 
+            <fieldset>
                 <div class="izquierda">
                     <h3>Registro</h3>
                     <p>Nombre de usuario:</p>
                 </div>
-
                 <div class="derecha">
-
-                    <div class="texto">Ingrese el nombre de usuario que le gustaria que se mostrara:</div>
-
-                    <input class='input' type="text" name="apodo" id="apodo" required>
-
+                    <div class="texto">Ingrese el nombre de usuario que le gustaría que se mostrara:</div>
+                    {% if mensaje1 %}
+                    <div class="error">{{ mensaje1 }}</div>
+                    {% endif %}
+                    <input class="input" type="text" name="nombre_usuario" id="nombre_usuario"
+                        value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}" required>
                 </div>
             </fieldset>
-            <fieldset>
 
+            <fieldset>
                 <div class="izquierda">
                     <h3>Registro</h3>
-                    <p>Numero de telefono y correo electrónico:</p>
+                    <p>Número de teléfono y correo electrónico:</p>
                 </div>
-
                 <div class="derecha">
-
-                    <div class="texto">Ingrese un numero de teléfono y correo electrónico que sean de su propiedad</div>
-
-                    <input class='input' type="text" name="telefono" id="telefono" required>
-
-                    <input class='input' type="email" name="correo" id="correo" required>
+                    <div class="texto">Ingrese un número de teléfono y correo electrónico que sean de su propiedad</div>
+                    {% if mensaje2 %}
+                    <div class="error">{{ mensaje2 }}</div>
+                    {% endif %}
+                    <input class="input" type="text" name="telefono" id="telefono"
+                        value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" required>
+                    {% if mensaje3 %}
+                    <div class="error">{{ mensaje3 }}</div>
+                    {% endif %}
+                    <input class="input" type="email" name="correo" id="correo"
+                        value="{{ form_data['correo'] if form_data['correo'] else '' }}" required>
                 </div>
             </fieldset>
-            
-            <fieldset>
 
+            <fieldset>
                 <div class="izquierda">
                     <h3>Registro</h3>
                     <p>Contraseña:</p>
                 </div>
-
                 <div class="derecha">
-
                     <div class="texto">Ingrese su contraseña:</div>
-
-                    <input class='input' type="password" name="contraseña" id="contraseña" required>
-
+                    {% if mensaje4 %}
+                    <div class="error">{{ mensaje4 }}</div>
+                    {% endif %}
+                    <input type="password" name="contraseña" id="contraseña" class="contraseña" required>
+                    <button type="button" id="togglePasswordButton" class="mostrar">Mostrar</button>
                 </div>
             </fieldset>
-            <fieldset>
 
+            <fieldset>
                 <div class="izquierda">
                     <h3>Registro</h3>
                     <p>Confirme su contraseña:</p>
                 </div>
-
                 <div class="derecha">
-
                     <div class="texto">Confirme su contraseña</div>
-
-                    <input class='input' type="password" name="confirmcontra" id="confirmcontra" required>
-
+                    {% if mensaje4 %}
+                    <div class="error">{{ mensaje4 }}</div>
+                    {% endif %}
+                    <input type="password" name="confirmcontra" id="confirmcontra" class="confirmcontra" required>
+                    <button type="button" id="togglePasswordButton" class="mostrar">Mostrar</button>
                     <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
                 </div>
             </fieldset>
-
-
         </div>
-        <div class="botones">
 
-            <button id="atras" class="mover">Atras</button>
+        <div class="botones">
+            <button id="atras" class="mover">Atrás</button>
             <button id="siguiente" class="mover fin">Siguiente</button>
         </div>
-
     </form>
 </div>
 
-<script src="../static/js/validacionesRegistro.js"></script>
+<!-- Script para diseño -->
 <script src="../static/js/diseño.js"></script>
-<link rel="stylesheet" href="/static/styles/style.css" />
 {% endblock %}

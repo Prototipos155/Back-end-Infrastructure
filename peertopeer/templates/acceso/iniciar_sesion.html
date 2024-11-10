@@ -22,8 +22,11 @@
 
                     <div class="texto"> Ingrese un correo electronico que sea de su propiedad para evitar problemas
                         posteriormente</div>
-
-                    <input type="email" name="correo" id="correo"  required>
+                    {% if mensaje1 %}
+                    <div class="error">{{ mensaje2 }}</div>
+                    {% endif %}
+                    <input type="email" name="correo" id="correo"
+                        value="{{ form_data['correo'] if form_data['correo'] else '' }}" required>
 
                 </div>
             </fieldset>
@@ -32,14 +35,17 @@
 
                 <div class="izquierda">
                     <h3>Inicio de sesion</h3>
-                    <p>Apodo:</p>
+                    <p>Nombre de usuario:</p>
                 </div>
 
                 <div class="derecha">
 
                     <div class="texto">Ingrese el apodo con el que se registro</div>
-
-                    <input type="text" name="apodo" id="apodo" required>
+                    {% if mensaje2 %}
+                    <div class="error">{{ mensaje2 }}</div>
+                    {% endif %}
+                    <input type="text" name="nombre_usuario" id="nombre_usuario"
+                        value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}" required>
 
                 </div>
             </fieldset>
@@ -54,8 +60,12 @@
                 <div class="derecha">
 
                     <div class="texto">Ingrese la contraseña con la que se registro</div>
-
-                    <input type="text" name="contraseña" id="contraseña" required>
+                    {% if mensaje3 %}
+                    <div class="error">{{ mensaje2 }}</div>
+                    {% endif %}
+                    <input type="password" name="contraseña" id="contraseña" class="contraseña"
+                        value="{{ form_data['contraseña'] if form_data['contraseña'] else '' }}" required>
+                    <button type="button" id="togglePasswordButton" class="mostrar">Mostrar</button>
 
                     <button type="submit" id="enviar" class="btn-inicio_sesion">Enviar</button>
                 </div>
@@ -72,4 +82,5 @@
         </div>
     </form>
 </div>
+<script src="../static/js/diseño.js"></script>
 {% endblock %}

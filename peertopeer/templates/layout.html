@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="/static/styles/style.css" />
   <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
   <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
-  <!-- <script type="text/javascript" src="/static/js/design.js" defer></script> -->
-
 
 </head>
 
@@ -52,12 +50,12 @@
       <li><a href="/crudpeticionesadmin">Crud de peticiones Admin</a></li>
       </li>
       <li><button id="cerrarsesion">cerrar sesion<a href="/cerrarsesion"></a></button>
-      </ul>
-    {% if mensaje1 %}
-    {{mensaje1}}
-    {% endif %}
+    </ul>
   </nav>
   <main>
+    {% if mensaje1 %}
+    <div class="error">{{ mensaje1 }}</div>
+    {% endif %}
     {% block content %}
 
     {% endblock %}
@@ -65,18 +63,5 @@
 
 
 </body>
-<script src="/static/js/diseño.js"></script>
-<script>
-  document.querySelector("body").onload = e => {
-
-    if (window.location.href.split("/")[3] != "") {
-      //no estamos en home
-      let newName = document.querySelector(".titleName")
-      if (newName != null) {
-        document.querySelector("head title").innerHTML = newName.innerHTML
-      }
-    }
-  }
-</script>
 
 </html>
