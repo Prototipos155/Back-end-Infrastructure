@@ -90,19 +90,36 @@ function obtenerCampoActivo() {
     }
     // return -1
 }
+let lastInputs=document.querySelectorAll(".derecha input:last-of-type")
+lastInputs.forEach(element => {
+    element.onchange=e=>{
+        // e.preventDefault()
+        console.log("input enter")
+        document.getElementById("siguiente").dispatchEvent(new Event("click"))
+    }
+});
 //FIN DE ANIMACION
 
 
 //MOSTRAR CONTENIDO DE CAMPO CONTRASEÑA
 document.querySelectorAll('.mostrar').forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', function (e) {
         const input = this.previousElementSibling;
+        console.error(e.target.parentNode.children[2])
         if (input.type === "password") {
             input.type = "text";
-            this.textContent = "Ocultar";
+            e.target.style.backgroundImage=`url(/static/fotos/iconos/esconder.png)`
+
+            e.target.title="Ocultar"
+            // e.target.parentNode.children[2].src="../static/fotos/iconos/ver.png";
+            // this.textContent = "../static/fotos/iconos/ver.png";
+            
         } else {
             input.type = "password";
-            this.textContent = "Mostrar";
+            e.target.title="Mostrar"
+            // this.textContent = "../static/fotos/iconos/esconder.png";
+            // e.target.parentNode.children[2].src="../static/fotos/iconos/esconder.png";
+            e.target.style.backgroundImage=`url(/static/fotos/iconos/ver3.png)`
         }
     });
 });

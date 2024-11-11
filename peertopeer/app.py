@@ -69,13 +69,13 @@ def load_user(id_usuario):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        
+        errores = {}
         if not current_user.is_authenticated:
             return redirect(url_for('inicio'))
 
         elif current_user.rol != 'administrador':
-            flash("No tienes permiso para acceder a esta página.", "warning")
-            return redirect(url_for('home'))
+            errores ['mensaje'] = "No tienes permiso para acceder a esta página.", "warning"
+            return redirect(url_for('inicio'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -206,9 +206,9 @@ def registro():
             return render_template("acceso/registro.html", **errores,  form_data=form_data)                           
         
         except pymysql.Error as err:
-            return render_template("acceso/registro.html", mensaje="Error al procesar el registro", form_data=form_data)
+            return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
-    return render_template ("acceso/registro.html", form_data=form_data)
+    return render_template ("acceso/registro.html",form_data={})
 
 
 @app.route ('/vericorreo_registro', methods=['GET', 'POST'])
@@ -256,6 +256,7 @@ def iniciar_sesion():
 
     print(f"metodo en uso: {request.method}")
 
+    form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == "POST" and 'correo' in request.form and 'nombre_usuario' in request.form:
 
         correo = request.form.get('correo')
@@ -267,8 +268,7 @@ def iniciar_sesion():
         try:            
             form_data = {
                 'correo': correo,
-                'nombre_usuario': nombre_usuario,
-                'contraseña': contraseña
+                'nombre_usuario': nombre_usuario
             }
             
             errores = {}
@@ -366,7 +366,7 @@ def iniciar_sesion():
         except pymysql.Error as err:
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
-    return render_template("acceso/iniciar_sesion.html")
+    return render_template("acceso/iniciar_sesion.html", form_data={})
 
 
 @app.route ('/vericorreo_acceso', methods=['GET', 'POST'])
