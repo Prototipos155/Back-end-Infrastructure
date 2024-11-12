@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="/static/styles/style.css" />
   <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
   <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
+  {% if num_fieldset %}
+    <meta name="casilla-de-error" content="{{num_fieldset}}">
+  {% endif %}
 
 </head>
 
@@ -49,7 +52,7 @@
       <li><a href="/crudusuariosadmin">Crud de usuarios Admin</a></li>
       <li><a href="/crudpeticionesadmin">Crud de peticiones Admin</a></li>
       </li>
-      <li><button type="button" id="cerrarsesion">cerrar sesion<a href="/cerrarsesion"></a></button>
+      <li><button id="cerrarsesion">cerrar sesion<a href="/cerrarsesion"></a></button>
     </ul>
   </nav>
   <main>
@@ -61,7 +64,9 @@
     {% endblock %}
   </main>
 
-
+  {% if num_fieldset %}
+    <script type="module" src="../static/js/moverFieldset.js"></script>
+  {% endif %}
 </body>
 
 </html>

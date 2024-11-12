@@ -16,24 +16,27 @@ for (let boton of document.querySelectorAll(".botones .mover")) {
     boton.direccion = c
     c = -1
 }
-let fields = document.querySelectorAll(".datos fieldset")
+export let fields = document.querySelectorAll(".datos fieldset")
 window.iniciaCambio = false
 
 
-function cambiarField(e, modo = 1) {
-    direccion = e.target.direccion
-    //0=atras       fieldset----->
-    //1=siguiente   <-----fieldset    
+export function cambiarField(e=null, modo = 1,direccion=null, sigFieldSet=null,duracionAnimando=null) {
+    direccion = (direccion==null)?e.target.direccion:direccion
+    //modo:
+        // forma de mover el fieldset( animacion)
+    //direccion:
+        //-1=atras       fieldset----->
+        //1=siguiente   <-----fieldset    
     if (window.iniciaCambio == true) {
         // alert("ya hay un proceso en curso")
         console.log("ya hay otro proceso en curso")
         return
     }
-    console.log(e.target.duracion)
+    duracionAnimando=(duracionAnimando==null)?e.target.duracion:duracionAnimando;
+    console.log(duracionAnimando)
     window.iniciaCambio = true
 
     let index = obtenerCampoActivo();
-
 
     if (index - direccion < 0 || index - direccion > fields.length - 1) {
         alert("NO TE SALGAS DE LOS LIMITES")
@@ -43,6 +46,7 @@ function cambiarField(e, modo = 1) {
         // }
         return
     }
+   sigFieldSet=(sigFieldSet==null)?index - direccion: sigFieldSet;
 
     console.log("index=", index)
     if (direccion == 1 && modo == 1) {
@@ -50,38 +54,38 @@ function cambiarField(e, modo = 1) {
         fields[index].offsetHeight;
     }
 
-    fields[index - direccion].classList.add("fieldactive")
+    fields[sigFieldSet].classList.add("fieldactive")
     if (modo == 2) {
-        fields[index - direccion].style.translate = `${direccion * -100}%`
+        fields[sigFieldSet].style.translate = `${direccion * -100}%`
         fields[index].offsetHeight;
         fields[index].classList.remove("fieldactive")
     }
 
-    fields[index - direccion].classList.add("animacion")
+    fields[sigFieldSet].classList.add("animacion")
     if (modo == 1) {
         fields[index].classList.add("animacion")
         fields[index].style.translate = (direccion != 1) ? `${direccion * 100}%` : "0";
     }
 
     setTimeout(e => {
-        fields[index - direccion].style.translate = (direccion == 1 || modo == 2) ? "0%" : `${direccion * 100}%`;
-    }, parseInt(e.target.duracion / 100))
+        fields[sigFieldSet].style.translate = (direccion == 1 || modo == 2) ? "0%" : `${direccion * 100}%`;
+    }, parseInt(duracionAnimando / 100))
     setTimeout((e) => {
         window.iniciaCambio = false
         if (modo == 1) {
             fields[index].classList.remove("fieldactive")
             fields[index].classList.remove("animacion")
         }
-        fields[index - direccion].classList.remove("animacion")
+        fields[sigFieldSet].classList.remove("animacion")
         if (direccion == 1 && modo == 1) {
             fields[index].style.translate = ""
         } else {
-            fields[index - direccion].style.translate = ""
+            fields[sigFieldSet].style.translate = ""
         }
-    }, parseInt(e.target.duracion))
+    }, parseInt(duracionAnimando))
 
 }
-function obtenerCampoActivo() {
+export function obtenerCampoActivo() {
     for (let index = 0; index < fields.length; index++) {
         if (fields[index].classList.contains("fieldactive")) {
             //encontro el fieldset en visualizacion

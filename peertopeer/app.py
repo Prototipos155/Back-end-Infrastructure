@@ -137,17 +137,23 @@ def registro():
                 cbd.cursor.execute("SELECT telefono FROM perfil WHERE telefono = %s", (telefono,))
                 telefono_exist = cbd.cursor.fetchone()
 
+                error_en_login=None
+
                 if nombre_usuario_exist:
                     errores['mensaje1'] = "este nombre_usuario ya esta en uso"
+                    error_en_login=1
 
                 elif telefono_exist:
                     errores["mensaje2"] = "este telefono ya esta en uso"
+                    error_en_login=2
 
                 elif correo_exist:
                     errores["mensaje3"] = "este correo ya esta en uso" 
+                    error_en_login=2
                 
                 elif contraseña != confirmcontra:
                     errores["mensaje4"] =  "las contraseñas que ingresas no coinciden"
+                    error_en_login=3
 
                 else:        
                     confirmcontra1 = str(confirmcontra)
@@ -203,8 +209,12 @@ def registro():
                 print(f"Error en la base de datos: {err}")
                 errores['mensajes_db'] = "Hubo un problema en el registro, intente nuevamente"     
 
-            return render_template("acceso/registro.html", **errores,  form_data=form_data)                           
-        
+            if(error_en_login):
+                print("NUM_FIELDSET ERROR",error_en_login)
+                errores['num_fieldset']=error_en_login
+
+            return render_template("acceso/registro.html", **errores,  form_data=form_data)    
+           
         except pymysql.Error as err:
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
