@@ -350,7 +350,7 @@ def iniciar_sesion():
 
                             except smtplib.SMTPException as err:
                                 print(f"El correo no ha podido ser enviado: {err}")
-                                return render_template("acceso/iniciar_sesion.html", mensaje="Error al enviar el correo de verificación.")
+                                return render_template("acceso/iniciar_sesion.html", mensaje="Error al enviar el correo de verificación.", form_data=form_data)
 
                             session['tokenacceso'] = tokenacceso
                             session['codigoveri'] = codigoveri
@@ -363,15 +363,15 @@ def iniciar_sesion():
                         
                     except Exception as err:
                         print(f"Error durante la verificación de la contraseña o generación del token: {err}")
-                        return render_template("acceso/iniciar_sesion.html", mensaje="Error interno al iniciar sesión")
+                        return render_template("acceso/iniciar_sesion.html", mensaje="Error interno al iniciar sesión", form_data=form_data)
 
                 else:
                     print("El nombre de usuario o correo no coinciden.")
-                    return render_template("acceso/iniciar_sesion.html", mensaje="El nombre de usuario o correo no coinciden.")
+                    return render_template("acceso/iniciar_sesion.html", mensaje="El nombre de usuario o correo no coinciden.", form_data=form_data)
             
             except pymysql.Error as err:
                 print(f"Error de base de datos: {err}")
-                return render_template("acceso/iniciar_sesion.html", mensaje="Error al conectar con la base de datos.")
+                return render_template("acceso/iniciar_sesion.html", mensaje="Error al conectar con la base de datos.", form_data=form_data)
             
         except pymysql.Error as err:
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)

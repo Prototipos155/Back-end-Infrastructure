@@ -94,12 +94,13 @@ export function obtenerCampoActivo() {
     }
     // return -1
 }
-let lastInputs=document.querySelectorAll(".derecha input:last-of-type")
+let lastInputs=document.querySelectorAll(".derecha .alminp:last-of-type .input")
 lastInputs.forEach(element => {
     element.onchange=e=>{
         // e.preventDefault()
         console.log("input enter")
         document.getElementById("siguiente").dispatchEvent(new Event("click"))
+        e.preventDefault()
     }
 });
 //FIN DE ANIMACION
@@ -112,7 +113,7 @@ document.querySelectorAll('.mostrar').forEach(button => {
         console.error(e.target.parentNode.children[2])
         if (input.type === "password") {
             input.type = "text";
-            e.target.style.backgroundImage=`url(/static/fotos/iconos/esconder.png)`
+            e.target.style.backgroundImage=`url(/static/fotos/iconos/ver.png)`
 
             e.target.title="Ocultar"
             // e.target.parentNode.children[2].src="../static/fotos/iconos/ver.png";
@@ -123,8 +124,9 @@ document.querySelectorAll('.mostrar').forEach(button => {
             e.target.title="Mostrar"
             // this.textContent = "../static/fotos/iconos/esconder.png";
             // e.target.parentNode.children[2].src="../static/fotos/iconos/esconder.png";
-            e.target.style.backgroundImage=`url(/static/fotos/iconos/ver3.png)`
+            e.target.style.backgroundImage=`url(/static/fotos/iconos/esconder.png)`
         }
+        e.preventDefault()
     });
 });
 

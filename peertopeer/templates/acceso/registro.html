@@ -7,80 +7,96 @@
         <div class="datos">
             <fieldset class="fieldactive">
                 <div class="izquierda">
+                    <h3>Nombre del Proyecto</h3>
                     <h3>Registro</h3>
-                    <p>Nombre(s) y apellido(s):</p>
                 </div>
+
                 <div class="derecha">
-                    <div class="texto">Ingrese su nombre(s) y apellido(s) de pila:</div>
-                    <input class="input" type="text" name="nombres" id="nombres"
-                        value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" required>
-                    <input class="input" type="text" name="apellidos" id="apellidos"
-                        value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}" required>
+                    <div class="alminp">
+                        <input class="input" type="text" name="nombres" id="nombres" class="input"
+                            value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" placeholder="Nombre(s)"
+                            required>
+                    </div>
+                    <div class="alminp">
+                        <input class="input" type="text" name="apellidos" id="apellidos" class="input"
+                            value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}"
+                            placeholder="Apellido(s)" required>
+                    </div>
                 </div>
             </fieldset>
 
             <fieldset>
                 <div class="izquierda">
+                    <h3>Nombre del Proyecto</h3>
                     <h3>Registro</h3>
-                    <p>Nombre de usuario:</p>
                 </div>
                 <div class="derecha">
-                    <div class="texto">Ingrese el nombre de usuario que le gustaría que se mostrara:</div>
                     {% if mensaje1 %}
                     <div class="error">{{ mensaje1 }}</div>
                     {% endif %}
-                    <input class="input" type="text" name="nombre_usuario" id="nombre_usuario"
-                        value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}" required>
+                    <div class="alminp">
+                        <input class="input" type="text" name="nombre_usuario" id="nombre_usuario" class="input"
+                            value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}"
+                            placeholder="Nombre de usuario" required>
+                    </div>
                 </div>
             </fieldset>
 
             <fieldset>
                 <div class="izquierda">
+                    <h3>Nombre del Proyecto</h3>
                     <h3>Registro</h3>
-                    <p>Número de teléfono y correo electrónico:</p>
+                    <p></p>
                 </div>
                 <div class="derecha">
-                    <div class="texto">Ingrese un número de teléfono y correo electrónico que sean de su propiedad</div>
                     {% if mensaje2 %}
                     <div class="error">{{ mensaje2 }}</div>
                     {% endif %}
-                    <input class="input" type="text" name="telefono" id="telefono"
-                        value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" required>
+                    <div class="alminp">
+                        <input class="input" type="text" name="telefono" id="telefono" class="input"
+                            value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" placeholder="Telefono"
+                            required>
+                    </div>
                     {% if mensaje3 %}
                     <div class="error">{{ mensaje3 }}</div>
                     {% endif %}
-                    <input class="input" type="email" name="correo" id="correo"
-                        value="{{ form_data['correo'] if form_data['correo'] else '' }}" required>
+                    <div class="alminp">
+                        <input class="input" type="email" name="correo" id="correo" class="input"
+                            value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder="Correo"
+                            required>
+                    </div>
                 </div>
             </fieldset>
 
             <fieldset>
                 <div class="izquierda">
+                    <h3>Nombre del Proyecto</h3>
                     <h3>Registro</h3>
-                    <p>Contraseña:</p>
                 </div>
                 <div class="derecha">
-                    <div class="texto">Ingrese su contraseña:</div>
                     {% if mensaje4 %}
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
-                    <input type="password" name="contraseña" id="contraseña" class="contraseña" required>
-                    <button type="button" id="togglePasswordButton" class="mostrar">Mostrar</button>
+                    <div class="alminp"><input type="password" name="contraseña" id="contraseña" class="input1"
+                            placeholder="Contraseña" required>
+                        <button type="button" id="togglePasswordButton" class="mostrar"></button>
+                    </div>
                 </div>
             </fieldset>
 
             <fieldset>
                 <div class="izquierda">
+                    <h3>Nombre del Proyecto</h3>
                     <h3>Registro</h3>
-                    <p>Confirme su contraseña:</p>
                 </div>
                 <div class="derecha">
-                    <div class="texto">Confirme su contraseña</div>
                     {% if mensaje4 %}
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
-                    <input type="password" name="confirmcontra" id="confirmcontra" class="confirmcontra" required>
-                    <button type="button" id="togglePasswordButton" class="mostrar">Mostrar</button>
+                    <div class="alminp"><input type="password" name="confirmcontra" id="confirmcontra"
+                            class="input1" placeholder="Contraseña" required>
+                        <button type="button" id="togglePasswordButton" class="mostrar"></button>
+                    </div>
                     <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
                 </div>
             </fieldset>
