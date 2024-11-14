@@ -12,15 +12,19 @@
             {% set count=namespace(value=0) %}
             <!-- aqui va un for -->
             {% for categoria in categorias %}
-            <li tabindex="0"> <!--contenedor de cada materia-->
-                <h5 class="opciones desplegar" id="{{categoria.0}}" title="{{categoria.2}}">
-                    {{categoria.1}}
+            <li > <!--contenedor de cada materia-->
+                <div class="main-opciones">
+                    <h5 class="opciones desplegar" id="{{categoria.0}}" title="{{categoria.2}}">
+                        {{categoria.1}}
+                    </h5>
                     <span class="puntos">...</span>
                     <article class="puntos-mostrar">
                         <option value="">foro</option>
                         <option value="">documentos</option>
+                        <option value="">Cerrar</option>
                     </article>
-                </h6>
+                </div>
+
                 <ul class="menu">
                     {% if temas[count.value].0 == categoria.0 %}
                         <!-- sale cuando dan click-->
@@ -32,6 +36,7 @@
                                     <article class="puntos-mostrar">
                                         <option value="">documentos</option>
                                         <option value="">articulos</option>
+                                        <option value="">Cerrar</option>
                                     </article>
                                 </h5>
                             </li>

@@ -2,7 +2,7 @@
     display:grid;
     grid-template-columns: 1fr 3fr;  
     flex:1;
-    padding: 3% 0%;
+    /* padding: 3% 0%; */
     /* overflow: hidden; */
     list-style:none;
     aside{
@@ -21,14 +21,15 @@ li, li h5{
 }
 .opciones{
     position: relative;
-    .puntos{
-        display: block;
-        rotate: 90deg;
-        translate: translateY(-50%);
-    }
-    .puntos-mostrar{
-        display: none;
-    }
+}
+.puntos{
+    display:inline-block;
+    rotate: 90deg;
+    margin-left: 1%;
+    /* translate: translateY(-50%); */
+}
+.puntos-mostrar{
+    display: none;
 }
 .menu{
     display: none;
