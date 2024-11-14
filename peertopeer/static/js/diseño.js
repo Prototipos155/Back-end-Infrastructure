@@ -9,9 +9,9 @@ for (let boton of document.querySelectorAll(".botones .mover")) {
     boton.duracion = transDuration;
 
     boton.addEventListener("click", e => {
-        e.preventDefault()
         console.log("click")
         cambiarField(e, 2)
+        e.preventDefault()
     })
     boton.direccion = c
     c = -1
@@ -94,15 +94,20 @@ export function obtenerCampoActivo() {
     }
     // return -1
 }
-let lastInputs=document.querySelectorAll(".derecha .alminp:last-of-type .input")
-lastInputs.forEach(element => {
-    element.onchange=e=>{
-        // e.preventDefault()
-        console.log("input enter")
-        document.getElementById("siguiente").dispatchEvent(new Event("click"))
-        e.preventDefault()
-    }
-});
+// let lastInputs=document.querySelectorAll(".derecha .alminp:last-of-type input")
+// lastInputs.forEach(element => {
+//     element.duerme=transDuration
+//     element.onchange=e=>{
+//         // e.preventDefault()
+//         console.log("change")
+//         e.preventDefault()
+//         document.getElementById("siguiente").dispatchEvent(new Event("click"))
+
+//         setTimeout(e=>{
+//             console.log("vuelto a la vida")
+//         },parseInt(e.target.duerme))
+//     }
+// });
 //FIN DE ANIMACION
 
 

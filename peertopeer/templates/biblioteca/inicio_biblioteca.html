@@ -2,6 +2,50 @@
 
 {% block content %}
 
-<aside>lorem*3</aside>
+<div class="biblioteca">
+    <aside class="">
+        <div class="buscador">
+            <input type="text" placeholder="buscar...">
+            <button>Buscar</button>
+        </div>
 
+        <ul class="materias">
+            <!-- aqui va un for -->
+            <li tabindex="0"> <!--contenedor de cada materia-->
+                <h5 class="opciones desplegar">Materia</h6>
+                <ul><!-- sale cuando dan click-->
+                    <li>
+                        <h5 class="opciones">Tema</h5>
+                    </li>
+                    <li>
+                        <h5 class="opciones">Tema2</h5>
+                    </li>
+                    <li>
+                        <h5 class="opciones">Tema3</h5>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="materias">
+            <!-- aqui va un for -->
+            <li tabindex="0" class="desplegar"> <!--contenedor de cada materia-->
+                <h5 class="opciones">Materia</h6>
+                <ul><!-- sale cuando dan click-->
+                    <li>
+                        <h5 class="opciones">Tema</h5>
+                    </li>
+                    <li>
+                        <h5 class="opciones">Tema2</h5>
+                    </li>
+                    <li>
+                        <h5 class="opciones">Tema3</h5>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+    <section></section>
+</div>
+
+<script src="/static/js/biblioteca.js"></script>
 {% endblock %}
