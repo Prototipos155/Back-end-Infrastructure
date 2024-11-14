@@ -27,6 +27,7 @@ app = Flask(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
 app.secret_key = os.getenv("PASSWORD1")
+usar_ssl=False
 
 class Usuario(UserMixin):
     def __init__(self, id_usuario, rol, nombre_usuario, correo, cuenta_activa):
@@ -248,7 +249,7 @@ def vericorreo_registro():
                 cbd.cursor.execute("INSERT INTO perfil (rol,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES ('usuario', %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
 
-                return render_template("acceso/iniciar_sesion.html", mensaje1 = "registro exitoso")
+                return render_template("acceso/iniciar_sesion.html", mensaje1 = "registro exitoso",form_data={})
                 
             except pymysql.Error as er:
                 print(er)
@@ -294,7 +295,7 @@ def iniciar_sesion():
 
                 if perfil_exist is None:
                     errores ["mensaje2"] = "El usuario no existe."
-                    return render_template("acceso/iniciar_sesion.html")
+                    return render_template("acceso/iniciar_sesion.html",form_data={})
                 
                 id_usuario = perfil_exist[0]
                 rol = perfil_exist[1]
@@ -673,4 +674,4 @@ def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
 
 if __name__ == "__main__":
-    app.run (host='127.0.0.1', port=5000, ssl_context=('adhoc'))
+    app.run (host='127.0.0.1', port=5000, ssl_context=('adhoc') if usar_ssl else None)
