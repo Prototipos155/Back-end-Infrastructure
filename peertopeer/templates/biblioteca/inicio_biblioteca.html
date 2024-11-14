@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
 <div class="biblioteca">
     <aside class="">
         <div class="buscador">
@@ -10,38 +9,38 @@
         </div>
 
         <ul class="materias">
+            {% set count=namespace(value=0) %}
             <!-- aqui va un for -->
+            {% for categoria in categorias %}
             <li tabindex="0"> <!--contenedor de cada materia-->
-                <h5 class="opciones desplegar">Materia</h6>
-                <ul><!-- sale cuando dan click-->
-                    <li>
-                        <h5 class="opciones">Tema</h5>
-                    </li>
-                    <li>
-                        <h5 class="opciones">Tema2</h5>
-                    </li>
-                    <li>
-                        <h5 class="opciones">Tema3</h5>
-                    </li>
+                <h5 class="opciones desplegar" id="{{categoria.0}}" title="{{categoria.2}}">
+                    {{categoria.1}}
+                    <span class="puntos">...</span>
+                    <article class="puntos-mostrar">
+                        <option value="">foro</option>
+                        <option value="">documentos</option>
+                    </article>
+                </h6>
+                <ul class="menu">
+                    {% if temas[count.value].0 == categoria.0 %}
+                        <!-- sale cuando dan click-->
+                        {% for tema in temas[count.value][1:] %}
+                            <li>
+                                <h5 class="opciones" id="{{tema.0}}" title="{{tema.2}}">
+                                    {{tema.1}}
+                                    <span class="puntos">...</span>
+                                    <article class="puntos-mostrar">
+                                        <option value="">documentos</option>
+                                        <option value="">articulos</option>
+                                    </article>
+                                </h5>
+                            </li>
+                        {% endfor %}
+                        {% set count.value = count.value+1 %}
+                    {% endif %}
                 </ul>
             </li>
-        </ul>
-        <ul class="materias">
-            <!-- aqui va un for -->
-            <li tabindex="0" class="desplegar"> <!--contenedor de cada materia-->
-                <h5 class="opciones">Materia</h6>
-                <ul><!-- sale cuando dan click-->
-                    <li>
-                        <h5 class="opciones">Tema</h5>
-                    </li>
-                    <li>
-                        <h5 class="opciones">Tema2</h5>
-                    </li>
-                    <li>
-                        <h5 class="opciones">Tema3</h5>
-                    </li>
-                </ul>
-            </li>
+            {% endfor %}
         </ul>
     </aside>
     <section></section>

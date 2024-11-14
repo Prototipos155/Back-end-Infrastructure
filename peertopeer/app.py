@@ -510,8 +510,36 @@ def archivo():
 @app.route('/inicio_biblioteca')
 @login_required
 def inicio_biblioteca():
-    return render_template("biblioteca/inicio_biblioteca.html")
+    cbd.cursor.execute("select * from categoria order by id_categoria asc;")
+    categorias=cbd.cursor.fetchall()
+    cbd.cursor.execute("select * from subcategoria order by id_categoria asc;")
+    temas=separarSubCategorias(cbd.cursor.fetchall())
+    
+    return render_template("biblioteca/inicio_biblioteca.html",categorias=categorias,temas=temas)
 
+def separarSubCategorias(tupla):
+    nuevoOrden=()
+    nivel=()
+    longitud_registros=len(tupla)
+    for index in range(longitud_registros):
+        if(nivel==()):
+            nivel+=tupla[index][1],
+        #nivel+=tupla[index],
+        nivel+=(tupla[index][0],tupla[index][2],tupla[index][3]),
+        #print(nivel)
+        try:
+            if(tupla[index][1]!=tupla[index+1][1]):
+                #este es el ultimo elemento del nivel
+                nuevoOrden+=nivel, #agregamos al nuevo orden
+                #print("f===",nivel)
+                nivel=() #refrescamos el nivel
+        except Exception as ex:
+            nuevoOrden+=nivel,
+    #f[0][0]
+    #1
+    #f[0][1]
+    #(id,'martin','desc')
+    return nuevoOrden
 
 @app.route('/verarchivo/<int:idpeticion>')
 @admin_required

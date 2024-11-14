@@ -1,0 +1,50 @@
+.biblioteca{
+    display:grid;
+    grid-template-columns: 1fr 3fr;  
+    flex:1;
+    padding: 3% 0%;
+    /* overflow: hidden; */
+    list-style:none;
+    aside{
+      border:2px solid black;
+    }
+  }
+.desplegar{
+ul{
+    display: none; 
+}
+}
+.materias{
+li, li h5{
+    width: max-content;
+}
+}
+.opciones{
+    position: relative;
+    .puntos{
+        display: block;
+        rotate: 90deg;
+        translate: translateY(-50%);
+    }
+    .puntos-mostrar{
+        display: none;
+    }
+}
+.menu{
+    display: none;
+}
+/* .desplegar:focus{
+ul{
+    display: block;
+}
+}
+.opciones::before{
+display: block;
+content:"...";
+font-size: x-large;
+width: max-content;
+position: absolute;
+rotate: 90deg;
+top:-50%;
+left:150%;
+} */

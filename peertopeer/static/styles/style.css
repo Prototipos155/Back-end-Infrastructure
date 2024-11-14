@@ -1,3 +1,5 @@
+@import url("./biblioteca.css");
+
 @font-face {
   font-family: 'Mifuente';
   src: url('../fuentes/Raleway-Regular.ttf') format('truetype');
@@ -444,43 +446,3 @@ nav {
     display: none;
   }
 }
-
-.biblioteca{
-  display:grid;
-  grid-template-columns: 1fr 2fr;  
-  flex:1;
-  padding: 3% 5%;
-  /* overflow: hidden; */
-  list-style:none;
-  aside{
-    border:2px solid black;
-  }
-}
-.desplegar{
-  ul{
-    display: none; 
-  }
-}
-.materias{
-  li, li h5{
-    width: max-content;
-  }
-}
-.opciones{
-  position: relative;
-}
-/* .desplegar:focus{
-  ul{
-    display: block;
-  }
-}
-.opciones::before{
-  display: block;
-  content:"...";
-  font-size: x-large;
-  width: max-content;
-  position: absolute;
-  rotate: 90deg;
-  top:-50%;
-  left:150%;
-} */
