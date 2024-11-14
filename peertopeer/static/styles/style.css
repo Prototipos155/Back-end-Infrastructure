@@ -66,20 +66,26 @@ nav {
     border: 0;
     padding: 0%;
     font-family: 'Mifuente';
+    font-size: 100%;
     background-color: #201e1a;
     color: #f2f2f2;
   }
 
   .dropdown {
-    background-color: #0a0c0d67;
+    background-color: #201e1a;
     font-family: 'Mifuente';
     color: #ffffff;
-    display: inline-block;
+    display: inline;
     position: relative;
+    width: 100%;
   }
 
   .dropdown-content {
+    text-align: start;
+    padding-top: 5%;
+    margin-top: 1%;
     display: none;
+    border-radius: 7px;
     position: absolute;
     min-width: 250%;
     overflow: auto;
@@ -89,6 +95,24 @@ nav {
   }
 
   .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .dropdown-content1 {
+    text-align: start;
+    padding-top: 5% ;
+    margin-top: 1%;
+    display: none;
+    border-radius: 7px;
+    position: absolute;
+    width: 100%;
+    overflow: auto;
+    background-color: #201e1a;
+    color: #f2f2f2;
+    z-index: 1;
+  }
+
+  .dropdown:hover .dropdown-content1 {
     display: block;
   }
 
