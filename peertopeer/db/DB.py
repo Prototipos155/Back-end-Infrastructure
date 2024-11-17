@@ -2,6 +2,7 @@ import pymysql
 from colorama import Back,Fore
 import re
 import os
+from hashlib import sha256
 
 class CC():
     def __init__(self):
@@ -91,13 +92,68 @@ class CC():
             self.tabla_buzon_quejas()
             self.tabla_categoria()
             self.tabla_subcategoria()
+            self.tabla_tema()
             self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
+            self.funcionCrearMateria()
 
         except pymysql.Error as err:
             print("\n error al intentar crear las tablas " .format(err))
-    
+    def crearHashParaBd(data):
+        # Datos a hashear
+        data = data.encode()
+        # Crear hash
+        hash_object = sha256(data)
+        hash_hex = hash_object.hexdigest()
+
+        print(f"Hash SHA-256: {hash_hex}")
+        return hash_hex
+
+    def crearMateriaCompleta(self,nombre_Materia,descripcion):
+        subCate=self.crearHashParaBd(f"{nombre_Materia}-General")
+        tema=self.crearHashParaBd(f"{nombre_Materia}-General-General")
+        # print(f"('{nombre_Materia}',' desc ','{subCate}','{tema}')")
+        self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,subCate,tema))
+
+    def funcionCrearMateria(self):
+        try:
+            self.cursor.execute("""
+            DELIMITER //
+            create function crearCategoriaCompleta(nomb varchar(100), descripcion varchar(150),codigoSubcateg char(64), codigoTema char(64))
+            returns int
+            deterministic
+            begin
+                if ((select id_categoria from categoria where nombre=nomb) is not null) then
+                    return -1;# ya existe la categoria/materia
+                end if;
+                insert into categoria(nombre,descripcion) values(nomb,descripcion); #creamos la categoria
+                set @idCateg=(select id_categoria from categoria where nombre=nomb); #obtenemos su id
+                if (@idCateg is null) then
+                    return -2; # no se pudo hacer el registro de la Categoria
+                end if;
+                if((select codigo from subcategoria where codigo=codigoSubcateg)) then 
+                    return -3;
+                end if;
+                #se debe crear la SubCategoria 'General'
+                insert into subcategoria(codigo,id_categoria,nombre,descripcion) values(codigoSubcateg,@idCateg,'General',CONCAT('Apartado general de ',nomb));
+                
+                set @idSubCateg=(select id_subcategoria from subcategoria where codigo=codigoSubcateg); #obtenemos el id de la SubCategoria
+                if(@idSubCateg is null) then
+                    return -4; # no se pudo hacer el regitsro de la subcategoria
+                end if;
+                if((select codigo from tema where codigo=codigoTema)) then 
+                    return -5;
+                end if;
+                #se debe crear el tema 'General' dentro de la subcategoria antes creada
+                insert into tema(codigo,id_subcategoria,nombre,descripcion) values(codigoTema,@idSubCateg,'General',CONCAT('Apartado general de ',nomb));
+                return 1;
+            end //
+            DELIMITER ;""")
+            print("funcion 'CrearMateria' creada con exito")
+        except Exception as ex:
+            print("no se pudo crear la funcion 'CrearMateria'",ex)
+        
     def tabla_perfil(self):
         try:
             self.cursor.execute("""
@@ -156,14 +212,36 @@ class CC():
         try:
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS subcategoria (
-              id_subcategoria INT UNIQUE AUTO_INCREMENT NOT NULL,
-              id_categoria INT NOT NULL,
+            id_subcategoria INT AUTO_INCREMENT NOT NULL,
+            codigo char(64) unique NOT NULL,
+            id_categoria INT NOT NULL,
 
-              nombre VARCHAR(100) NOT NULL,
-              descripcion VARCHAR(150) NOT NULL,
+            nombre VARCHAR(100) NOT NULL,
+            descripcion VARCHAR(150) NOT NULL,
                                 
-              PRIMARY KEY (id_subcategoria),
-              FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria))""")
+            PRIMARY KEY (id_subcategoria),
+            FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
+            );""")
+            
+            print("la tabla subcategoria creada ")
+
+        except pymysql.Error as err:
+            print("la tabla subcategoria no fue creada ",err)
+
+    def tabla_tema(self):
+        try:
+            self.cursor.execute("""
+            create table tema(
+                id_tema int auto_increment not null,
+                codigo char(64) unique not null,
+                id_subcategoria int not null,
+                
+                nombre VARCHAR(100) NOT NULL,
+                descripcion VARCHAR(150) NOT NULL,
+                
+                primary key(id_tema),
+                FOREIGN KEY (id_subcategoria) REFERENCES subcategoria(id_subcategoria)
+            );""")
             
             print("la tabla subcategoria creada ")
 
