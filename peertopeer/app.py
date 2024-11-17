@@ -27,7 +27,7 @@ app = Flask(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
 app.secret_key = os.getenv("PASSWORD1")
-usar_ssl=False
+usar_ssl=True
 
 class Usuario(UserMixin):
     def __init__(self, id_usuario, rol, nombre_usuario, correo, cuenta_activa):
