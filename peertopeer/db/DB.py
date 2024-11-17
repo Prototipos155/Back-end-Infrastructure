@@ -119,8 +119,7 @@ class CC():
     def funcionCrearMateria(self):
         try:
             self.cursor.execute("""
-            DELIMITER //
-            create function crearCategoriaCompleta(nomb varchar(100), descripcion varchar(150),codigoSubcateg char(64), codigoTema char(64))
+            create function if not exists crearCategoriaCompleta(nomb varchar(100), descripcion varchar(150),codigoSubcateg char(64), codigoTema char(64))
             returns int
             deterministic
             begin
@@ -148,8 +147,7 @@ class CC():
                 #se debe crear el tema 'General' dentro de la subcategoria antes creada
                 insert into tema(codigo,id_subcategoria,nombre,descripcion) values(codigoTema,@idSubCateg,'General',CONCAT('Apartado general de ',nomb));
                 return 1;
-            end //
-            DELIMITER ;""")
+            end ;""")
             print("funcion 'CrearMateria' creada con exito")
         except Exception as ex:
             print("no se pudo crear la funcion 'CrearMateria'",ex)
@@ -231,7 +229,7 @@ class CC():
     def tabla_tema(self):
         try:
             self.cursor.execute("""
-            create table tema(
+            create table if not exists tema(
                 id_tema int auto_increment not null,
                 codigo char(64) unique not null,
                 id_subcategoria int not null,
