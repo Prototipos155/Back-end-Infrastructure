@@ -9,3 +9,4 @@ flask
 pymysql
 cryptography
 flask_login
+flask-socketio
