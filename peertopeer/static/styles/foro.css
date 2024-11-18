@@ -54,7 +54,7 @@ h2 {
   flex: 1;
 }
 
-.texto {
+.text {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -63,7 +63,7 @@ h2 {
   padding-right: 10px;
 }
 
-.sordear {
+.muted {
   font-size: 10px;
   color: darkgray;
 }

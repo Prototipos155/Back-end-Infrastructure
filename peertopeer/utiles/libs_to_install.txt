@@ -10,3 +10,5 @@ pymysql
 cryptography
 flask_login
 flask-socketio
+eventlet
+gevent-websocket

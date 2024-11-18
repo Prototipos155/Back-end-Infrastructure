@@ -1,3 +1,4 @@
+import eventlet.wsgi
 from flask import Flask, render_template, current_app, redirect, request, session, url_for,Response, send_file, flash
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_socketio import join_room, leave_room, send, SocketIO
@@ -11,6 +12,7 @@ from string import ascii_uppercase
 from db.DB import CC
 from utiles.hash import Encrypt
 
+import eventlet
 import pymysql
 import os
 import subprocess
@@ -25,15 +27,16 @@ load_dotenv()
 cbd = CC()
 encriptado = Encrypt()
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("PASSWORD4")
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
 app.secret_key = os.getenv("PASSWORD1")
-usar_ssl=True
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-salas = {}
+rooms = {}
 
 class Usuario(UserMixin):
     def __init__(self, id_usuario, rol, nombre_usuario, correo, cuenta_activa):
@@ -41,7 +44,7 @@ class Usuario(UserMixin):
         self.rol = rol
         self.nombre_usuario = nombre_usuario
         self.correo = correo
-        self.cuenta_activa = cuenta_activa  # Asegúrate de que sea un valor booleano (1 o 0 en la BD convertido a True/False)
+        self.cuenta_activa = cuenta_activa 
 
     def get_id(self):
         return str(self.id)
@@ -92,7 +95,12 @@ def apply_csp(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["X-Frame-Options"] = "DENY"
-    #response.headers['Content-Security-Policy'] = "default-src 'self'; connect-src 'self' http://localhost:3500; script-src 'self' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/;"
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'nonce-unique_nonce_value';"
+        "connect-src 'self' wss://localhost:3500 http://localhost:3500; "
+        "script-src 'self' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js;"
+    )   
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(self), microphone=()"
@@ -578,7 +586,7 @@ def generar_codigo_unico(length):
         for _ in range(length):
             codigo += random.choice(ascii_uppercase)
         
-        if codigo not in salas:
+        if codigo not in rooms:
             break
     
     return codigo
@@ -599,75 +607,75 @@ def foro():
         if unirse != False and not codigo:
             return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo, nombre = nombre)
     
-        sala = codigo
+        room = codigo
         
         if crear != False:
-            sala = generar_codigo_unico(4)
-            salas[sala] = {"miembros": 0, "mensajes": []}
+            room = generar_codigo_unico(4)
+            rooms[room] = {"miembros": 0, "mensajes": []}
         
-        elif codigo not in salas:
+        elif codigo not in rooms:
             return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo, nombre=nombre)
 
-        session["sala"] = sala
+        session["room"] = room
         session["nombre"] = nombre
-        print(("sala: ", sala), ("nombre: ", nombre))
+        print(("room: ", room), ("nombre: ", nombre))
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
 
 @app.route('/sala')
 def sala():
-    sala = session.get("sala")
+    room = session.get("room")
     nombre = session.get("nombre")
-    print(("sala: ", sala), ("nombre: ", nombre))
+    print(("sala: ", room), ("nombre: ", nombre))
     
-    if sala is None or nombre is None or sala not in salas:
+    if room is None or nombre is None or room not in rooms:
         return redirect(url_for("inicio"))
         
-    return render_template("salas/sala.html", codigo=sala, mensajes=salas[sala]["mensajes"])
+    return render_template("salas/sala.html", codigo=room, mensajes=rooms[room]["mensajes"])
 
 @socketio.on("message")
-def mensaje(data):
-    sala = session.get("sala")
-    if sala not in salas:
+def message(data):
+    room = session.get("room")
+    if room not in rooms:
         return 
     
-    content = {
+    contenido = {
         "nombre": session.get("nombre"),
         "mensaje": data["data"]
     }
-    send(content, to=sala)
-    salas[sala]["mensajes"].append(content)
+    send(contenido, to=room)
+    rooms[room]["mensajes"].append(contenido)
     print(f"{session.get('nombre')} dice: {data['data']}")
 
 @socketio.on("connect")
 def conectar(auth):
-    sala = session.get("sala")
+    room = session.get("room")
     nombre = session.get("nombre")
-    if not sala or not nombre:
+    if not room or not nombre:
         return
-    if sala not in salas:
-        leave_room(sala)
+    if room not in rooms:
+        leave_room(room)
         return
     
-    join_room(sala)
-    send({"nombre": nombre, "mensaje": "has entered the room"}, to=sala)
-    salas[sala]["miembros"] += 1
-    print(f"{nombre} joined room {sala}")
+    join_room(room)
+    send({"nombre": nombre, "mensaje": "entro a la sala"}, to=room)
+    rooms[room]["miembros"] += 1
+    print(f"{nombre} Entro a la sala {room}")
 
 @socketio.on("disconnect")
 def desconectar():
-    sala = session.get("sala")
+    room = session.get("room")
     nombre = session.get("nombre")
-    leave_room(sala)
+    leave_room(room)
 
-    if sala in salas:
-        salas[sala]["miembros"] -= 1
-        if salas[sala]["miembros"] <= 0:
-            del salas[sala]
+    if room in rooms:
+        rooms[room]["miembros"] -= 1
+        if rooms[room]["miembros"] <= 0:
+            del rooms[room]
     
-    send({"name": nombre, "mensaje": "has left the room"}, to=sala)
-    print(f"{nombre} has left the room {sala}")
+    send({"name": nombre, "mensaje": "has left the room"}, to=room)
+    print(f"{nombre} has left the room {room}")
 
 
 @app.route('/crudusuariosadmin')
@@ -806,6 +814,20 @@ def status_401(error):
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
 
+cert_path = os.path.join(current_dir,'utiles', 'server.crt')
+key_path = os.path.join(current_dir,'utiles', 'server.key')
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context.load_cert_chain(certfile=cert_path, keyfile=key_path)
+
+server_socket = eventlet.wrap_ssl(
+    eventlet.listen(('127.0.0.1', 5000)),
+    certfile=cert_path,
+    keyfile=key_path,
+    server_side=True
+)
+
 if __name__ == "__main__":
-    app.run (host='127.0.0.1', port=5000, ssl_context=('adhoc') if usar_ssl else None)
-    socketio.run(app, debug=True)
+
+    eventlet.wsgi.server(server_socket, app)
+    
