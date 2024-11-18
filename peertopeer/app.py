@@ -22,6 +22,7 @@ import random
 import jwt
 import filetype
 import io
+import re
 
 load_dotenv()
 cbd = CC()
@@ -115,6 +116,46 @@ def inicio():
 
     return render_template("inicio.html")
 
+def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
+    errores = {}
+    valido = True
+    nombreregex = r"[^a-zA-Z\s]"
+    apodoregex = r"[^\w.-]"
+    correoregex = r"^[\w.]+@[a-zA-Z0-9]+\.+[a-zA-Z.]{1,}$"
+    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-])([\w!#.-]|[^\s]){8,}$"
+
+    if nombres.strip()=="" or len(nombres.strip())>50 or re.search(nombreregex, nombres):
+        valido = False
+        errores['mensaje01'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
+        errores['num_fieldset']= 0
+
+    if apellidos.strip()=="" or len(apellidos.strip())>50 or re.search(nombreregex, apellidos):
+        valido = False
+        errores['mensaje02'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
+        errores['num_fieldset']= 0
+
+    elif nomusuario.strip()=="" or len(nomusuario.strip())>20 or re.search(apodoregex, nomusuario):
+        valido = False
+        errores['mensaje1'] = "Campo requerido, no más de 20 caracteres y sin espacios ni caracteres especiales"
+        errores['num_fieldset']= 1
+
+    elif telefono.strip()==""  or len(telefono.strip())<10 or len(telefono.strip())>13 or not telefono.isdigit():
+        valido = False
+        errores['mensaje2'] = "Campo de teléfono requerido, entre 10 y 13 caracteres"
+        errores['num_fieldset']= 2
+
+    elif correo.strip()==""  or len(correo.strip())<10 or len(correo.strip())>150 or not re.search(correoregex, correo):
+        valido = False
+        errores['mensaje3'] = "Campo de correo requerido, entre 10 y 150 caracteres"
+        errores['num_fieldset']= 2
+
+    elif contraseña.strip()==""  or len(contraseña.strip())<8 or len(contraseña.strip())>30 or not re.search(contraregex, contraseña):
+        valido = False
+        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial y sin espacios"
+        errores['num_fieldset']= 3
+
+    return valido, errores
+
 
 @app.route ('/registro',  methods=['GET', 'POST'])
 def registro():
@@ -142,6 +183,9 @@ def registro():
 
             errores = {}
     
+            valido, errores = validaciones(nombres, apellidos, nombre_usuario, telefono, correo, contraseña)
+            if not valido:
+                return render_template("acceso/registro.html", **errores,  form_data=form_data)
 
             try:
                 cbd.cursor.execute("SELECT nombre_usuario FROM perfil WHERE nombre_usuario = %s", (nombre_usuario,))
@@ -156,19 +200,19 @@ def registro():
                 error_en_login=None
 
                 if nombre_usuario_exist:
-                    errores['mensaje1'] = "este nombre_usuario ya esta en uso"
+                    errores['mensaje1'] = "Este nombre de usuario ya está en uso"
                     error_en_login=1
 
                 elif telefono_exist:
-                    errores["mensaje2"] = "este telefono ya esta en uso"
+                    errores["mensaje2"] = "Este teléfono ya está en uso"
                     error_en_login=2
 
                 elif correo_exist:
-                    errores["mensaje3"] = "este correo ya esta en uso" 
+                    errores["mensaje3"] = "Este correo ya está en uso" 
                     error_en_login=2
                 
                 elif contraseña != confirmcontra:
-                    errores["mensaje4"] =  "las contraseñas que ingresas no coinciden"
+                    errores["mensaje4"] =  "Las contraseñas que ingresaste no coinciden"
                     error_en_login=3
 
                 else:        
@@ -196,7 +240,7 @@ def registro():
                     codigoveri = random.randint(100000, 999999)
 
                     asunto = "Correo de Verificación"
-                    body = f"Hola {nombre_usuario} el código para verificar que ingresaste un correo que esta en tu propiedad es: {codigoveri}"
+                    body = f"Hola, {nombre_usuario}. El código para verificar que ingresaste un correo que está en tu propiedad es: {codigoveri}"
 
                     try:
                                     
@@ -219,7 +263,7 @@ def registro():
                     session['codigoveri'] = codigoveri
                     session['tokenregistro'] = tokenregistro
 
-                    return render_template ("acceso/vericorreo_registro.html", mensaje1="ingrese el codigo que le enviamos por correo")
+                    return render_template ("acceso/vericorreo_registro.html", mensaje1="Ingrese el código que le enviamos por correo")
                         
             except pymysql.Error as err:
                 print(f"Error en la base de datos: {err}")
@@ -248,7 +292,7 @@ def vericorreo_registro():
         codigo = request.form.get('codigo')
         
         if not (str(codigo) == str(codigoveri)):
-            return render_template("vericorreo_registro.html", mensaje1= "no se porque no jala este pedo")
+            return render_template("acceso/vericorreo_registro.html", mensaje1= "Los códigos de verificación no coinciden")
 
         try:
             payload = jwt.decode(tokenregistro, os.getenv("PASSWORD2"), algorithms=['HS256'])
@@ -264,11 +308,11 @@ def vericorreo_registro():
                 cbd.cursor.execute("INSERT INTO perfil (rol,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES ('usuario', %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
 
-                return render_template("acceso/iniciar_sesion.html", mensaje1 = "registro exitoso",form_data={})
+                return render_template("acceso/iniciar_sesion.html", mensaje1 = "Registro exitoso",form_data={})
                 
             except pymysql.Error as er:
                 print(er)
-                return render_template("acceso/vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
+                return render_template("acceso/vericorreo_registro.html", mensaje1 = "No se pudieron insertar los valores del registro")
 
         except jwt.InvalidTokenError:
             print("Token inválido.")
@@ -299,18 +343,20 @@ def iniciar_sesion():
             
             errores = {}
 
-            if not correo or not nombre_usuario or not contraseña:
+            if correo.strip()=="" or nombre_usuario.strip()=="" or contraseña.strip()=="":
                 errores['mensaje1'] = "Todos los campos son obligatorios"
+                errores['num_fieldset']=0
                 print("entro aca")
-                return render_template("acceso/iniciar_sesion.html")   
+                return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
 
             try:
                 cbd.cursor.execute("SELECT id_usuario, rol, nombre_usuario, correo, telefono, contraseña_encript, cuenta_activa FROM perfil WHERE nombre_usuario = %s AND correo = %s", (nombre_usuario, correo))
                 perfil_exist = cbd.cursor.fetchone()
 
                 if perfil_exist is None:
-                    errores ["mensaje2"] = "El usuario no existe."
-                    return render_template("acceso/iniciar_sesion.html",form_data={})
+                    errores ["mensaje1"] = "El usuario no existe."
+                    errores['num_fieldset']=0
+                    return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                 
                 id_usuario = perfil_exist[0]
                 rol = perfil_exist[1]
@@ -350,7 +396,7 @@ def iniciar_sesion():
 
                             try:
                                 asunto = "Correo de Verificación"
-                                body = (f"Hola {nombre_usuario}, tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                body = (f"Hola, {nombre_usuario}. Tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
                                                                                 
                                 em = EmailMessage()
                                 em["From"] = remitente
@@ -375,6 +421,7 @@ def iniciar_sesion():
                         else:
                             print("Contraseña incorrecta")
                             errores["mensaje3"] = "Contraseña incorrecta"
+                            errores['num_fieldset']=2
                             return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                         
                     except Exception as err:

@@ -16,7 +16,7 @@ class CC():
                 self.crearProcedimientos()
 
             except pymysql.Error as err:
-                print("\n error al intentar crear las tablas " .format(err))
+                print("\n error al intentar crear las tablas o procedimientos: " .format(err))
             
         except pymysql.Error as err:
             self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp)
@@ -25,6 +25,14 @@ class CC():
             self.connection.commit()
             self.cursor.execute("USE peertopeer")
             print("\nCreacion exitosa")
+
+            try:
+                self.crearTablas()
+                self.crearProcedimientos()
+
+            except pymysql.Error as err:
+                print("\n error al intentar crear las tablas o procedimientos: " .format(err))
+
 
     def detectarPuertosXampp(rutaXampp='C:/xampp/mysql/bin/my.ini'):
         try:
