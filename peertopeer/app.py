@@ -27,8 +27,6 @@ load_dotenv()
 cbd = CC()
 encriptado = Encrypt()
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("PASSWORD4")
 login_manager = LoginManager(app)
@@ -813,21 +811,25 @@ def status_401(error):
 
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 cert_path = os.path.join(current_dir,'utiles', 'server.crt')
 key_path = os.path.join(current_dir,'utiles', 'server.key')
 
-context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 context.load_cert_chain(certfile=cert_path, keyfile=key_path)
 
-server_socket = eventlet.wrap_ssl(
+ssl_context = {
+    'certfile': cert_path,
+    'keyfile' : key_path
+}
+
+server = eventlet.wrap_ssl(
     eventlet.listen(('127.0.0.1', 5000)),
-    certfile=cert_path,
-    keyfile=key_path,
+    **ssl_context,
     server_side=True
 )
 
 if __name__ == "__main__":
-
-    eventlet.wsgi.server(server_socket, app)
+    eventlet.wsgi.server(server, app)
     
