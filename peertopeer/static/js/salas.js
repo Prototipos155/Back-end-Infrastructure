@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mensajes.insertAdjacentHTML("beforeend", contenido);
   };
 
-  socketio.on("mensaje", (data) => {
+  socketio.on("message", (data) => {
     console.log("Mensaje recibido: ", data);
     crearMensaje(data.nombre, data.mensaje);
   });
@@ -25,11 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const mensaje = mensajeInput.value.trim()
 
     if (mensaje === "") return;
-    socketio.emit("mensaje", { nombre: "Tu", mensaje });
-    crearMensaje("Tu", mensaje);
+    socketio.emit("message", { "nombre": "Tú", "mensaje": mensaje });
+    //crearMensaje("Tú", mensaje);
     mensajeInput.value = "";
   }
-  const btnEnviar = document.getElementById(".btnEnviar");
+  const btnEnviar = document.getElementById("btnEnviar");
 
   if (!btnEnviar){
     console.error("El boton Enviar no se encontro en el DOM")
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  const mensajesData = document.getElementById("mensajes-data");
+  const mensajesData = document.getElementById("mensajes-container");
 
   if (mensajesData) {
     const mensajes = JSON.parse(mensajesData.dataset.mensajes);
