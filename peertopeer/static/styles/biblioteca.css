@@ -14,25 +14,38 @@ ul{
     display: none; 
 }
 }
-.materias{
-li, li h5{
-    width: max-content;
-}
-}
 .opciones{
     position: relative;
+    width:100%;
 }
 .puntos{
-    display:inline-block;
-    rotate: 90deg;
-    margin-left: 1%;
+    /* display:inline-block; */
+    /* rotate: 90deg; */
+    /* margin-left: 1%; */
     /* translate: translateY(-50%); */
+    position:relative;
+}
+.puntos::before{
+    display:block;
+    content:"...";
+    rotate: 90deg;
+    position: absolute;
+    margin: 50% 25%;
+    width: 100%;
+    text-align: center;
 }
 .puntos-mostrar{
     display: none;
+    border:2px solid black;
+    width: 25vh;
+    padding: 0% 5%;
 }
 .menu{
     display: none;
+}
+.main-opciones{
+    display: grid;
+    grid-template-columns: max-content 10% auto;
 }
 /* .desplegar:focus{
 ul{

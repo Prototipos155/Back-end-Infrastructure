@@ -519,10 +519,20 @@ def archivo():
 def inicio_biblioteca():
     cbd.cursor.execute("select * from categoria order by id_categoria asc;")
     categorias=cbd.cursor.fetchall()
-    cbd.cursor.execute("select * from subcategoria order by id_categoria asc;")
+    
+    cbd.cursor.execute("select id_subcategoria,id_categoria,nombre,descripcion from subcategoria order by id_categoria asc;")
+    subcate=separarSubCategorias(cbd.cursor.fetchall())
+
+    cbd.cursor.execute("select id_tema,id_subcategoria,nombre,descripcion from tema order by id_subcategoria;")
     temas=separarSubCategorias(cbd.cursor.fetchall())
     
-    return render_template("biblioteca/inicio_biblioteca.html",categorias=categorias,temas=temas)
+    print("subcate=",subcate)
+    print("temas=",temas)
+    return render_template("biblioteca/inicio_biblioteca.html",categorias=categorias,subcategorias=subcate
+        ,temas=temas,
+        limiteSubcategorias=len(subcate),
+        limiteTemas=len(temas)
+    )
 
 def separarSubCategorias(tupla):
     nuevoOrden=()

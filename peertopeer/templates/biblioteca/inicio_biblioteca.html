@@ -9,39 +9,66 @@
         </div>
 
         <ul class="materias">
-            {% set count=namespace(value=0) %}
+            {% set countSubcate=namespace(value=0) %}
+            {% set countTema=namespace(value=0) %}
             <!-- aqui va un for -->
             {% for categoria in categorias %}
             <li > <!--contenedor de cada materia-->
-                <div class="main-opciones">
+                <div class="main-opciones categoria">
                     <h5 class="opciones desplegar" id="{{categoria.0}}" title="{{categoria.2}}">
                         {{categoria.1}}
                     </h5>
-                    <span class="puntos">...</span>
+                    <span class="puntos"></span>
                     <article class="puntos-mostrar">
                         <option value="">foro</option>
                         <option value="">documentos</option>
-                        <option value="">Cerrar</option>
+                        
                     </article>
                 </div>
 
                 <ul class="menu">
-                    {% if temas[count.value].0 == categoria.0 %}
-                        <!-- sale cuando dan click-->
-                        {% for tema in temas[count.value][1:] %}
-                            <li>
-                                <h5 class="opciones" id="{{tema.0}}" title="{{tema.2}}">
-                                    {{tema.1}}
-                                    <span class="puntos">...</span>
-                                    <article class="puntos-mostrar">
-                                        <option value="">documentos</option>
-                                        <option value="">articulos</option>
-                                        <option value="">Cerrar</option>
-                                    </article>
-                                </h5>
-                            </li>
-                        {% endfor %}
-                        {% set count.value = count.value+1 %}
+                    {% if limiteSubcategorias!=countSubcate.value %}
+                        {% if subcategorias[countSubcate.value].0 == categoria.0 %}
+                            <!-- sale cuando dan click-->
+                            {% for subcategoria in subcategorias[countSubcate.value][1:] %}
+                                <li>
+                                    <div class="main-opciones subcategoria">
+                                        <h5 class="opciones desplegar" id="{{subcategoria.0}}" title="{{subcategoria.2}}">
+                                            {{subcategoria.1}}
+                                        </h5>
+                                        <span class="puntos"></span>
+                                        <article class="puntos-mostrar">
+                                            <option value="">documentos</option>
+                                            <option value="">articulos</option>
+                                            
+                                        </article>
+                                    </div>  
+                                    <ul class="menu">
+                                        {% if limiteTemas!=countTema.value %}
+                                            {% if(temas[countTema.value].0 == subcategoria.0) %}
+                                                {% for tema in temas[countTema.value][1:] %}
+                                                    <li>
+                                                        <div class="main-opciones tema">
+                                                            <h5 class="opciones" id="{{tema.0}}" title="{{tema.2}}">
+                                                                {{tema.1}}
+                                                            </h5>
+                                                            <span class="puntos"></span>
+                                                            <article class="puntos-mostrar">
+                                                                <option value="">documentos</option>
+                                                                <option value="">articulos</option>
+                                                                
+                                                            </article>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                                {% set countTema.value = countTema.value+1 %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </ul>
+                                </li>
+                            {% endfor %}
+                            {% set countSubcate.value = countSubcate.value+1 %}
+                        {% endif %}
                     {% endif %}
                 </ul>
             </li>

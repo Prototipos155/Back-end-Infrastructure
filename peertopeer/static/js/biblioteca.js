@@ -11,37 +11,52 @@ for (let desplegable of desplegables){
         }
         menuActual.style.display="block"
         if(menuActual.children[0]==undefined){
-            alert("no tiene temas")
+            alert("no tiene contenido")
         }
         let c=0
-        for (let menu of document.querySelectorAll(".menu")){
-            if(menu!=menuActual && menu.style.display=="block"){
-                console.log("menu numero ",c)
-                menu.style.display="none";
-                break
+        if(e.target.parentNode.classList.contains("categoria")){
+
+            for (let menu of document.querySelectorAll(".menu")){
+                if(menu!=menuActual && menu.style.display=="block"){
+                    // console.log("menu numero ",c)
+                    menu.style.display="none";
+                    break
+                }
+                c+=1
             }
-            c+=1
         }
     })
 }
+let puntosActualmenteSeleccionado=null;
 
 for(let puntos of document.querySelectorAll(".puntos")){
-    puntos.addEventListener("click",e=>{
-        targ=e
-        console.log("targ=",e.target)
-        console.log("padre=",e.target.parentNode)
-        console.log("hermano=",e.target.parentNode.lastElementChild)
+    let salir= new Option()
+    salir.addEventListener("click",e=>{
+        if(e.stopPropagation){
+            e.stopPropagation()
+        }
+        
+        e.target.parentNode.style.display="none"
+        if(puntosActualmenteSeleccionado==e.target.parentNode){
+            //estamos cerrando el menu actual
+            puntosActualmenteSeleccionado=null;
+        }
+    })
+    salir.innerHTML+="Salir"
 
+    puntos.addEventListener("click",e=>{
+        if(puntosActualmenteSeleccionado!=null){
+            puntosActualmenteSeleccionado.style.display="none"
+        }
+        
+        
         if(e.target.parentNode.lastElementChild.checkVisibility()){
             e.target.parentNode.lastElementChild.style.display="none"
         }else{
             e.target.parentNode.lastElementChild.style.display="block"
         }
+        puntosActualmenteSeleccionado=e.target.parentNode.lastElementChild;
     })
-    puntos.parentNode.lastElementChild.lastElementChild.addEventListener("click",e=>{
-        if(e.stopPropagation){
-            e.stopPropagation()
-        }
-        e.target.parentNode.style.display="none"
-    })
+    puntos.parentNode.lastElementChild.appendChild(salir)
+
 }
