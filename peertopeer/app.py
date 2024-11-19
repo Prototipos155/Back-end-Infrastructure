@@ -715,11 +715,13 @@ def conectar(auth):
     if room not in rooms:
         leave_room(room)
         return
-    
+    if room in rooms:
+        join_room(room)
     join_room(room)
     send({"nombre": nombre, "mensaje": "entro a la sala"}, to=room)
     rooms[room]["miembros"] += 1
     print(f"{nombre} Entro a la sala {room}")
+    print(rooms)
 
 @socketio.on("disconnect")
 def desconectar():
