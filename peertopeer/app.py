@@ -1,3 +1,4 @@
+import eventlet.wsgi
 from flask import Flask, render_template, current_app, redirect, request, session, url_for,Response, send_file, flash
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_socketio import join_room, leave_room, send, SocketIO
@@ -11,6 +12,7 @@ from string import ascii_uppercase
 from db.DB import CC
 from utiles.hash import Encrypt
 
+import eventlet
 import pymysql
 import os
 import subprocess
@@ -20,6 +22,7 @@ import random
 import jwt
 import filetype
 import io
+import re
 
 load_dotenv()
 cbd = CC()
@@ -30,10 +33,9 @@ app.config["SECRET_KEY"] = os.getenv("PASSWORD4")
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
 app.secret_key = os.getenv("PASSWORD1")
-usar_ssl=True
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-salas = {}
+rooms = {}
 
 class Usuario(UserMixin):
     def __init__(self, id_usuario, rol, nombre_usuario, correo, cuenta_activa):
@@ -41,7 +43,7 @@ class Usuario(UserMixin):
         self.rol = rol
         self.nombre_usuario = nombre_usuario
         self.correo = correo
-        self.cuenta_activa = cuenta_activa  # Asegúrate de que sea un valor booleano (1 o 0 en la BD convertido a True/False)
+        self.cuenta_activa = cuenta_activa 
 
     def get_id(self):
         return str(self.id)
@@ -92,7 +94,11 @@ def apply_csp(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["X-Frame-Options"] = "DENY"
-    #response.headers['Content-Security-Policy'] = "default-src 'self'; connect-src 'self' http://localhost:3500; script-src 'self' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/;"
+    response.headers['Content-Security-Policy'] = (
+    "default-src 'self'; "
+    "script-src 'self' 'nonce-unique_nonce_value' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js; "
+    "connect-src 'self' ws://127.0.0.1:5000 ws://localhost:3500;"
+    ) 
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(self), microphone=()"
@@ -106,6 +112,46 @@ def apply_csp(response):
 def inicio():
 
     return render_template("inicio.html")
+
+def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
+    errores = {}
+    valido = True
+    nombreregex = r"[^a-zA-Z\s]"
+    apodoregex = r"[^\w.-]"
+    correoregex = r"^[\w.]+@[a-zA-Z0-9]+\.+[a-zA-Z.]{1,}$"
+    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-])([\w!#.-]|[^\s]){8,}$"
+
+    if nombres.strip()=="" or len(nombres.strip())>50 or re.search(nombreregex, nombres):
+        valido = False
+        errores['mensaje01'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
+        errores['num_fieldset']= 0
+
+    if apellidos.strip()=="" or len(apellidos.strip())>50 or re.search(nombreregex, apellidos):
+        valido = False
+        errores['mensaje02'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
+        errores['num_fieldset']= 0
+
+    elif nomusuario.strip()=="" or len(nomusuario.strip())>20 or re.search(apodoregex, nomusuario):
+        valido = False
+        errores['mensaje1'] = "Campo requerido, no más de 20 caracteres y sin espacios ni caracteres especiales"
+        errores['num_fieldset']= 1
+
+    elif telefono.strip()==""  or len(telefono.strip())<10 or len(telefono.strip())>13 or not telefono.isdigit():
+        valido = False
+        errores['mensaje2'] = "Campo de teléfono requerido, entre 10 y 13 caracteres"
+        errores['num_fieldset']= 2
+
+    elif correo.strip()==""  or len(correo.strip())<10 or len(correo.strip())>150 or not re.search(correoregex, correo):
+        valido = False
+        errores['mensaje3'] = "Campo de correo requerido, entre 10 y 150 caracteres"
+        errores['num_fieldset']= 2
+
+    elif contraseña.strip()==""  or len(contraseña.strip())<8 or len(contraseña.strip())>30 or not re.search(contraregex, contraseña):
+        valido = False
+        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial y sin espacios"
+        errores['num_fieldset']= 3
+
+    return valido, errores
 
 
 @app.route ('/registro',  methods=['GET', 'POST'])
@@ -134,6 +180,9 @@ def registro():
 
             errores = {}
     
+            valido, errores = validaciones(nombres, apellidos, nombre_usuario, telefono, correo, contraseña)
+            if not valido:
+                return render_template("acceso/registro.html", **errores,  form_data=form_data)
 
             try:
                 cbd.cursor.execute("SELECT nombre_usuario FROM perfil WHERE nombre_usuario = %s", (nombre_usuario,))
@@ -148,19 +197,19 @@ def registro():
                 error_en_login=None
 
                 if nombre_usuario_exist:
-                    errores['mensaje1'] = "este nombre_usuario ya esta en uso"
+                    errores['mensaje1'] = "Este nombre de usuario ya está en uso"
                     error_en_login=1
 
                 elif telefono_exist:
-                    errores["mensaje2"] = "este telefono ya esta en uso"
+                    errores["mensaje2"] = "Este teléfono ya está en uso"
                     error_en_login=2
 
                 elif correo_exist:
-                    errores["mensaje3"] = "este correo ya esta en uso" 
+                    errores["mensaje3"] = "Este correo ya está en uso" 
                     error_en_login=2
                 
                 elif contraseña != confirmcontra:
-                    errores["mensaje4"] =  "las contraseñas que ingresas no coinciden"
+                    errores["mensaje4"] =  "Las contraseñas que ingresaste no coinciden"
                     error_en_login=3
 
                 else:        
@@ -188,7 +237,7 @@ def registro():
                     codigoveri = random.randint(100000, 999999)
 
                     asunto = "Correo de Verificación"
-                    body = f"Hola {nombre_usuario} el código para verificar que ingresaste un correo que esta en tu propiedad es: {codigoveri}"
+                    body = f"Hola, {nombre_usuario}. El código para verificar que ingresaste un correo que está en tu propiedad es: {codigoveri}"
 
                     try:
                                     
@@ -211,7 +260,7 @@ def registro():
                     session['codigoveri'] = codigoveri
                     session['tokenregistro'] = tokenregistro
 
-                    return render_template ("acceso/vericorreo_registro.html", mensaje1="ingrese el codigo que le enviamos por correo")
+                    return render_template ("acceso/vericorreo_registro.html", mensaje1="Ingrese el código que le enviamos por correo")
                         
             except pymysql.Error as err:
                 print(f"Error en la base de datos: {err}")
@@ -240,7 +289,7 @@ def vericorreo_registro():
         codigo = request.form.get('codigo')
         
         if not (str(codigo) == str(codigoveri)):
-            return render_template("vericorreo_registro.html", mensaje1= "no se porque no jala este pedo")
+            return render_template("acceso/vericorreo_registro.html", mensaje1= "Los códigos de verificación no coinciden")
 
         try:
             payload = jwt.decode(tokenregistro, os.getenv("PASSWORD2"), algorithms=['HS256'])
@@ -256,11 +305,11 @@ def vericorreo_registro():
                 cbd.cursor.execute("INSERT INTO perfil (rol,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES ('usuario', %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
 
-                return render_template("acceso/iniciar_sesion.html", mensaje1 = "registro exitoso",form_data={})
+                return render_template("acceso/iniciar_sesion.html", mensaje1 = "Registro exitoso",form_data={})
                 
             except pymysql.Error as er:
                 print(er)
-                return render_template("acceso/vericorreo_registro.html", mensaje1 = "no se pudieron insertar los valores del registro")
+                return render_template("acceso/vericorreo_registro.html", mensaje1 = "No se pudieron insertar los valores del registro")
 
         except jwt.InvalidTokenError:
             print("Token inválido.")
@@ -291,18 +340,20 @@ def iniciar_sesion():
             
             errores = {}
 
-            if not correo or not nombre_usuario or not contraseña:
+            if correo.strip()=="" or nombre_usuario.strip()=="" or contraseña.strip()=="":
                 errores['mensaje1'] = "Todos los campos son obligatorios"
+                errores['num_fieldset']=0
                 print("entro aca")
-                return render_template("acceso/iniciar_sesion.html")   
+                return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
 
             try:
                 cbd.cursor.execute("SELECT id_usuario, rol, nombre_usuario, correo, telefono, contraseña_encript, cuenta_activa FROM perfil WHERE nombre_usuario = %s AND correo = %s", (nombre_usuario, correo))
                 perfil_exist = cbd.cursor.fetchone()
 
                 if perfil_exist is None:
-                    errores ["mensaje2"] = "El usuario no existe."
-                    return render_template("acceso/iniciar_sesion.html",form_data={})
+                    errores ["mensaje1"] = "El usuario no existe."
+                    errores['num_fieldset']=0
+                    return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                 
                 id_usuario = perfil_exist[0]
                 rol = perfil_exist[1]
@@ -342,7 +393,7 @@ def iniciar_sesion():
 
                             try:
                                 asunto = "Correo de Verificación"
-                                body = (f"Hola {nombre_usuario}, tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                body = (f"Hola, {nombre_usuario}. Tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
                                                                                 
                                 em = EmailMessage()
                                 em["From"] = remitente
@@ -367,6 +418,7 @@ def iniciar_sesion():
                         else:
                             print("Contraseña incorrecta")
                             errores["mensaje3"] = "Contraseña incorrecta"
+                            errores['num_fieldset']=2
                             return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                         
                     except Exception as err:
@@ -448,7 +500,7 @@ def cerrarsesion():
 
 
 @app.route ('/peticiones', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def archivo():
 
     if request.method == "POST":
@@ -515,7 +567,7 @@ def archivo():
     return render_template ("biblioteca/peticiones.html")
 
 @app.route('/inicio_biblioteca')
-@login_required
+#@login_required
 def inicio_biblioteca():
     cbd.cursor.execute("select * from categoria order by id_categoria asc;")
     categorias=cbd.cursor.fetchall()
@@ -558,6 +610,10 @@ def separarSubCategorias(tupla):
     #(id,'martin','desc')
     return nuevoOrden
 
+#/////////////////////////////////////////////////////////////////////////
+#                         A D M I N I S T R A D O R
+#///////////////////////////////////////////////////////////////////////////
+
 @app.route('/verarchivo/<int:idpeticion>')
 @admin_required
 def verarchivo(idpeticion):
@@ -588,7 +644,7 @@ def generar_codigo_unico(length):
         for _ in range(length):
             codigo += random.choice(ascii_uppercase)
         
-        if codigo not in salas:
+        if codigo not in rooms:
             break
     
     return codigo
@@ -609,75 +665,108 @@ def foro():
         if unirse != False and not codigo:
             return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo, nombre = nombre)
     
-        sala = codigo
+        room = codigo
         
         if crear != False:
-            sala = generar_codigo_unico(4)
-            salas[sala] = {"miembros": 0, "mensajes": []}
+            room = generar_codigo_unico(4)
+            rooms[room] = {"miembros": 0, "mensajes": []}
         
-        elif codigo not in salas:
+        elif codigo not in rooms:
             return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo, nombre=nombre)
 
-        session["sala"] = sala
+        session["room"] = room
         session["nombre"] = nombre
-        print(("sala: ", sala), ("nombre: ", nombre))
+        print(("room: ", room), ("nombre: ", nombre))
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
 
 @app.route('/sala')
 def sala():
-    sala = session.get("sala")
+    room = session.get("room")
     nombre = session.get("nombre")
-    print(("sala: ", sala), ("nombre: ", nombre))
+    print(("sala: ", room), ("nombre: ", nombre))
     
-    if sala is None or nombre is None or sala not in salas:
+    if room is None or nombre is None or room not in rooms:
         return redirect(url_for("inicio"))
         
-    return render_template("salas/sala.html", codigo=sala, mensajes=salas[sala]["mensajes"])
+    return render_template("salas/sala.html", codigo=room, mensajes=rooms[room]["mensajes"])
 
 @socketio.on("message")
-def mensaje(data):
-    sala = session.get("sala")
-    if sala not in salas:
+def message(data):
+    room = session.get("room")
+    if room not in rooms:
         return 
     
-    content = {
+    contenido = {
         "nombre": session.get("nombre"),
         "mensaje": data["data"]
     }
-    send(content, to=sala)
-    salas[sala]["mensajes"].append(content)
+    send(contenido, to=room)
+    rooms[room]["mensajes"].append(contenido)
     print(f"{session.get('nombre')} dice: {data['data']}")
 
 @socketio.on("connect")
 def conectar(auth):
-    sala = session.get("sala")
+    room = session.get("room")
     nombre = session.get("nombre")
-    if not sala or not nombre:
+    if not room or not nombre:
         return
-    if sala not in salas:
-        leave_room(sala)
+    if room not in rooms:
+        leave_room(room)
         return
     
-    join_room(sala)
-    send({"nombre": nombre, "mensaje": "has entered the room"}, to=sala)
-    salas[sala]["miembros"] += 1
-    print(f"{nombre} joined room {sala}")
+    join_room(room)
+    send({"nombre": nombre, "mensaje": "entro a la sala"}, to=room)
+    rooms[room]["miembros"] += 1
+    print(f"{nombre} Entro a la sala {room}")
 
 @socketio.on("disconnect")
 def desconectar():
-    sala = session.get("sala")
+    room = session.get("room")
     nombre = session.get("nombre")
-    leave_room(sala)
+    leave_room(room)
 
-    if sala in salas:
-        salas[sala]["miembros"] -= 1
-        if salas[sala]["miembros"] <= 0:
-            del salas[sala]
+    if room in rooms:
+        rooms[room]["miembros"] -= 1
+        if rooms[room]["miembros"] <= 0:
+            del rooms[room]
     
-    send({"name": nombre, "mensaje": "has left the room"}, to=sala)
-    print(f"{nombre} has left the room {sala}")
+    send({"name": nombre, "mensaje": "has left the room"}, to=room)
+    print(f"{nombre} has left the room {room}")
+
+
+
+
+@app.route('/convertirarchivos', methods=['GET', 'POST'])
+def convertirarchivos():
+    if request.method == "POST":
+        mime_permitidos = ['application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+        
+        archivo = request.files['file']
+        if archivo:
+            try:
+                mime = filetype.guess(archivo)
+                if mime is None or mime not in mime_permitidos:
+                    return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Sólo documentos Office")
+                
+            except Exception as err:
+                return render_template ("biblioteca/convertirarchivos.html", mensaje1 = f"Sólo documentos Office")
+            
+        else:
+            return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Suba un archivo para su conversión") 
+
+        rutaarchivo = os.path.join('/tmp/', archivo.filename)
+        archivo.save(rutaarchivo)
+
+        rutapdf = rutaarchivo.rsplit('.', 1)[0] + ".pdf"
+        subprocess.run(['unoconv', '-f', 'pdf', rutaarchivo])
+        #os.remove(rutaarchivo)
+
+        return send_file(rutapdf, as_attachment=True)      
+
+    return render_template("biblioteca/convertirarchivos.html")
 
 
 @app.route('/crudusuariosadmin')
@@ -779,43 +868,31 @@ def aceptarpeticion(idpeticion):
 
     return redirect(url_for("crudpeticionesadmin"))
 
-@app.route('/convertirarchivos', methods=['GET', 'POST'])
-def convertirarchivos():
-    if request.method == "POST":
-        mime_permitidos = ['application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
-        
-        archivo = request.files['file']
-        if archivo:
-            try:
-                mime = filetype.guess(archivo)
-                if mime is None or mime not in mime_permitidos:
-                    return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Sólo documentos Office")
-                
-            except Exception as err:
-                return render_template ("biblioteca/convertirarchivos.html", mensaje1 = f"Sólo documentos Office")
-            
-        else:
-            return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Suba un archivo para su conversión") 
-
-        rutaarchivo = os.path.join('/tmp/', archivo.filename)
-        archivo.save(rutaarchivo)
-
-        rutapdf = rutaarchivo.rsplit('.', 1)[0] + ".pdf"
-        subprocess.run(['unoconv', '-f', 'pdf', rutaarchivo])
-        #os.remove(rutaarchivo)
-
-        return send_file(rutapdf, as_attachment=True)      
-
-    return render_template("biblioteca/convertirarchivos.html")
-
 def status_401(error):
     return redirect(url_for('inicio.html'))
 
 
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+cert_path = os.path.join(current_dir,'utiles', 'server.crt')
+key_path = os.path.join(current_dir,'utiles', 'server.key')
+
+context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+context.load_cert_chain(certfile=cert_path, keyfile=key_path)
+
+ssl_context = {
+    'certfile': cert_path,
+    'keyfile' : key_path
+}
+
+server = eventlet.wrap_ssl(
+    eventlet.listen(('127.0.0.1', 5000)),
+    **ssl_context,
+    server_side=True
+)
 
 if __name__ == "__main__":
-    app.run (host='127.0.0.1', port=5000, ssl_context=('adhoc') if usar_ssl else None)
-    socketio.run(app, debug=True)
+    eventlet.wsgi.server(server, app)
+    

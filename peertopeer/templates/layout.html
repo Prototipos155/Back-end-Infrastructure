@@ -7,10 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="tituloHead">Knowledge Field</title>
   <link rel="stylesheet" href="/static/styles/style.css" />
-  <link rel="stylesheet" href="/static/styles/foro.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
     integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
-    crossorigin="anonymous"></script>
+    crossorigin="anonymous" nonce="unique_nonce_value"></script>
+  <script src="../static/js/salas.js" defer></script>
   <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
   <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
   {% if num_fieldset %}
@@ -45,7 +45,7 @@
       <li>
         <div class="dropdown">
           <button class="menu_desplegable">Biblioteca</button>
-          <div class="dropdown-content1">
+          <div class="dropdown-content">
             <a href="/peticiones">Peticiones</a>
             <a href="/inicio_biblioteca">Biblioteca</a>
             <a href="/convertirarchivos">Convertir a PDF</a>

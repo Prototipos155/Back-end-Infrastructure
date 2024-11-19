@@ -16,7 +16,7 @@ class CC():
                 self.crearProcedimientos()
 
             except pymysql.Error as err:
-                print("\n error al intentar crear las tablas " .format(err))
+                print("\n error al intentar crear las tablas o procedimientos: " .format(err))
             
         except pymysql.Error as err:
             self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp)
@@ -25,6 +25,14 @@ class CC():
             self.connection.commit()
             self.cursor.execute("USE peertopeer")
             print("\nCreacion exitosa")
+
+            try:
+                self.crearTablas()
+                self.crearProcedimientos()
+
+            except pymysql.Error as err:
+                print("\n error al intentar crear las tablas o procedimientos: " .format(err))
+
 
     def detectarPuertosXampp(rutaXampp='C:/xampp/mysql/bin/my.ini'):
         try:
@@ -121,7 +129,13 @@ class CC():
 
         except pymysql.Error as err:
             print("\n error al intentar crear los procedimientos " .format(err))
+            
+#/////////////////////////////////////////////////////////////////////////
+#                            F U N C I O N E S
+#///////////////////////////////////////////////////////////////////////////
+
     @staticmethod
+
     def crearHashParaBd(data):
         # Datos a hashear
         data = data.encode()
@@ -290,7 +304,7 @@ class CC():
             print("la funcion crearArticulo fue creada")
         except pymysql.Error as err:
             print("la funcion crearArticulo no fue creada ",err)
-       
+    
     def funcion_calificarArticulo(self):
         try:
             self.cursor.execute("""
@@ -370,6 +384,14 @@ class CC():
             print("la funcion sacarPromedio fue creada")
         except pymysql.Error as err:
             print("la funcion sacarPromedio no fue creada ",err)
+            
+#/////////////////////////////////////////////////////////////////////////
+#                           F I N   F U N C I O N E S
+#///////////////////////////////////////////////////////////////////////////  
+
+#/////////////////////////////////////////////////////////////////////////
+#                            T A B L A S
+#///////////////////////////////////////////////////////////////////////////         
 
     def tabla_perfil(self):
         try:
@@ -778,6 +800,10 @@ class CC():
     #         print("la tabla pregunta_has_respuestas creada ")
     #     except pymysql.Error as er:
     #         print("la tabla pregunta_has_respuestas no fue creada ",er)
+    
+#/////////////////////////////////////////////////////////////////////////
+#                               F I N  T A B L A S
+#///////////////////////////////////////////////////////////////////////////
 
 cx=None
 if(__name__=="__main__"):
