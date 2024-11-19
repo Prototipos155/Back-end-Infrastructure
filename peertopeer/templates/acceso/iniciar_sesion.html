@@ -21,12 +21,12 @@
                 <div class="derecha">
 
                     {% if mensaje1 %}
-                    <div class="error">{{ mensaje2 }}</div>
+                    <div class="error">{{ mensaje1 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input type="email" name="correo" id="correo" class="input"
+                        <input type="text" name="correo" id="correo" class="input"
                             value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder="Correo"
-                            required>
+                            >
                     </div>
                 </div>
             </fieldset>
@@ -46,7 +46,7 @@
                     <div class="alminp">
                         <input type="text" name="nombre_usuario" id="nombre_usuario" class="input"
                             value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}"
-                            placeholder="Nombre de Usuario" required>
+                            placeholder="Nombre de Usuario">
                     </div>
 
                 </div>
@@ -62,10 +62,10 @@
                 <div class="derecha">
 
                     {% if mensaje3 %}
-                    <div class="error">{{ mensaje2 }}</div>
+                    <div class="error">{{ mensaje3 }}</div>
                     {% endif %}
                     <div class="alminp"> <input type="password" name="contraseña" id="contraseña" class="input1"
-                            placeholder="Contraseña" required>
+                            placeholder="Contraseña">
                         <button type="button" id="togglePasswordButton" title="Mostrar" class="mostrar"></button>
                     </div>
 
