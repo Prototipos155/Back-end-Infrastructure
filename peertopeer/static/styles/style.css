@@ -176,13 +176,13 @@ nav {
   transition: translate var(--TransitionDuration) ease;
   position: relative;
   display: none;
-  width: 80%;
+  width: 70%;
   min-height: 80%;
   padding: 4%;
   border-radius: 28px;
   border: none;
   background-color: #68757a;
-
+  margin-top: 5%;
 }
 
 .fieldactive {
@@ -359,6 +359,14 @@ nav {
   padding: 2%;
   border-radius: 28px;
 
+  #seleccionar {
+    background-color: #ffffff;
+    width: 15%;
+    padding: 1%;
+    text-align: center;
+    align-items: center;
+  }
+
   .texto {
     color: #f2f2f2;
     font-size: 100%;
@@ -376,7 +384,7 @@ nav {
     text-align: center;
   }
 
-  label {
+  #labelarchivo {
     display: inline-block;
     border-radius: 3px;
     border: none;
@@ -394,10 +402,9 @@ nav {
 
   }
 
-  label:hover {
+  #labelarchivo:hover {
     color: #68757a;
     background-color: #120e11;
-    width: 31%;
   }
 
   #enviar {

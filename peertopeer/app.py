@@ -501,69 +501,32 @@ def cerrarsesion():
 
 @app.route ('/peticiones', methods=['GET', 'POST'])
 #@login_required
-def archivo():
-
-    if request.method == "POST":
-        tokenacceso = session.get('tokenacceso')
-
-        try:
-            payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
-
-            id_tupla = payload['id_usuario'],
-            nombre_usuario = payload['nombre_usuario']
-
-            id_usuario = id_tupla[0]
-
-        except jwt.InvalidTokenError:
-            return render_template("biblioteca/peticiones.html", mensaje1 = "Al parece no ha iniciado session")
-
-        TAMAÑO_MAXIMO_ARCHIVOS = 16*1024*1024
-        mime_permitidos = ['application/pdf']
-        # 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        # 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-
-        mensaje = request.form.get('mensaje')
-        link = request.form.get('link')
-        archivoblob = request.files['archivo']
-
-        if link.strip() == "" and not archivoblob:
-            return render_template ("biblioteca/peticiones.html", mensaje1 = "Debe enviar un link o archivo")
+def peticiones(): 
+    
+    tipo = request.form.get('tipo')
+    nombre = request.form.get('nombre')
+    descripcion = request.form.get('descripcion')
+    
+    if not (tipo and nombre and descripcion):
+        print("primer if no funciono")
+    
+    try:
+    
+        if tipo == "tema":
+            cbd.cursor.execute("INSERT INTO tema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
         
-        if archivoblob:
-            if len(archivoblob.read()) <= TAMAÑO_MAXIMO_ARCHIVOS :
-                try:
-                    tipoarchivo = filetype.guess(archivoblob)
-                    print(f"\n{archivoblob, tipoarchivo.mime, tipoarchivo.extension}\n")
+        elif tipo == "categoria":
+            cbd.cursor.execute("INSERT INTO categoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))
 
-                    if tipoarchivo is None or not (tipoarchivo.mime in mime_permitidos or tipoarchivo.mime.startswith('image')
-                            or tipoarchivo.mime.startswith('video')):
-                        return render_template ("biblioteca/peticiones.html", mensaje1 = "Sólo archivos PDF, imágenes y videos")
-                
-                except Exception as err:
-                    return render_template ("biblioteca/peticiones.html", mensaje1 = f"Sólo archivos PDF, imágenes y videos")
-            
-            else:
-                return render_template ("biblioteca/peticiones.html", mensaje1 = "No se permiten archivos mayores a 16MB")
+        elif tipo == "subcategoria":
+            cbd.cursor.execute("INSERT INTO subcategoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
 
-        try:
-            archivoblob.seek(0)
-            nombrearchivo = archivoblob.filename
-            archivo = archivoblob.read()
-
-            fecha = datetime.now ().date()
-            hora = datetime.now ().time()
-            print(id_usuario)
-            print(fecha)
-            print(hora)
-
-            cbd.cursor.execute("INSERT INTO peticiones (id_usuario, mensaje, archivo, nombre_archivo, link, fecha, hora) VALUES (%s, %s, %s, %s, %s, %s, %s)", (id_usuario, mensaje, archivo, nombrearchivo, link.strip(), fecha, hora))
-            cbd.connection.commit()
-
-            return render_template ("inicio.html", mensaje1 = "la peticion se envio correctamente")
-
-        except pymysql.Error as err:
-            return render_template("biblioteca/peticiones.html", mensaje1 = f"no se pudo guardar el archivo: {err}")
-
+        else:
+            print
+    
+    except Exception as err:
+        print("SU PTM NO JALO")
+ 
     return render_template ("biblioteca/peticiones.html")
 
 @app.route('/inicio_biblioteca')
@@ -695,16 +658,18 @@ def sala():
 @socketio.on("message")
 def message(data):
     room = session.get("room")
+    print(f"\n{room}")
     if room not in rooms:
         return 
     
     contenido = {
         "nombre": session.get("nombre"),
-        "mensaje": data["data"]
+        "mensaje": data["mensaje"]
     }
     send(contenido, to=room)
+    print(rooms)
     rooms[room]["mensajes"].append(contenido)
-    print(f"{session.get('nombre')} dice: {data['data']}")
+    print(f"{session.get('nombre')} dice: {data['mensaje']}")
 
 @socketio.on("connect")
 def conectar(auth):
@@ -716,10 +681,12 @@ def conectar(auth):
         leave_room(room)
         return
     
+    print(f"\nSala: {rooms}")
     join_room(room)
-    send({"nombre": nombre, "mensaje": "entro a la sala"}, to=room)
+    send({"nombre": nombre, "mensaje": "entró a la sala"}, to=room)
     rooms[room]["miembros"] += 1
-    print(f"{nombre} Entro a la sala {room}")
+    print(f"{nombre} entró a la sala {room}")
+    print(f"\nSala: {rooms}")
 
 @socketio.on("disconnect")
 def desconectar():
@@ -732,8 +699,8 @@ def desconectar():
         if rooms[room]["miembros"] <= 0:
             del rooms[room]
     
-    send({"name": nombre, "mensaje": "has left the room"}, to=room)
-    print(f"{nombre} has left the room {room}")
+    send({"nombre": nombre, "mensaje": "ha salido de la sala"}, to=room)
+    print(f"{nombre} ha salido de la sala {room}")
 
 
 
