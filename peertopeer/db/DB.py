@@ -129,259 +129,261 @@ class CC():
 
         except pymysql.Error as err:
             print("\n error al intentar crear los procedimientos " .format(err))
-
-        @staticmethod
+            
 #/////////////////////////////////////////////////////////////////////////
 #                            F U N C I O N E S
 #///////////////////////////////////////////////////////////////////////////
-        def crearHashParaBd(data):
-            # Datos a hashear
-            data = data.encode()
-            # Crear hash
-            hash_object = sha256(data)
-            hash_hex = hash_object.hexdigest()
 
-            print(f"Hash SHA-256: {hash_hex}")
-            return hash_hex
+    @staticmethod
 
-        def crearMateriaCompleta(self,nombre_Materia,descripcion):
-            subCate=self.crearHashParaBd(f"{nombre_Materia}-General")
-            tema=self.crearHashParaBd(f"{nombre_Materia}-General-General")
-            # print(f"('{nombre_Materia}',' desc ','{subCate}','{tema}')")
-            self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,subCate,tema))
+    def crearHashParaBd(data):
+        # Datos a hashear
+        data = data.encode()
+        # Crear hash
+        hash_object = sha256(data)
+        hash_hex = hash_object.hexdigest()
 
-        def funcion_CrearSoloMateria(self):
-            try:
-                self.cursor.execute("""
-                create procedure crearCategoria(
-                    in nomb varchar(100), 
-                    in descripcion varchar(150),
-                    out resultado int)
-                deterministic
-                begin
-                    etiqueta: begin
-                        if ((select id_categoria from categoria where nombre=nomb) is not null) then
-                            set resultado= -1;# ya existe la categoria/materia
-                            leave etiqueta;
-                        end if;
-                        insert into categoria(nombre,descripcion) values(nomb,descripcion); #creamos la categoria
-                        
-                        set resultado=(select id_categoria from categoria where nombre=nomb);
-                    end etiqueta;
-                end""")
-            except Exception as ex:
-                print("no se pudo crear la funcion 'CrearMateria'",ex)
-        
-        def funcion_CrearSoloSubtema(self):
-            try:
-                self.cursor.execute("""
-                create procedure crearSubCategoria(
-                    in nomb varchar(100), 
-                    in descripcion varchar(150),
-                    in id_categ int,
-                    in codigoSubcateg char(64),
-                    out resultado int)
-                deterministic
-                begin
-                    etiqueta: begin
-                        if((select codigo from subcategoria where codigo=codigoSubcateg) is not null) then 
-                            set resultado= -3; # ya existe la subcategoria
-                            leave etiqueta;
-                        end if;
-                        #se debe crear la SubCategoria
-                        insert into subcategoria(codigo,id_categoria,nombre,descripcion) values(codigoSubcateg,id_categ,nomb,descripcion);
-                        
-                        set resultado=(select id_subcategoria from subcategoria where codigo=codigoSubcateg);
-                    end etiqueta;
-                end""")
-            except Exception as ex:
-                print("no se pudo crear la funcion 'CrearSubTema'",ex)
-        
-        def funcion_CrearSoloTema(self):
-            try:
-                self.cursor.execute("""
-                create procedure crearTema(
-                    in nomb varchar(100), 
-                    in descripcion varchar(150),
-                    in idSubCateg int,
-                    in codigoTema char(64),
-                    out resultado int)
-                deterministic
-                begin
-                    etiqueta: begin
-                        if((select id_tema from tema where codigo=codigoTema)is not null) then 
-                            set resultado= -5;
-                            leave etiqueta;
-                        end if;
-                        #se debe crear el tema 'General' dentro de la subcategoria antes creada
-                        insert into tema(codigo,id_subcategoria,nombre,descripcion) values(codigoTema,idSubCateg,nomb,descripcion);
-                        set resultado=1;
-                    end etiqueta;
-                end""")
-            except Exception as ex:
-                print("no se pudo crear la funcion 'CrearTema'",ex)
+        print(f"Hash SHA-256: {hash_hex}")
+        return hash_hex
 
-        def funcion_CrearMateriaCompleta(self):
-            try:
-                self.cursor.execute("""
-                create procedure crearCategoriaCompleta (
-                    in nomb varchar(100),
-                    in descripcion varchar(150),
-                    in codigoSubcateg char(64),
-                    in codigoTema char(64),
-                    out resultado int
-                )
-                deterministic
-                begin
-                    etiqueta: begin
-                        call crearCategoria(nomb, descripcion, @idCateg);
-                        if(@idCateg=-1) then
-                            set resultado=-1; #ya existe la categoria
-                            -- signal sqlstate '45000' set message_text="error -1";
-                            leave etiqueta;
-                        end if;
-                        if (@idCateg is null) then
-                            set resultado= -2; # no se pudo hacer el registro de la Categoria
-                            leave etiqueta;
-                        end if;
-                        ######################################################################
-                        #se debe crear la SubCategoria 'General'
-                        call crearSubCategoria('General',CONCAT('Apartado general de ',nomb),@idCateg,codigoSubcateg,@idSubCateg);
-                        if(@idSubCatg =-3) then
-                            set resultado=-3; # ya existe la categoria
-                            leave etiqueta;
-                        end if;
-                        if(@idSubCateg is null) then
-                            set resultado= -4; # no se pudo hacer el registro de la subcategoria
-                            leave etiqueta;
-                        end if;
-                        ######################################################################
-                        call crearTema('General',CONCAT('Apartado general de ',nomb),@idSubCateg,codigoTema,@idTema);
-                        
-                        if(@idTema=-5) then
-                            set resultado =-5;
-                            leave etiqueta;
-                        end if;
-                        if(@idTema is null) then
-                            set resultado =-6;
-                            leave etiqueta;
-                        end if;
-                        set resultado=1;
-                    end etiqueta;
-                end""")
-                print("funcion 'CrearMateria' creada con exito")
-            except Exception as ex:
-                print("no se pudo crear la funcion 'CrearMateriaCompleta'",ex)
-        
-        def funcion_crearArticulo(self):
-            try:
-                self.cursor.execute("""
-                create procedure crearArticulo(
-                    in nombre varchar(150),
-                    in idTema int,
-                    in idAutor int,
-                    out resultado tinyint
-                )
-                deterministic
-                begin
-                    if exists(select id_tema from tema where id_tema=idTema) 
-                        and exists(select id_usuario from perfil where id_usuario=idAutor)
-                        and not exists(select id_articulo from articulo where nombre_articulo=nombre) then 
-                        
-                        insert into articulo(
-                            nombre_articulo,id_autor,id_tema,id_sala,fecha_creacion,ultima_modificacion,calificacion,num_calificaciones
-                        ) values(
-                            #modifical 'id_sala'
-                            nombre,idAutor,idTema,0,(select utc_date()),(select utc_date()),null,0
-                        );
-                        set resultado=True;
-                    else 
-                        set resultado=False;
+    def crearMateriaCompleta(self,nombre_Materia,descripcion):
+        subCate=self.crearHashParaBd(f"{nombre_Materia}-General")
+        tema=self.crearHashParaBd(f"{nombre_Materia}-General-General")
+        # print(f"('{nombre_Materia}',' desc ','{subCate}','{tema}')")
+        self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,subCate,tema))
+
+    def funcion_CrearSoloMateria(self):
+        try:
+            self.cursor.execute("""
+            create procedure crearCategoria(
+                in nomb varchar(100), 
+                in descripcion varchar(150),
+                out resultado int)
+            deterministic
+            begin
+                etiqueta: begin
+                    if ((select id_categoria from categoria where nombre=nomb) is not null) then
+                        set resultado= -1;# ya existe la categoria/materia
+                        leave etiqueta;
                     end if;
-                end""")
-                print("la funcion crearArticulo fue creada")
-            except pymysql.Error as err:
-                print("la funcion crearArticulo no fue creada ",err)
-        
-        def funcion_calificarArticulo(self):
-            try:
-                self.cursor.execute("""
-                create procedure calificarArticulo(
-                    in idArticulo int,
-                    in Calif_ingresada decimal (3,2),
-                    in idUsuario int,
-                    in Comentario varchar(100),
-                    out resultado tinyint
-                )
-                deterministic
-                begin    
-                    label :begin
-                        select 
-                            calificacion,num_calificaciones 
-                        into 
-                            @calif,@num 
-                        from articulo where id_articulo=idArticulo;
-                        
-                        -- signal sqlstate '45000' set message_text=@calif;
-                        if exists(select id_calificacion from articulo_es_calificado where id_usuario=idUsuario and id_articulo=idArticulo)then 
-                            set resultado=False;
-                            leave label;
-                        end if;
-                        
-                        if not exists(select id_usuario from perfil where id_usuario=idUsuario) 
-                            or not exists(select  @num )then 
-                            #no existe el usuario o el articulo
-                            set resultado=False;
-                            leave label ;
-                        end if;
-                        
-                        if(Calif_ingresada>5) then 
-                            set Calif_ingresada=5;
-                        end if;
-                        
-                        set @nuevaCalif:=null;
-                        
-                        if(@num=0) then 
-                            set @nuevaCalif=Calif_ingresada;
-                        else
-                            set @nuevaCalif=(select SacarPromedio(@calif, @num,Calif_ingresada));
-                        end if;
-                        -- set @txt=concat(idArticulo,id_Usuario);
-                        
-                        set @num=@num+1;
-                        
-                        -- signal sqlstate '45000' set message_text=@txt;
-                        insert into articulo_es_calificado(id_articulo,id_usuario,fecha) values(idArticulo,idUsuario,(select utc_timestamp()));
-                        update articulo set calificacion =@nuevaCalif, num_calificaciones=@num where id_articulo=idArticulo;
-                        
-                        if (comentario != "") then 
-                            insert into calificacion_tiene_comentario(comentario,id_usuario,id_calificacion ) 
-                                values(Comentario,idUsuario,(select id_calificacion from articulo_es_calificado 
-                                where id_articulo=idArticulo and id_usuario=IdUsuario));
-                        end if;
-                        set resultado=True;
-                    end label;
-                end""")
-                print("la funcion calificarArticulo fue creada")
-            except pymysql.Error as err:
-                print("la funcion calificarArticulo no fue creada ",err)
-        
-        def funcion_sacarPromedio(self):
-            try:
-                self.cursor.execute("""
-                create function sacarPromedio(cantidad double, numero_objetos int, nuevo_elemento double)
-                returns double
-                deterministic
-                begin
-                    set @resultado=((cantidad*numero_objetos)+nuevo_elemento);
-                    set numero_objetos=numero_objetos+1;
-                    #signal sqlstate '45000' set message_text=@resultado;
-                    set @resultado=(@resultado/(numero_objetos));
-                    return @resultado;
-                end""")
-                print("la funcion sacarPromedio fue creada")
-            except pymysql.Error as err:
-                print("la funcion sacarPromedio no fue creada ",err)
+                    insert into categoria(nombre,descripcion) values(nomb,descripcion); #creamos la categoria
+                    
+                    set resultado=(select id_categoria from categoria where nombre=nomb);
+                end etiqueta;
+            end""")
+        except Exception as ex:
+            print("no se pudo crear la funcion 'CrearMateria'",ex)
+    
+    def funcion_CrearSoloSubtema(self):
+        try:
+            self.cursor.execute("""
+            create procedure crearSubCategoria(
+                in nomb varchar(100), 
+                in descripcion varchar(150),
+                in id_categ int,
+                in codigoSubcateg char(64),
+                out resultado int)
+            deterministic
+            begin
+                etiqueta: begin
+                    if((select codigo from subcategoria where codigo=codigoSubcateg) is not null) then 
+                        set resultado= -3; # ya existe la subcategoria
+                        leave etiqueta;
+                    end if;
+                    #se debe crear la SubCategoria
+                    insert into subcategoria(codigo,id_categoria,nombre,descripcion) values(codigoSubcateg,id_categ,nomb,descripcion);
+                    
+                    set resultado=(select id_subcategoria from subcategoria where codigo=codigoSubcateg);
+                end etiqueta;
+            end""")
+        except Exception as ex:
+            print("no se pudo crear la funcion 'CrearSubTema'",ex)
+    
+    def funcion_CrearSoloTema(self):
+        try:
+            self.cursor.execute("""
+            create procedure crearTema(
+                in nomb varchar(100), 
+                in descripcion varchar(150),
+                in idSubCateg int,
+                in codigoTema char(64),
+                out resultado int)
+            deterministic
+            begin
+                etiqueta: begin
+                    if((select id_tema from tema where codigo=codigoTema)is not null) then 
+                        set resultado= -5;
+                        leave etiqueta;
+                    end if;
+                    #se debe crear el tema 'General' dentro de la subcategoria antes creada
+                    insert into tema(codigo,id_subcategoria,nombre,descripcion) values(codigoTema,idSubCateg,nomb,descripcion);
+                    set resultado=1;
+                end etiqueta;
+            end""")
+        except Exception as ex:
+            print("no se pudo crear la funcion 'CrearTema'",ex)
+
+    def funcion_CrearMateriaCompleta(self):
+        try:
+            self.cursor.execute("""
+            create procedure crearCategoriaCompleta (
+                in nomb varchar(100),
+                in descripcion varchar(150),
+                in codigoSubcateg char(64),
+                in codigoTema char(64),
+                out resultado int
+            )
+            deterministic
+            begin
+                etiqueta: begin
+                    call crearCategoria(nomb, descripcion, @idCateg);
+                    if(@idCateg=-1) then
+                        set resultado=-1; #ya existe la categoria
+                        -- signal sqlstate '45000' set message_text="error -1";
+                        leave etiqueta;
+                    end if;
+                    if (@idCateg is null) then
+                        set resultado= -2; # no se pudo hacer el registro de la Categoria
+                        leave etiqueta;
+                    end if;
+                    ######################################################################
+                    #se debe crear la SubCategoria 'General'
+                    call crearSubCategoria('General',CONCAT('Apartado general de ',nomb),@idCateg,codigoSubcateg,@idSubCateg);
+                    if(@idSubCatg =-3) then
+                        set resultado=-3; # ya existe la categoria
+                        leave etiqueta;
+                    end if;
+                    if(@idSubCateg is null) then
+                        set resultado= -4; # no se pudo hacer el registro de la subcategoria
+                        leave etiqueta;
+                    end if;
+                    ######################################################################
+                    call crearTema('General',CONCAT('Apartado general de ',nomb),@idSubCateg,codigoTema,@idTema);
+                    
+                    if(@idTema=-5) then
+                        set resultado =-5;
+                        leave etiqueta;
+                    end if;
+                    if(@idTema is null) then
+                        set resultado =-6;
+                        leave etiqueta;
+                    end if;
+                    set resultado=1;
+                end etiqueta;
+            end""")
+            print("funcion 'CrearMateria' creada con exito")
+        except Exception as ex:
+            print("no se pudo crear la funcion 'CrearMateriaCompleta'",ex)
+    
+    def funcion_crearArticulo(self):
+        try:
+            self.cursor.execute("""
+            create procedure crearArticulo(
+                in nombre varchar(150),
+                in idTema int,
+                in idAutor int,
+                out resultado tinyint
+            )
+            deterministic
+            begin
+                if exists(select id_tema from tema where id_tema=idTema) 
+                    and exists(select id_usuario from perfil where id_usuario=idAutor)
+                    and not exists(select id_articulo from articulo where nombre_articulo=nombre) then 
+                    
+                    insert into articulo(
+                        nombre_articulo,id_autor,id_tema,id_sala,fecha_creacion,ultima_modificacion,calificacion,num_calificaciones
+                    ) values(
+                        #modifical 'id_sala'
+                        nombre,idAutor,idTema,0,(select utc_date()),(select utc_date()),null,0
+                    );
+                    set resultado=True;
+                else 
+                    set resultado=False;
+                end if;
+            end""")
+            print("la funcion crearArticulo fue creada")
+        except pymysql.Error as err:
+            print("la funcion crearArticulo no fue creada ",err)
+    
+    def funcion_calificarArticulo(self):
+        try:
+            self.cursor.execute("""
+            create procedure calificarArticulo(
+                in idArticulo int,
+                in Calif_ingresada decimal (3,2),
+                in idUsuario int,
+                in Comentario varchar(100),
+                out resultado tinyint
+            )
+            deterministic
+            begin    
+                label :begin
+                    select 
+                        calificacion,num_calificaciones 
+                    into 
+                        @calif,@num 
+                    from articulo where id_articulo=idArticulo;
+                    
+                    -- signal sqlstate '45000' set message_text=@calif;
+                    if exists(select id_calificacion from articulo_es_calificado where id_usuario=idUsuario and id_articulo=idArticulo)then 
+                        set resultado=False;
+                        leave label;
+                    end if;
+                    
+                    if not exists(select id_usuario from perfil where id_usuario=idUsuario) 
+                        or not exists(select  @num )then 
+                        #no existe el usuario o el articulo
+                        set resultado=False;
+                        leave label ;
+                    end if;
+                    
+                    if(Calif_ingresada>5) then 
+                        set Calif_ingresada=5;
+                    end if;
+                    
+                    set @nuevaCalif:=null;
+                    
+                    if(@num=0) then 
+                        set @nuevaCalif=Calif_ingresada;
+                    else
+                        set @nuevaCalif=(select SacarPromedio(@calif, @num,Calif_ingresada));
+                    end if;
+                    -- set @txt=concat(idArticulo,id_Usuario);
+                    
+                    set @num=@num+1;
+                    
+                    -- signal sqlstate '45000' set message_text=@txt;
+                    insert into articulo_es_calificado(id_articulo,id_usuario,fecha) values(idArticulo,idUsuario,(select utc_timestamp()));
+                    update articulo set calificacion =@nuevaCalif, num_calificaciones=@num where id_articulo=idArticulo;
+                    
+                    if (comentario != "") then 
+                        insert into calificacion_tiene_comentario(comentario,id_usuario,id_calificacion ) 
+                            values(Comentario,idUsuario,(select id_calificacion from articulo_es_calificado 
+                            where id_articulo=idArticulo and id_usuario=IdUsuario));
+                    end if;
+                    set resultado=True;
+                end label;
+            end""")
+            print("la funcion calificarArticulo fue creada")
+        except pymysql.Error as err:
+            print("la funcion calificarArticulo no fue creada ",err)
+    
+    def funcion_sacarPromedio(self):
+        try:
+            self.cursor.execute("""
+            create function sacarPromedio(cantidad double, numero_objetos int, nuevo_elemento double)
+            returns double
+            deterministic
+            begin
+                set @resultado=((cantidad*numero_objetos)+nuevo_elemento);
+                set numero_objetos=numero_objetos+1;
+                #signal sqlstate '45000' set message_text=@resultado;
+                set @resultado=(@resultado/(numero_objetos));
+                return @resultado;
+            end""")
+            print("la funcion sacarPromedio fue creada")
+        except pymysql.Error as err:
+            print("la funcion sacarPromedio no fue creada ",err)
             
 #/////////////////////////////////////////////////////////////////////////
 #                           F I N   F U N C I O N E S

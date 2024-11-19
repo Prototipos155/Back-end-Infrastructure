@@ -266,6 +266,10 @@ nav {
   align-items: center;
 }
 
+.derecha .alminp:focus-within{
+  z-index: 2;
+}
+
 .derecha #enviar {
   border-radius: 3px;
   border: none;
