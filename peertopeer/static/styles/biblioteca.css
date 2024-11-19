@@ -1,12 +1,15 @@
 .biblioteca{
     display:grid;
-    grid-template-columns: 1fr 3fr;  
+    grid-template-columns:1fr 2fr;  
     flex:1;
     /* padding: 3% 0%; */
     /* overflow: hidden; */
     list-style:none;
     aside{
       border:2px solid black;
+      *{
+        list-style: none;
+      }
     }
   }
 .desplegar{
@@ -46,6 +49,24 @@ ul{
 .main-opciones{
     display: grid;
     grid-template-columns: max-content 10% auto;
+}
+.mostrar-opcion{
+    display: block;
+    .menu{
+        display: block;
+    }
+}
+.esconder-opcion{
+    display: none;
+    .main-opciones,.menu{
+        display: none;
+    }
+}
+.esconder{
+    display:none;
+}
+.mostrar-2{
+    display: block;
 }
 /* .desplegar:focus{
 ul{

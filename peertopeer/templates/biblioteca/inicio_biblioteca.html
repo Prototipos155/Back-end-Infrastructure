@@ -4,8 +4,8 @@
 <div class="biblioteca">
     <aside class="">
         <div class="buscador">
-            <input type="text" placeholder="buscar...">
-            <button>Buscar</button>
+            <input type="text" id="buscador" placeholder="buscar...">
+            <!-- <button>Buscar</button> -->
         </div>
 
         <ul class="materias">
@@ -26,7 +26,7 @@
                     </article>
                 </div>
 
-                <ul class="menu">
+                <ul class="menu menu-categoria">
                     {% if limiteSubcategorias!=countSubcate.value %}
                         {% if subcategorias[countSubcate.value].0 == categoria.0 %}
                             <!-- sale cuando dan click-->
