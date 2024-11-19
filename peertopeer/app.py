@@ -94,11 +94,10 @@ def apply_csp(response):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers['Content-Security-Policy'] = (
-        "default-src 'self'; "
-        "script-src 'self' 'nonce-unique_nonce_value';"
-        "connect-src 'self' wss://localhost:3500 http://localhost:3500; "
-        "script-src 'self' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js;"
-    )   
+    "default-src 'self'; "
+    "script-src 'self' 'nonce-unique_nonce_value' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js; "
+    "connect-src 'self' ws://127.0.0.1:5000 ws://localhost:3500;"
+    ) 
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(self), microphone=()"
@@ -454,7 +453,7 @@ def cerrarsesion():
 
 
 @app.route ('/peticiones', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def archivo():
 
     if request.method == "POST":
@@ -521,7 +520,7 @@ def archivo():
     return render_template ("biblioteca/peticiones.html")
 
 @app.route('/inicio_biblioteca')
-@login_required
+#@login_required
 def inicio_biblioteca():
     cbd.cursor.execute("select * from categoria order by id_categoria asc;")
     categorias=cbd.cursor.fetchall()
@@ -553,6 +552,10 @@ def separarSubCategorias(tupla):
     #f[0][1]
     #(id,'martin','desc')
     return nuevoOrden
+
+#/////////////////////////////////////////////////////////////////////////
+#                         A D M I N I S T R A D O R
+#///////////////////////////////////////////////////////////////////////////
 
 @app.route('/verarchivo/<int:idpeticion>')
 @admin_required
@@ -676,6 +679,39 @@ def desconectar():
     print(f"{nombre} has left the room {room}")
 
 
+
+
+@app.route('/convertirarchivos', methods=['GET', 'POST'])
+def convertirarchivos():
+    if request.method == "POST":
+        mime_permitidos = ['application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+        
+        archivo = request.files['file']
+        if archivo:
+            try:
+                mime = filetype.guess(archivo)
+                if mime is None or mime not in mime_permitidos:
+                    return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Sólo documentos Office")
+                
+            except Exception as err:
+                return render_template ("biblioteca/convertirarchivos.html", mensaje1 = f"Sólo documentos Office")
+            
+        else:
+            return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Suba un archivo para su conversión") 
+
+        rutaarchivo = os.path.join('/tmp/', archivo.filename)
+        archivo.save(rutaarchivo)
+
+        rutapdf = rutaarchivo.rsplit('.', 1)[0] + ".pdf"
+        subprocess.run(['unoconv', '-f', 'pdf', rutaarchivo])
+        #os.remove(rutaarchivo)
+
+        return send_file(rutapdf, as_attachment=True)      
+
+    return render_template("biblioteca/convertirarchivos.html")
+
+
 @app.route('/crudusuariosadmin')
 @login_required
 @admin_required
@@ -774,36 +810,6 @@ def aceptarpeticion(idpeticion):
         print(f"Error al mover la petición de la tabla: {err}")
 
     return redirect(url_for("crudpeticionesadmin"))
-
-@app.route('/convertirarchivos', methods=['GET', 'POST'])
-def convertirarchivos():
-    if request.method == "POST":
-        mime_permitidos = ['application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
-        
-        archivo = request.files['file']
-        if archivo:
-            try:
-                mime = filetype.guess(archivo)
-                if mime is None or mime not in mime_permitidos:
-                    return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Sólo documentos Office")
-                
-            except Exception as err:
-                return render_template ("biblioteca/convertirarchivos.html", mensaje1 = f"Sólo documentos Office")
-            
-        else:
-            return render_template("biblioteca/convertirarchivos.html", mensaje1 = "Suba un archivo para su conversión") 
-
-        rutaarchivo = os.path.join('/tmp/', archivo.filename)
-        archivo.save(rutaarchivo)
-
-        rutapdf = rutaarchivo.rsplit('.', 1)[0] + ".pdf"
-        subprocess.run(['unoconv', '-f', 'pdf', rutaarchivo])
-        #os.remove(rutaarchivo)
-
-        return send_file(rutapdf, as_attachment=True)      
-
-    return render_template("biblioteca/convertirarchivos.html")
 
 def status_401(error):
     return redirect(url_for('inicio.html'))

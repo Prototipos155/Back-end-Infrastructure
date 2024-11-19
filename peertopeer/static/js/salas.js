@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     crearMensaje("Tu", mensaje);
     mensajeInput.value = "";
   }
-  const btnEnviar = document.getElementById("enviar-btn");
+  const btnEnviar = document.getElementById(".btnEnviar");
 
   if (!btnEnviar){
     console.error("El boton Enviar no se encontro en el DOM")
