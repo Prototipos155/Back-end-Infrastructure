@@ -3,21 +3,28 @@
 
 <div class="mensaje-cuadro">
   <h2>Chat Sala: {{codigo}}</h2>
-  <div class="mensajes" id="mensajes"></div>
+  <div class="mensajes" id="mensajes">
+    {% for mnsj in mensajes %}
+    <div class="text">
+      <span><strong>{{mnsj['nombre']}}</strong>: {{mnsj['mensaje']}}</span>
+    </div>
+    {% endfor %}
+  </div>
   <div class="inputs">
     <input type="text" placeholder="Mensaje" name="mensaje" id="mensaje" />
-    <button type="button" name="enviar" class="btnEnviar">
+    <button type="button" name="enviar" id="btnEnviar" class="btnEnviar">
       Enviar
     </button>
   </div>
 </div>
-{% for mnsj in mensajes %}
 
-<div id="mensajes-container"
- data-nombre="{{mnsj.nombre}}" 
- data-mensaje="{{mnsj.mensaje}}">
-</div>
+<!--div id="mensajes-container"
 
-{% endfor %}
+ data-nombre="" 
+ data-mensaje=""
+ 
+ >
+</div-->
+
 
 {% endblock %}

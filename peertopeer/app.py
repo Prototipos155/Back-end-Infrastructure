@@ -658,16 +658,18 @@ def sala():
 @socketio.on("message")
 def message(data):
     room = session.get("room")
+    print(f"\n{room}")
     if room not in rooms:
         return 
     
     contenido = {
         "nombre": session.get("nombre"),
-        "mensaje": data["data"]
+        "mensaje": data["mensaje"]
     }
     send(contenido, to=room)
+    print(rooms)
     rooms[room]["mensajes"].append(contenido)
-    print(f"{session.get('nombre')} dice: {data['data']}")
+    print(f"{session.get('nombre')} dice: {data['mensaje']}")
 
 @socketio.on("connect")
 def conectar(auth):
@@ -679,10 +681,12 @@ def conectar(auth):
         leave_room(room)
         return
     
+    print(f"\nSala: {rooms}")
     join_room(room)
-    send({"nombre": nombre, "mensaje": "entro a la sala"}, to=room)
+    send({"nombre": nombre, "mensaje": "entró a la sala"}, to=room)
     rooms[room]["miembros"] += 1
-    print(f"{nombre} Entro a la sala {room}")
+    print(f"{nombre} entró a la sala {room}")
+    print(f"\nSala: {rooms}")
 
 @socketio.on("disconnect")
 def desconectar():
@@ -695,8 +699,8 @@ def desconectar():
         if rooms[room]["miembros"] <= 0:
             del rooms[room]
     
-    send({"name": nombre, "mensaje": "has left the room"}, to=room)
-    print(f"{nombre} has left the room {room}")
+    send({"nombre": nombre, "mensaje": "ha salido de la sala"}, to=room)
+    print(f"{nombre} ha salido de la sala {room}")
 
 
 
