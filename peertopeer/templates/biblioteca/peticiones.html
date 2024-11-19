@@ -6,14 +6,22 @@
 
     <h1>Peticiones</h1>
 
-    <div class="texto">Comentanos, que quisiera que agregaramos (o puedes especificar rasgos del archivo que
-        subes aqui) :</div>
+    <div id="seleccionar">
+        <label for="Tipo">¿Que desea crear?:</label>
+        <select id="" name="tipo">
+            <option value=""></option>
+            <option value="tema">Materia</option>
+            <option value="categoria">Categoria</option>
+            <option value="subcategoria">Subcategoria</option>
+        </select>
+    </div>
 
-    <input type="text" name="mensaje" class="input" placeholder="Mensaje...">
+    <input type="text" name="nombre" class="input" placeholder="Nombre...">
+    <input type="text" name="descripcion" class="input" placeholder="Descripcion">
 
     <div class="texto">Ingrese su archivo para enriquecer nuestra biblioteca:</div>
 
-    <label> Seleccionar archivo<input type="file" name="archivo" id="subir_archivo"
+    <label id="labelarchivo"> Seleccionar archivo<input type="file" name="archivo" id="subir_archivo"
             class="archivo"></label>
     <button type="submit" id="enviar">Enviar</button>
 
