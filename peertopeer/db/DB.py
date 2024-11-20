@@ -100,8 +100,8 @@ class CC():
             self.tabla_perfil()
             self.tabla_buzon_quejas()
             self.tabla_categoria()
-            self.tabla_subcategoria()
             self.tabla_tema()
+            self.tabla_subtema()
             self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
@@ -118,8 +118,8 @@ class CC():
         try:
             print("empezo la creacion de procedimientos")
             self.funcion_CrearSoloMateria()
-            self.funcion_CrearSoloSubtema()
             self.funcion_CrearSoloTema()
+            self.funcion_CrearSoloSubtema()
             self.funcion_CrearMateriaCompleta()
 
             self.funcion_sacarPromedio()
@@ -147,10 +147,10 @@ class CC():
         return hash_hex
 
     def crearMateriaCompleta(self,nombre_Materia,descripcion):
-        subCate=self.crearHashParaBd(f"{nombre_Materia}-General")
-        tema=self.crearHashParaBd(f"{nombre_Materia}-General-General")
-        # print(f"('{nombre_Materia}',' desc ','{subCate}','{tema}')")
-        self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,subCate,tema))
+        tema=self.crearHashParaBd(f"{nombre_Materia}-General")
+        subtema=self.crearHashParaBd(f"{nombre_Materia}-General-General")
+        # print(f"('{nombre_Materia}',' desc ','{tema}','{subtema}')")
+        self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,tema,subtema))
 
     def funcion_CrearSoloMateria(self):
         try:
@@ -172,56 +172,56 @@ class CC():
                 end etiqueta;
             end""")
         except Exception as ex:
-            print("no se pudo crear la funcion 'CrearMateria'",ex)
-    
-    def funcion_CrearSoloSubtema(self):
-        try:
-            self.cursor.execute("""
-            create procedure crearSubCategoria(
-                in nomb varchar(100), 
-                in descripcion varchar(150),
-                in id_categ int,
-                in codigoSubcateg char(64),
-                out resultado int)
-            deterministic
-            begin
-                etiqueta: begin
-                    if((select codigo from subcategoria where codigo=codigoSubcateg) is not null) then 
-                        set resultado= -3; # ya existe la subcategoria
-                        leave etiqueta;
-                    end if;
-                    #se debe crear la SubCategoria
-                    insert into subcategoria(codigo,id_categoria,nombre,descripcion) values(codigoSubcateg,id_categ,nomb,descripcion);
-                    
-                    set resultado=(select id_subcategoria from subcategoria where codigo=codigoSubcateg);
-                end etiqueta;
-            end""")
-        except Exception as ex:
-            print("no se pudo crear la funcion 'CrearSubTema'",ex)
+            print("no se pudo crear el procedimiento 'CrearCategoria'",ex)
     
     def funcion_CrearSoloTema(self):
         try:
             self.cursor.execute("""
-            create procedure crearTema(
+            create procedure creartema(
                 in nomb varchar(100), 
                 in descripcion varchar(150),
-                in idSubCateg int,
-                in codigoTema char(64),
+                in id_categ int,
+                in codigotema char(64),
                 out resultado int)
             deterministic
             begin
                 etiqueta: begin
-                    if((select id_tema from tema where codigo=codigoTema)is not null) then 
+                    if((select codigo from tema where codigo=codigotema) is not null) then 
+                        set resultado= -3; # ya existe la tema
+                        leave etiqueta;
+                    end if;
+                    #se debe crear la tema
+                    insert into tema(codigo,id_categoria,nombre,descripcion) values(codigotema,id_categ,nomb,descripcion);
+                    
+                    set resultado=(select id_tema from tema where codigo=codigotema);
+                end etiqueta;
+            end""")
+        except Exception as ex:
+            print("no se pudo crear la funcion 'creartema'/",ex)
+    
+    def funcion_CrearSoloSubtema(self):
+        try:
+            self.cursor.execute("""
+            create procedure crearsubtema(
+                in nomb varchar(100), 
+                in descripcion varchar(150),
+                in idtema int,
+                in codigosubtema char(64),
+                out resultado int)
+            deterministic
+            begin
+                etiqueta: begin
+                    if((select id_subtema from subtema where codigo=codigosubtema)is not null) then 
                         set resultado= -5;
                         leave etiqueta;
                     end if;
-                    #se debe crear el tema 'General' dentro de la subcategoria antes creada
-                    insert into tema(codigo,id_subcategoria,nombre,descripcion) values(codigoTema,idSubCateg,nomb,descripcion);
+                    #se debe crear el subtema 'General' dentro de la tema antes creada
+                    insert into subtema(codigo,id_tema,nombre,descripcion) values(codigosubtema,idtema,nomb,descripcion);
                     set resultado=1;
                 end etiqueta;
             end""")
         except Exception as ex:
-            print("no se pudo crear la funcion 'CrearTema'",ex)
+            print("no se pudo crear la funcion 'Crearsubtema'",ex)
 
     def funcion_CrearMateriaCompleta(self):
         try:
@@ -229,8 +229,8 @@ class CC():
             create procedure crearCategoriaCompleta (
                 in nomb varchar(100),
                 in descripcion varchar(150),
-                in codigoSubcateg char(64),
-                in codigoTema char(64),
+                in codigotema char(64),
+                in codigosubtema char(64),
                 out resultado int
             )
             deterministic
@@ -247,24 +247,24 @@ class CC():
                         leave etiqueta;
                     end if;
                     ######################################################################
-                    #se debe crear la SubCategoria 'General'
-                    call crearSubCategoria('General',CONCAT('Apartado general de ',nomb),@idCateg,codigoSubcateg,@idSubCateg);
-                    if(@idSubCatg =-3) then
+                    #se debe crear la tema 'General'
+                    call creartema('General',CONCAT('Apartado general de ',nomb),@idCateg,codigotema,@idtema);
+                    if(@idtema =-3) then
                         set resultado=-3; # ya existe la categoria
                         leave etiqueta;
                     end if;
-                    if(@idSubCateg is null) then
-                        set resultado= -4; # no se pudo hacer el registro de la subcategoria
+                    if(@idtema is null) then
+                        set resultado= -4; # no se pudo hacer el registro de la tema
                         leave etiqueta;
                     end if;
                     ######################################################################
-                    call crearTema('General',CONCAT('Apartado general de ',nomb),@idSubCateg,codigoTema,@idTema);
+                    call crearsubtema('General',CONCAT('Apartado general de ',nomb),@idtema,codigosubtema,@idsubtema);
                     
-                    if(@idTema=-5) then
+                    if(@idsubtema=-5) then
                         set resultado =-5;
                         leave etiqueta;
                     end if;
-                    if(@idTema is null) then
+                    if(@idsubtema is null) then
                         set resultado =-6;
                         leave etiqueta;
                     end if;
@@ -274,27 +274,27 @@ class CC():
             print("funcion 'CrearMateria' creada con exito")
         except Exception as ex:
             print("no se pudo crear la funcion 'CrearMateriaCompleta'",ex)
-    
+
     def funcion_crearArticulo(self):
         try:
             self.cursor.execute("""
             create procedure crearArticulo(
                 in nombre varchar(150),
-                in idTema int,
+                in idsubtema int,
                 in idAutor int,
                 out resultado tinyint
             )
             deterministic
             begin
-                if exists(select id_tema from tema where id_tema=idTema) 
+                if exists(select id_subtema from subtema where id_subtema=idsubtema) 
                     and exists(select id_usuario from perfil where id_usuario=idAutor)
                     and not exists(select id_articulo from articulo where nombre_articulo=nombre) then 
                     
                     insert into articulo(
-                        nombre_articulo,id_autor,id_tema,id_sala,fecha_creacion,ultima_modificacion,calificacion,num_calificaciones
+                        nombre_articulo,id_autor,id_subtema,id_sala,fecha_creacion,ultima_modificacion,calificacion,num_calificaciones
                     ) values(
                         #modifical 'id_sala'
-                        nombre,idAutor,idTema,0,(select utc_date()),(select utc_date()),null,0
+                        nombre,idAutor,idsubtema,0,(select utc_date()),(select utc_date()),null,0
                     );
                     set resultado=True;
                 else 
@@ -447,45 +447,45 @@ class CC():
         except pymysql.Error as err:
             print("la tabla categoria no fue creada ",err)
 
-    def tabla_subcategoria(self):
+    def tabla_tema(self):
         try:
             self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS subcategoria (
-            id_subcategoria INT AUTO_INCREMENT NOT NULL,
+            CREATE TABLE IF NOT EXISTS tema (
+            id_tema INT AUTO_INCREMENT NOT NULL,
             codigo char(64) unique NOT NULL,
             id_categoria INT NOT NULL,
 
             nombre VARCHAR(100) NOT NULL,
             descripcion VARCHAR(150) NOT NULL,
                                 
-            PRIMARY KEY (id_subcategoria),
+            PRIMARY KEY (id_tema),
             FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
             );""")
             
-            print("la tabla subcategoria creada ")
+            print("la tabla tema creada ")
 
         except pymysql.Error as err:
-            print("la tabla subcategoria no fue creada ",err)
+            print("la tabla tema no fue creada ",err)
 
-    def tabla_tema(self):
+    def tabla_subtema(self):
         try:
             self.cursor.execute("""
-            create table if not exists tema(
-                id_tema int auto_increment not null,
+            create table if not exists subtema(
+                id_subtema int auto_increment not null,
                 codigo char(64) unique not null,
-                id_subcategoria int not null,
+                id_tema int not null,
                 
                 nombre VARCHAR(100) NOT NULL,
                 descripcion VARCHAR(150) NOT NULL,
                 
-                primary key(id_tema),
-                FOREIGN KEY (id_subcategoria) REFERENCES subcategoria(id_subcategoria)
+                primary key(id_subtema),
+                FOREIGN KEY (id_tema) REFERENCES tema(id_tema)
             );""")
             
-            print("la tabla subcategoria creada ")
+            print("la tabla tema creada ")
 
         except pymysql.Error as err:
-            print("la tabla subcategoria no fue creada ",err)
+            print("la tabla tema no fue creada ",err)
 
     def tabla_articulo(self):
         try:
@@ -495,7 +495,7 @@ class CC():
                 nombre_articulo varchar(150) unique not null,
                 
                 id_autor int not null,
-                id_tema int not null,
+                id_subtema int not null,
                 id_sala int,
                 
                 fecha_creacion date not null,
@@ -506,7 +506,7 @@ class CC():
                 
                 primary key(id_articulo),
                 foreign key (id_autor) references perfil(id_usuario),
-                foreign key (id_tema) references tema(id_tema)
+                foreign key (id_subtema) references subtema(id_subtema)
                 -- foreign key a la tabla sala
             );""")
             

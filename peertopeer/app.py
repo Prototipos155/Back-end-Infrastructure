@@ -535,18 +535,18 @@ def inicio_biblioteca():
     cbd.cursor.execute("select * from categoria order by id_categoria asc;")
     categorias=cbd.cursor.fetchall()
     
-    cbd.cursor.execute("select id_subcategoria,id_categoria,nombre,descripcion from subcategoria order by id_categoria asc;")
-    subcate=separarSubCategorias(cbd.cursor.fetchall())
-
-    cbd.cursor.execute("select id_tema,id_subcategoria,nombre,descripcion from tema order by id_subcategoria;")
+    cbd.cursor.execute("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc;")
     temas=separarSubCategorias(cbd.cursor.fetchall())
+
+    cbd.cursor.execute("select id_subtema,id_tema,nombre,descripcion from subtema order by id_tema;")
+    subtemas=separarSubCategorias(cbd.cursor.fetchall())
     
-    print("subcate=",subcate)
     print("temas=",temas)
-    return render_template("biblioteca/inicio_biblioteca.html",categorias=categorias,subcategorias=subcate
-        ,temas=temas,
-        limiteSubcategorias=len(subcate),
-        limiteTemas=len(temas)
+    print("subtemas=",subtemas)
+    return render_template("biblioteca/inicio_biblioteca.html",categorias=categorias,Temas=temas
+        ,Subtemas=subtemas,
+        limiteTemas=len(temas),
+        limiteSubtemas=len(subtemas)
     )
 
 def separarSubCategorias(tupla):
@@ -653,7 +653,7 @@ def sala():
     if room is None or nombre is None or room not in rooms:
         return redirect(url_for("inicio"))
         
-    return render_template("salas/sala.html", codigo=room, mensajes=rooms[room]["mensajes"])
+    return render_template("salas/sala.html", codigo=room, mensajes=rooms[room]["mensajes"],EstamosEnSalas=True)
 
 @socketio.on("message")
 def message(data):

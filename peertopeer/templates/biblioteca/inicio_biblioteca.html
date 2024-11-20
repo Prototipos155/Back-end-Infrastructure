@@ -9,8 +9,8 @@
         </div>
 
         <ul class="materias">
-            {% set countSubcate=namespace(value=0) %}
             {% set countTema=namespace(value=0) %}
+            {% set countSubTema=namespace(value=0) %}
             <!-- aqui va un for -->
             {% for categoria in categorias %}
             <li > <!--contenedor de cada materia-->
@@ -27,14 +27,14 @@
                 </div>
 
                 <ul class="menu menu-categoria">
-                    {% if limiteSubcategorias!=countSubcate.value %}
-                        {% if subcategorias[countSubcate.value].0 == categoria.0 %}
+                    {% if limiteTemas!=countTema.value %}
+                        {% if Temas[countTema.value].0 == categoria.0 %}
                             <!-- sale cuando dan click-->
-                            {% for subcategoria in subcategorias[countSubcate.value][1:] %}
+                            {% for Tema in Temas[countTema.value][1:] %}
                                 <li>
-                                    <div class="main-opciones subcategoria">
-                                        <h5 class="opciones desplegar" id="{{subcategoria.0}}" title="{{subcategoria.2}}">
-                                            {{subcategoria.1}}
+                                    <div class="main-opciones Tema">
+                                        <h5 class="opciones desplegar" id="{{Tema.0}}" title="{{Tema.2}}">
+                                            {{Tema.1}}
                                         </h5>
                                         <span class="puntos"></span>
                                         <article class="puntos-mostrar">
@@ -44,13 +44,13 @@
                                         </article>
                                     </div>  
                                     <ul class="menu">
-                                        {% if limiteTemas!=countTema.value %}
-                                            {% if(temas[countTema.value].0 == subcategoria.0) %}
-                                                {% for tema in temas[countTema.value][1:] %}
+                                        {% if limiteSubtemas!=countSubTema.value %}
+                                            {% if(Subtemas[countSubTema.value].0 == Tema.0) %}
+                                                {% for Subtema in Subtemas[countSubTema.value][1:] %}
                                                     <li>
-                                                        <div class="main-opciones tema">
-                                                            <h5 class="opciones" id="{{tema.0}}" title="{{tema.2}}">
-                                                                {{tema.1}}
+                                                        <div class="main-opciones Subtema">
+                                                            <h5 class="opciones" id="{{Subtema.0}}" title="{{Subtema.2}}">
+                                                                {{Subtema.1}}
                                                             </h5>
                                                             <span class="puntos"></span>
                                                             <article class="puntos-mostrar">
@@ -61,13 +61,13 @@
                                                         </div>
                                                     </li>
                                                 {% endfor %}
-                                                {% set countTema.value = countTema.value+1 %}
+                                                {% set countSubTema.value = countSubTema.value+1 %}
                                             {% endif %}
                                         {% endif %}
                                     </ul>
                                 </li>
                             {% endfor %}
-                            {% set countSubcate.value = countSubcate.value+1 %}
+                            {% set countTema.value = countTema.value+1 %}
                         {% endif %}
                     {% endif %}
                 </ul>

@@ -10,12 +10,12 @@
     </div>
     {% endfor %}
   </div>
-  <div class="inputs">
-    <input type="text" placeholder="Mensaje" name="mensaje" id="mensaje" />
-    <button type="button" name="enviar" id="btnEnviar" class="btnEnviar">
+  <form class="inputs" id="form-enviar">
+    <input required type="text" placeholder="Mensaje" name="mensaje" id="mensaje" />
+    <button type="submit" name="enviar" id="btnEnviar" class="btnEnviar">
       Enviar
     </button>
-  </div>
+  </form>
 </div>
 
 <!--div id="mensajes-container"

@@ -20,7 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
     crearMensaje(data.nombre, data.mensaje);
   });
 
-  function enviarMensaje() {
+  function enviarMensaje(ev){
+    ev.preventDefault();
+    if(!ev.target.checkValidity()){
+      alert("llena bien el campo de mensaje")
+      return
+    }
+
     const mensajeInput = document.getElementById("mensaje");
     const mensaje = mensajeInput.value.trim()
 
@@ -29,14 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
     //crearMensaje("Tú", mensaje);
     mensajeInput.value = "";
   }
-  const btnEnviar = document.getElementById("btnEnviar");
+  // const btnEnviar = document.getElementById("btnEnviar");
+  const btnEnviar = document.getElementById("form-enviar");
 
   if (!btnEnviar){
     console.error("El boton Enviar no se encontro en el DOM")
     return
   }
 
-  btnEnviar.addEventListener("click", enviarMensaje);
+  // btnEnviar.addEventListener("click", enviarMensaje);
+  btnEnviar.addEventListener("submit", enviarMensaje);
 });
 
 
