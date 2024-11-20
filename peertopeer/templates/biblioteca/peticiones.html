@@ -6,17 +6,27 @@
 
     <h1>Peticiones</h1>
 
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
     <div id="seleccionar">
-        <label for="Tipo">¿Que desea crear?:</label>
-        <select id="" name="tipo">
-            <option value=""></option>
-            <option value="tema">Materia</option>
-            <option value="categoria">Categoria</option>
-            <option value="subcategoria">Subcategoria</option>
+        <label for="tipo">¿Qué desea crear?:</label>
+        <select id="tipo" name="tipo">
+            <option value="">Seleccione...</option>
+            <option value="categoria">Categoría</option>
+            <option value="tema">Tema</option>
+            <option value="subtema">Subtema</option>
         </select>
     </div>
 
     <input type="text" name="nombre" class="input" placeholder="Nombre...">
+
+    <div id="categoria_tema" hidden>
+        <input type="text" name="categoria_tema" id="buscador" class="input" placeholder="Categoría">
+        <ul id="resultados"></ul>
+    </div>
+
     <input type="text" name="descripcion" class="input" placeholder="Descripcion">
 
     <div class="texto">Ingrese su archivo para enriquecer nuestra biblioteca:</div>
@@ -26,5 +36,5 @@
     <button type="submit" id="enviar">Enviar</button>
 
 </form>
-<!-- pdfs, imágenes, documentos de office, videos, txt -->
+<script type="module" src="../static/js/peticiones.js"></script>
 {% endblock %}

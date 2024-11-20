@@ -437,8 +437,10 @@ class CC():
             CREATE TABLE IF NOT EXISTS categoria (
               id_categoria INT UNIQUE AUTO_INCREMENT NOT NULL,
                                 
+              codigo char(64) unique NOT NULL,                  
               nombre VARCHAR(100) NOT NULL,
               descripcion VARCHAR(150) NOT NULL,
+
                                 
               PRIMARY KEY (id_categoria))""")
             
