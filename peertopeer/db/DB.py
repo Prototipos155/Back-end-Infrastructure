@@ -5,13 +5,15 @@ import os
 from hashlib import sha256
 
 class CC():
-    def __init__(self):
+    def __init__(self,auto_destruir=None):
         try:
             self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp, db='peertopeer')
             self.cursor = self.connection.cursor()
             print("\n Conexion exitosa")
 
             try:
+                if(auto_destruir!=None):
+                    self.auto_destruccion(auto_destruir)
                 self.crearTablas()
                 self.crearProcedimientos()
 
@@ -33,6 +35,25 @@ class CC():
             except pymysql.Error as err:
                 print("\n error al intentar crear las tablas o procedimientos: " .format(err))
 
+    def auto_destruccion(self,tablas_excepcion=()):
+        print("GOKUUUUUUUUUUUUUUUUUUUUUUUAH!")
+        adicional=""
+        for tabla in tablas_excepcion:
+            # and table_name!='perfil'
+            adicional+=f"and table_name!='{tabla}' "
+
+        try:
+            self.cursor.execute(f"select table_name from INFORMATION_SCHEMA.tables where table_schema='peertopeer' {adicional} order by create_time desc ;")
+        except Exception as ex:
+            print("Error en InformationSChema ",ex)
+        tablas_borrar=self.cursor.fetchall()
+        for tabla in tablas_borrar:
+            print(f"----drop table {tabla[0]}")
+            try:
+                self.cursor.execute(f'drop table {tabla[0]}')
+                print("se pudo borrar la tabla ",tabla[0])
+            except Exception as ex:
+                print("no se pudo borrar la tabla ",tabla[0],ex)
 
     def detectarPuertosXampp(rutaXampp='C:/xampp/mysql/bin/my.ini'):
         try:
@@ -102,6 +123,8 @@ class CC():
             self.tabla_categoria()
             self.tabla_tema()
             self.tabla_subtema()
+            self.tabla_sala()
+            self.tabla_mensaje()
             self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
@@ -484,10 +507,50 @@ class CC():
                 FOREIGN KEY (id_tema) REFERENCES tema(id_tema)
             );""")
             
-            print("la tabla tema creada ")
+            print("la tabla subtema creada ")
 
         except pymysql.Error as err:
-            print("la tabla tema no fue creada ",err)
+            print("la tabla subtema no fue creada ",err)
+
+    def tabla_sala(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sala(
+                id_sala INT UNIQUE AUTO_INCREMENT NOT NULL,
+                id_tema INT UNIQUE,
+                codigo_sala char(8) UNIQUE NOT NULL,
+                
+                PRIMARY KEY(id_sala),
+                FOREIGN KEY(id_tema) REFERENCES tema(id_tema)
+            );""")
+
+            print("la tabla sala creada ")
+
+        except pymysql.Error as err:
+            print("la tabla sala no fue creada: ",err)
+
+    def tabla_mensaje(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS mensaje(
+                id_msj INT UNIQUE AUTO_INCREMENT NOT NULL,
+                id_usuario INT NOT NULL,
+                id_sala INT NOT NULL,
+                mensaje text NOT NULL,
+                fecha date NOT NULL,
+                hora time NOT NULL,
+                id_mensajeAResponder INT,
+                
+                PRIMARY KEY(id_msj),
+                FOREIGN KEY(id_mensajeAResponder) REFERENCES mensaje(id_msj),
+                FOREIGN KEY(id_usuario) REFERENCES perfil(id_usuario),
+                FOREIGN KEY(id_sala) REFERENCES sala(id_sala)
+            );""")
+
+            print("la tabla mensaje creada ")
+
+        except pymysql.Error as err:
+            print("la tabla mensaje no fue creada: ",err)
 
     def tabla_articulo(self):
         try:
@@ -802,11 +865,12 @@ class CC():
     #         print("la tabla pregunta_has_respuestas creada ")
     #     except pymysql.Error as er:
     #         print("la tabla pregunta_has_respuestas no fue creada ",er)
-    
 #/////////////////////////////////////////////////////////////////////////
 #                               F I N  T A B L A S
 #///////////////////////////////////////////////////////////////////////////
-
 cx=None
 if(__name__=="__main__"):
+    # cx=CC(('perfil','categoria','tema','subtema'))
+    # cx=CC(('perfil'))
     cx=CC()
+    input("Eviando que sierre...")

@@ -681,8 +681,13 @@ def generar_codigo_unico(length):
 
 
 @app.route('/foro', methods=["POST", "GET"])
+@login_required
 def foro():
     session.clear()
+    #if not current_user.is_authenticated:
+        #return redirect(url_for("iniciar_sesion"))
+    id_user = current_user.id
+    nombre_usuario = current_user.nombre_usuario
     
     if request.method == "POST":
         nombre = request.form.get("nombre")
@@ -690,24 +695,30 @@ def foro():
         unirse = request.form.get("unirse", False)
         crear  = request.form.get("crear", False)
     
-        if not nombre:
-            return render_template("salas/foro.html", error = "Por favor ingrese un nombre", codigo=codigo, nombre = nombre)
+        #if not nombre:
+            #return render_template("salas/foro.html", error = "Por favor ingrese un nombre", codigo=codigo, nombre = nombre)
     
         if unirse != False and not codigo:
             return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo, nombre = nombre)
     
+        cbd.cursor.execute("SELECT codigo_sala FROM sala")
+        salas = cbd.cursor.fetchall()
+        
         room = codigo
         
         if crear != False:
-            room = generar_codigo_unico(4)
+            room = generar_codigo_unico(8)
             rooms[room] = {"miembros": 0, "mensajes": []}
+            cbd.cursor.execute("INSERT INTO sala (codigo_sala) VALUES (%s)", (room))
+            cbd.connection.commit()
         
-        elif codigo not in rooms:
+        elif codigo not in salas:
             return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo, nombre=nombre)
 
         session["room"] = room
-        session["nombre"] = nombre
-        print(("room: ", room), ("nombre: ", nombre))
+        session["id_usuario"] = id_user
+        session["nombre"] = nombre_usuario
+        print(("room: ", room), ("nombre: ", nombre_usuario))
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
@@ -715,29 +726,44 @@ def foro():
 @app.route('/sala')
 def sala():
     room = session.get("room")
+    #id_user = session.get("id_usuario")
     nombre = session.get("nombre")
     print(("sala: ", room), ("nombre: ", nombre))
     
     if room is None or nombre is None or room not in rooms:
         return redirect(url_for("inicio"))
+    
+    cbd.cursor.execute("SELECT id_sala FROM sala WHERE codigo_sala = %s", (room))
+    idsala = cbd.cursor.fetchone()
+    print(f"\nSala id: {idsala}\n")
+    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.nombre_usuario,m.id_sala,m.mensaje,m.fecha,m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
+    mensajes = cbd.cursor.fetchall
+
+    session["id_sala"] = idsala
         
-    return render_template("salas/sala.html", codigo=room, mensajes=rooms[room]["mensajes"],EstamosEnSalas=True)
+    return render_template("salas/sala.html", codigo=room, mensajes=reversed(mensajes),EstamosEnSalas=True)
 
 @socketio.on("message")
 def message(data):
     room = session.get("room")
+    id_user = session.get("id_usuario")
+    nombre = session.get("nombre")
+    idsala = session.get("id_sala")
     print(f"\n{room}")
     if room not in rooms:
         return 
     
     contenido = {
-        "nombre": session.get("nombre"),
+        "nombre": nombre,
         "mensaje": data["mensaje"]
     }
     send(contenido, to=room)
     print(rooms)
     rooms[room]["mensajes"].append(contenido)
     print(f"{session.get('nombre')} dice: {data['mensaje']}")
+
+    cbd.cursor.execute("INSERT INTO mensaje (id_usuario,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],data["fecha"],data["hora"]))
+    cbd.connection.commit()
 
 @socketio.on("connect")
 def conectar(auth):
