@@ -13,6 +13,7 @@ from db.DB import CC
 from utiles.hash import Encrypt
 
 import eventlet
+import logging
 import pymysql
 import os
 import subprocess
@@ -30,10 +31,15 @@ encriptado = Encrypt()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("PASSWORD4")
+app.secret_key = os.getenv("PASSWORD1")
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
-app.secret_key = os.getenv("PASSWORD1")
-socketio = SocketIO(app, cors_allowed_origins="*")
+
+socketio = SocketIO(app, async_mode="eventlet")
+logging.basicConfig(level=logging.DEBUG) 
+socketio = SocketIO(app, logger=True, engineio_logger=True)
+
 
 rooms = {}
 
@@ -507,6 +513,8 @@ def peticiones():
     nombre = request.form.get('nombre')
     descripcion = request.form.get('descripcion')
     
+    print(nombre, descripcion)
+    
     if not (tipo and nombre and descripcion):
         print("primer if no funciono")
     
@@ -516,13 +524,16 @@ def peticiones():
             cbd.cursor.execute("INSERT INTO tema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
         
         elif tipo == "categoria":
+            print("si se envio")
             cbd.cursor.execute("INSERT INTO categoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))
 
         elif tipo == "subcategoria":
             cbd.cursor.execute("INSERT INTO subcategoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
 
         else:
-            print
+            print ("no se pudo enviar")
+            
+        cbd.connection.commit()
     
     except Exception as err:
         print("SU PTM NO JALO")
@@ -573,9 +584,6 @@ def separarSubCategorias(tupla):
     #(id,'martin','desc')
     return nuevoOrden
 
-#/////////////////////////////////////////////////////////////////////////
-#                         A D M I N I S T R A D O R
-#///////////////////////////////////////////////////////////////////////////
 
 @app.route('/verarchivo/<int:idpeticion>')
 @admin_required
@@ -611,6 +619,7 @@ def generar_codigo_unico(length):
             break
     
     return codigo
+
 
 @app.route('/foro', methods=["POST", "GET"])
 def foro():
@@ -735,6 +744,10 @@ def convertirarchivos():
 
     return render_template("biblioteca/convertirarchivos.html")
 
+#/////////////////////////////////////////////////////////////////////////
+#                         A D M I N I S T R A D O R
+#///////////////////////////////////////////////////////////////////////////
+
 
 @app.route('/crudusuariosadmin')
 @login_required
@@ -841,25 +854,26 @@ def status_401(error):
 
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
+
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 cert_path = os.path.join(current_dir,'utiles', 'server.crt')
 key_path = os.path.join(current_dir,'utiles', 'server.key')
 
-context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certfile=cert_path, keyfile=key_path)
 
-ssl_context = {
-    'certfile': cert_path,
-    'keyfile' : key_path
-}
 
-server = eventlet.wrap_ssl(
+if __name__ == "__main__":    
+    
+    server = eventlet.wrap_ssl(
     eventlet.listen(('127.0.0.1', 5000)),
-    **ssl_context,
+    certfile = cert_path,
+    keyfile = key_path,
     server_side=True
 )
 
-if __name__ == "__main__":
+    
     eventlet.wsgi.server(server, app)
     
