@@ -6,7 +6,8 @@
   <div class="mensajes" id="mensajes">
     {% for mnsj in mensajes %}
     <div class="text">
-      <span><strong>{{mnsj['nombre']}}</strong>: {{mnsj['mensaje']}}</span>
+      <span><strong>{{mnsj[2]}}</strong>: {{mnsj[4]}}</span>
+      <span class="muted">{{mnsj[5]}} {{mnsj[6]}}</span>
     </div>
     {% endfor %}
   </div>

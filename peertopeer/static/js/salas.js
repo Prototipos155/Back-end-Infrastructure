@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mensaje = mensajeInput.value.trim()
 
     if (mensaje === "") return;
-    socketio.emit("message", { "nombre": "Tú", "mensaje": mensaje });
+    socketio.emit("message", { "nombre": "Tú", "mensaje": mensaje, "fecha":new Date().toLocaleDateString(), "hora":new Date().toLocaleTimeString()});
     //crearMensaje("Tú", mensaje);
     mensajeInput.value = "";
   }
