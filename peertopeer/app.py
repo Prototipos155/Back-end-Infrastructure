@@ -520,15 +520,15 @@ def peticiones():
     
     try:
     
-        if tipo == "tema":
-            cbd.cursor.execute("INSERT INTO tema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
+        if tipo == "subtema":
+            cbd.cursor.execute("INSERT INTO subtema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
         
         elif tipo == "categoria":
             print("si se envio")
             cbd.cursor.execute("INSERT INTO categoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))
 
-        elif tipo == "subcategoria":
-            cbd.cursor.execute("INSERT INTO subcategoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
+        elif tipo == "tema":
+            cbd.cursor.execute("INSERT INTO tema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
 
         else:
             print ("no se pudo enviar")
