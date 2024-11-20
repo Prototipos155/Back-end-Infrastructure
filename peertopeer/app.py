@@ -640,7 +640,7 @@ def foro():
         room = codigo
         
         if crear != False:
-            room = generar_codigo_unico(4)
+            room = generar_codigo_unico(8)
             rooms[room] = {"miembros": 0, "mensajes": []}
         
         elif codigo not in rooms:

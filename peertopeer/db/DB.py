@@ -102,6 +102,8 @@ class CC():
             self.tabla_categoria()
             self.tabla_tema()
             self.tabla_subtema()
+            self.tabla_sala()
+            self.tabla_mensaje()
             self.tabla_peticiones()
             self.tabla_documentos()
             self.tabla_links()
@@ -482,10 +484,50 @@ class CC():
                 FOREIGN KEY (id_tema) REFERENCES tema(id_tema)
             );""")
             
-            print("la tabla tema creada ")
+            print("la tabla subtema creada ")
 
         except pymysql.Error as err:
-            print("la tabla tema no fue creada ",err)
+            print("la tabla subtema no fue creada ",err)
+
+    def tabla_sala(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sala(
+                id_sala INT UNIQUE AUTO_INCREMENT NOT NULL,
+                id_tema INT UNIQUE NOT NULL,
+                codigo_sala char(8) UNIQUE NOT NULL,
+                
+                PRIMARY KEY(id_sala),
+                FOREIGN KEY(id_tema) REFERENCES tema(id_tema)
+            );""")
+
+            print("la tabla sala creada ")
+
+        except pymysql.Error as err:
+            print("la tabla sala no fue creada: ",err)
+
+    def tabla_mensaje(self):
+        try:
+            self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS mensaje(
+                id_msj INT UNIQUE AUTO_INCREMENT NOT NULL,
+                id_usuario INT NOT NULL,
+                id_sala INT NOT NULL,
+                mensaje text NOT NULL,
+                fecha date NOT NULL,
+                hora time NOT NULL,
+                id_mensajeAResponder INT NOT NULL,
+                
+                PRIMARY KEY(id_msj),
+                FOREIGN KEY(id_mensajeAResponder) REFERENCES mensaje(id_msj),
+                FOREIGN KEY(id_usuario) REFERENCES perfil(id_usuario),
+                FOREIGN KEY(id_sala) REFERENCES sala(id_sala)
+            );""")
+
+            print("la tabla mensaje creada ")
+
+        except pymysql.Error as err:
+            print("la tabla mensaje no fue creada: ",err)
 
     def tabla_articulo(self):
         try:
