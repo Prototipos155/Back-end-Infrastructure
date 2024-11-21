@@ -2,11 +2,6 @@
 {% block content %}
 
 <div class="container">
-
-    {% if mensaje %}
-    {{mensaje}}
-    {% endif %}
-
     <form action="/iniciar_sesion" id="form-inicio_sesi" class="form-inicio_sesi" method="post">
 
         <div class="datos">
@@ -20,9 +15,7 @@
 
                 <div class="derecha">
 
-                    {% if mensaje1 %}
-                    <div class="error">{{ mensaje1 }}</div>
-                    {% endif %}
+                    <div class="error"></div>
                     <div class="alminp">
                         <input type="text" name="correo" id="correo" class="input"
                             value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder="Correo"
@@ -40,9 +33,7 @@
 
                 <div class="derecha">
 
-                    {% if mensaje2 %}
-                    <div class="error">{{ mensaje2 }}</div>
-                    {% endif %}
+                    <div class="error"></div>
                     <div class="alminp">
                         <input type="text" name="nombre_usuario" id="nombre_usuario" class="input"
                             value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}"
@@ -61,9 +52,7 @@
 
                 <div class="derecha">
 
-                    {% if mensaje3 %}
-                    <div class="error">{{ mensaje3 }}</div>
-                    {% endif %}
+                    <div class="error"></div>
                     <div class="alminp"> <input type="password" name="contraseña" id="contraseña" class="input1"
                             placeholder="Contraseña">
                         <button type="button" id="togglePasswordButton" title="Mostrar" class="mostrar"></button>

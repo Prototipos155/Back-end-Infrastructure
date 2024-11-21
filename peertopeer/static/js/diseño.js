@@ -38,6 +38,12 @@ export function cambiarField(e=null, modo = 1,direccion=null, sigFieldSet=null,d
 
     let index = obtenerCampoActivo();
 
+    if(!fields[index].checkValidity()){
+        alert("Debes responder bien el campo")
+        window.iniciaCambio=false
+        return
+    }
+
     if (index - direccion < 0 || index - direccion > fields.length - 1) {
         alert("NO TE SALGAS DE LOS LIMITES")
         window.iniciaCambio = false
@@ -82,6 +88,8 @@ export function cambiarField(e=null, modo = 1,direccion=null, sigFieldSet=null,d
         } else {
             fields[sigFieldSet].style.translate = ""
         }
+        console.log("sig=",fields[sigFieldSet])
+        fields[sigFieldSet].querySelector("input[value=''],input").focus()
     }, parseInt(duracionAnimando))
 
 }

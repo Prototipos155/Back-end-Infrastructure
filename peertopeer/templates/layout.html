@@ -5,22 +5,34 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title id="tituloHead">Knowledge Field</title>
-  <link rel="stylesheet" href="/static/styles/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
-    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
-    crossorigin="anonymous" nonce="unique_nonce_value"></script>
-  {% if EstamosEnSalas %}
-    <script src="../static/js/salas.js" defer></script>
+  {% if mensaje1 %}
+    <meta class="metaError" content="{{mensaje1}}">
   {% endif %}
-  <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
-  <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
-  {% if num_fieldset %}
+
+  {% if mensaje %}
+    <meta class="metaError" content="{{mensaje}}">
+  {% endif %}
+  
+  {% if mensajeFieldset %}
+  <meta id="mensajeFieldset" content="{{mensajeFieldset}}">
+  {% endif %}
+
+  {% if num_fieldset != None %}
   <meta name="casilla-de-error" content="{{num_fieldset}}">
   {% endif %}
+  
+    <title id="tituloHead">Knowledge Field</title>
+    <link rel="stylesheet" href="/static/styles/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+      crossorigin="anonymous" nonce="unique_nonce_value"></script>
+    {% if EstamosEnSalas %}
+      <script src="../static/js/salas.js" defer></script>
+    {% endif %}
+    <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
+    <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
 
-</head>
-
+</head> 
 <body>
   <nav class="nav">
     <ul>
@@ -62,16 +74,18 @@
     </ul>
   </nav>
   <main>
-    {% if mensaje1 %}
-    <div class="error">{{ mensaje1 }}</div>
-    {% endif %}
     {% block content %}
 
     {% endblock %}
   </main>
 
-  {% if num_fieldset %}
+  {% if num_fieldset or mensajeFieldset%}
   <script type="module" src="../static/js/moverFieldset.js"></script>
+  {% endif %}
+
+
+  {% if mensaje1 %}
+    <script type="module" src="../static/js/alertErrores.js"></script>
   {% endif %}
 </body>
 

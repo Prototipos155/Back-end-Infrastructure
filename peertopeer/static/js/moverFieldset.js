@@ -5,6 +5,15 @@ console.log(fields)
 const casillaError = document.querySelector('meta[name="casilla-de-error"]').getAttribute('content');
 // (e=null, modo = 1,direccion=null, sigFieldSet=null
 let cmpActivo=obtenerCampoActivo()
+
+let fieldConError=fields[casillaError].querySelector(".error")
+if(fieldConError){
+    fieldConError.innerText=document.querySelector('meta[id="mensajeFieldset"]').getAttribute("content")
+    alert(fieldConError.innerText);
+    // console.log(fieldConError.innerText)
+}
+
+
 if(casillaError!=cmpActivo){
 
     let dir=(casillaError<cmpActivo)?1:-1;

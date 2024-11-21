@@ -25,6 +25,8 @@ import filetype
 import io
 import re
 
+from colorama import Fore,Back
+
 load_dotenv()
 cbd = CC()
 encriptado = Encrypt()
@@ -42,6 +44,9 @@ socketio = SocketIO(app, logger=True, engineio_logger=True)
 
 
 rooms = {}
+
+def myprint(inicio,fin,mensaje):
+    print(f"{inicio}{mensaje}{fin}")
 
 class Usuario(UserMixin):
     def __init__(self, id_usuario, rol, nombre_usuario, correo, cuenta_activa):
@@ -154,7 +159,7 @@ def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
 
     elif contraseña.strip()==""  or len(contraseña.strip())<8 or len(contraseña.strip())>30 or not re.search(contraregex, contraseña):
         valido = False
-        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial y sin espacios"
+        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial(!, #, ., -) y sin espacios"
         errores['num_fieldset']= 3
 
     return valido, errores
@@ -346,10 +351,15 @@ def iniciar_sesion():
             
             errores = {}
 
-            if correo.strip()=="" or nombre_usuario.strip()=="" or contraseña.strip()=="":
-                errores['mensaje1'] = "Todos los campos son obligatorios"
-                errores['num_fieldset']=0
-                print("entro aca")
+            indexError=-1
+            for casilla in (correo,nombre_usuario,contraseña):
+                if casilla.strip()=="":
+                    indexError+=1
+                    break
+            if indexError!=-1:
+                errores['mensajeFieldset']= "Todos los campos son obligatorios"
+                errores['num_fieldset']=indexError
+                myprint(Back.RED,Back.RESET,"entro aca")
                 return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
 
             try:
@@ -357,8 +367,9 @@ def iniciar_sesion():
                 perfil_exist = cbd.cursor.fetchone()
 
                 if perfil_exist is None:
-                    errores ["mensaje1"] = "El usuario no existe."
+                    errores ["mensajeFieldset"] = "El usuario no existe."
                     errores['num_fieldset']=0
+                    myprint(Back.RED,Back.RESET,"el usuario no existe")
                     return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                 
                 id_usuario = perfil_exist[0]
@@ -369,7 +380,7 @@ def iniciar_sesion():
                 contraseña_encript = perfil_exist[5]  
                 cuenta_activa = perfil_exist[6]
 
-                print(perfil_exist)
+                myprint(Back.RED,Back.RESET,perfil_exist)
 
                 if (nombre_usuario == nombre_usuario_exist and correo == correo_exist):
                     
@@ -423,7 +434,7 @@ def iniciar_sesion():
                         
                         else:
                             print("Contraseña incorrecta")
-                            errores["mensaje3"] = "Contraseña incorrecta"
+                            errores["mensajeFieldset"] = "Contraseña incorrecta"
                             errores['num_fieldset']=2
                             return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                         
@@ -440,8 +451,11 @@ def iniciar_sesion():
                 return render_template("acceso/iniciar_sesion.html", mensaje="Error al conectar con la base de datos.", form_data=form_data)
             
         except pymysql.Error as err:
+            myprint(Back.RED,Back.RESET,"Error en primer Try de inicioSesion")
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
+
+    # if(request.method== "POST")
     return render_template("acceso/iniciar_sesion.html", form_data={})
 
 
