@@ -510,135 +510,169 @@ def cerrarsesion():
 #@login_required
 def peticiones(): 
     
+    tipo = request.form.get('tipo')
+    nombre = request.form.get('nombre')
+    descripcion = request.form.get('descripcion')
+    id_categoria = request.form.get("listaTema")
+    id_tema = request.form.get("listaSubtema")
+    error=""
+        
+        
+    if not (tipo and nombre and descripcion):
+        error="Debe llenar los campos correctamente"
+    
+    else: 
+        try:
+        
+            if tipo == "categoria":
+
+                try:
+                
+                    if nombre:
+                        
+                        cbd.cursor.execute("SELECT nombre FROM categoria WHERE nombre = %s", (nombre,))
+                        nombre_exist = cbd.cursor.fetchone() 
+
+                        if nombre_exist and nombre_exist[0] == nombre :  
+                            error="La categoria que ingreso ya existe"
+                            #return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
+                            
+                        else:
+                            cbd.cursor.execute("SELECT MAX(codigo) FROM categoria")
+                            ultimo_codigo = cbd.cursor.fetchone()[0]  
+
+                            if ultimo_codigo is None:
+                                ultimo_codigo = 0
+                                
+                            else:
+                                ultimo_codigo = int(ultimo_codigo)
+
+                            codigo = f"{ultimo_codigo + 1}"
+                            print(f"Nuevo código generado: {codigo}")
+                            
+                            cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
+                            cbd.connection.commit()
+                            error="Su categoria fue generada."
+                            #return render_template ("biblioteca/peticiones.html", error= "Su categoria fue generada.")
+                            
+                    else:
+                        error="Debe proporcionar un nombre de categoria válido."
+                        #return render_template ("biblioteca/peticiones.html", error= "Debe proporcionar un nombre de categoria válido.")
+                
+                except Exception as err:
+                    error=f"Error al procesar la solicitud categoria: {err}"
+                    #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud categoria: {err}")
+            
+            elif tipo == "tema":
+
+                if nombre:
+                    try:
+                        cbd.cursor.execute("SELECT nombre FROM tema WHERE nombre = %s", (nombre,))
+                        nombre_exist1 = cbd.cursor.fetchone()
+
+                        if nombre_exist1 and nombre_exist1[0] == nombre:
+                            error="El tema que ingresó ya existe"
+                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
+                        else:
+                            cbd.cursor.execute("SELECT codigo FROM categoria")
+                            codigo_padre = cbd.cursor.fetchone()[0]
+
+                            cbd.cursor.execute("SELECT MAX(codigo) FROM tema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
+                            ultimo_codigo1 = cbd.cursor.fetchone()[0]
+
+                            if not id_categoria:
+                                error="Seleccione una categoria para crear un tema"
+                            else:
+
+                                if ultimo_codigo1 is None:
+                                    nuevo_sub = 1
+                                else:
+                                    nuevo_sub = int(ultimo_codigo1.split('-')[-1]) + 1
+
+                                codigo = f"{codigo_padre}-{nuevo_sub}"
+
+                                cbd.cursor.execute("INSERT INTO tema (codigo, nombre, descripcion, id_categoria) VALUES (%s, %s, %s, %s)",(codigo, nombre, descripcion, id_categoria))
+                                cbd.connection.commit()
+                                error="Tema generado correctamente"
+                            
+                    except Exception as err:
+                        error=f"Error al procesar la solicitud: {err}"
+                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
+                else:
+                    error="Debe proporcionar un nombre de tema válido."
+                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+
+            elif tipo == "subtema":
+                if nombre:
+                    try:
+                        cbd.cursor.execute("SELECT nombre FROM subtema WHERE nombre = %s", (nombre,))
+                        nombre_exist1 = cbd.cursor.fetchone()
+
+                        if nombre_exist1 and nombre_exist1[0] == nombre:
+                            error="El subtema que ingresó ya existe"
+                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
+                        else:
+                            cbd.cursor.execute("SELECT codigo FROM tema ")
+                            codigo_padre = cbd.cursor.fetchone()[0]
+
+                            cbd.cursor.execute("SELECT MAX(codigo) FROM subtema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
+                            ultimo_codigo1 = cbd.cursor.fetchone()[0]
+
+                            if ultimo_codigo1 is None:
+                                nuevo_sub1 = 1
+                            else:
+                                nuevo_sub1 = int(ultimo_codigo1.split('-')[-1]) + 1
+
+                            nuevo_codigo = f"{codigo_padre}-{nuevo_sub1}"
+
+                            if not id_tema:
+                                error = "Seleccione un tema para crear un subtema"
+                            else:
+
+                                cbd.cursor.execute("INSERT INTO subtema (codigo, nombre, descripcion, id_tema) VALUES (%s, %s, %s, %s)",(nuevo_codigo, nombre, descripcion, id_tema))
+                                cbd.connection.commit()
+                                error="Subtema creado con éxito"
+                                #return render_template("biblioteca/peticiones.html", mensaje="Categoría creada con éxito.")
+                    except Exception as err:
+                        error=f"Error al procesar la solicitud: {err}"
+                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
+                else:
+                    error="Debe proporcionar un nombre de subtema válido."
+                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+        
+
+            else:
+                print ("no se pudo enviar") 
+                error="Opción escogida incorrecta"       
+
+        except Exception as err:
+            print("SU PTM NO JALO")
+            error=f"Error no sé: {err}"
+
     cbd.cursor.execute("SELECT id_categoria, nombre FROM categoria")
     resultados = cbd.cursor.fetchall()     
 
     print("resultados: ",resultados)
 
-    list_items_html = ""
+    list_items_html_cate = ""
     for resultado in resultados:
-        id = resultado[0]
+        idc = resultado[0]
         nombre = resultado[1]
-        list_items_html += f'<li data-id="{id}">{nombre}</li>'
-    
-    tipo = request.form.get('tipo')
-    nombre = request.form.get('nombre')
-    descripcion = request.form.get('descripcion')
-        
-        
-    if not (tipo and nombre and descripcion):
-        print("primer if no funciono")
-    
-    try:
-    
-        if tipo == "categoria":
+        list_items_html_cate += f'<option value="{idc}">{nombre}</option>'
 
-            try:
-            
-                if nombre:
-                    
-                    cbd.cursor.execute("SELECT nombre FROM categoria WHERE nombre = %s", (nombre,))
-                    nombre_exist = cbd.cursor.fetchone() 
 
-                    if nombre_exist and nombre_exist[0] == nombre :  
-                        
-                        return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
-                        
-                    else:
-                        cbd.cursor.execute("SELECT MAX(codigo) FROM categoria")
-                        ultimo_codigo = cbd.cursor.fetchone()[0]  
+    cbd.cursor.execute("SELECT id_tema, nombre FROM tema")
+    resultados = cbd.cursor.fetchall()     
 
-                        if ultimo_codigo is None:
-                            ultimo_codigo = 0
-                            
-                        else:
-                            ultimo_codigo = int(ultimo_codigo)
+    print("resultados: ",resultados)
 
-                        codigo = f"{ultimo_codigo + 1}"
-                        print(f"Nuevo código generado: {codigo}")
-                        
-                        cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
-                        cbd.connection.commit()
-                        return render_template ("biblioteca/peticiones.html", error= "Su categoria fue generada.")
-                        
-                else:
-                    return render_template ("biblioteca/peticiones.html", error= "Debe proporcionar un nombre de categoria válido.")
-            
-            except Exception as err:
-                return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud categoria: {err}")
-           
-        elif tipo == "tema":
-
-            if nombre:
-                try:
-                    cbd.cursor.execute("SELECT nombre FROM tema WHERE nombre = %s", (nombre,))
-                    nombre_exist1 = cbd.cursor.fetchone()
-
-                    if nombre_exist1 and nombre_exist1[0] == nombre:
-                        return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
-                    else:
-                        cbd.cursor.execute("SELECT codigo FROM categoria")
-                        codigo_padre = cbd.cursor.fetchone()[0]
-
-                        cbd.cursor.execute("SELECT MAX(codigo) FROM tema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
-                        ultimo_codigo1 = cbd.cursor.fetchone()[0]
-
-                        if ultimo_codigo1 is None:
-                            nuevo_sub = 1
-                        else:
-                            nuevo_sub = int(ultimo_codigo1.split('-')[-1]) + 1
-
-                        codigo = f"{codigo_padre}-{nuevo_sub}"
-
-                        cbd.cursor.execute("INSERT INTO tema (codigo, nombre, descripcion, id_categoria) VALUES (%s, %s, %s, %s)",(codigo, nombre, descripcion, id_categoria))
-
-                        cbd.connection.commit()
-                        
-                except Exception as err:
-                    return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
-            else:
-                return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
-
-        elif tipo == "subtema":
-            if nombre:
-                try:
-                    cbd.cursor.execute("SELECT nombre FROM subtema WHERE nombre = %s", (nombre,))
-                    nombre_exist1 = cbd.cursor.fetchone()
-
-                    if nombre_exist1 and nombre_exist1[0] == nombre:
-                        return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
-                    else:
-                        cbd.cursor.execute("SELECT codigo FROM tema ")
-                        codigo_padre = cbd.cursor.fetchone()[0]
-
-                        cbd.cursor.execute("SELECT MAX(codigo) FROM subtema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
-                        ultimo_codigo1 = cbd.cursor.fetchone()[0]
-
-                        if ultimo_codigo1 is None:
-                            nuevo_sub1 = 1
-                        else:
-                            nuevo_sub1 = int(ultimo_codigo1.split('-')[-1]) + 1
-
-                        nuevo_codigo = f"{codigo_padre}-{nuevo_sub1}"
-
-                        cbd.cursor.execute("INSERT INTO subtema (codigo, nombre, descripcion, id_tema) VALUES (%s, %s, %s, %s)",(nuevo_codigo, nombre, descripcion, id_tema))
-
-                        cbd.connection.commit()
-
-                        return render_template("biblioteca/peticiones.html", mensaje="Categoría creada con éxito.")
-                except Exception as err:
-                    return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
-            else:
-                return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
-    
-
-        else:
-            print ("no se pudo enviar")        
-
-    except Exception as err:
-        print("SU PTM NO JALO")
+    list_items_html_tema = ""
+    for resultado in resultados:
+        idt = resultado[0]
+        nombre = resultado[1]
+        list_items_html_tema += f'<option value="{idt}">{nombre}</option>'
  
-    return render_template ("biblioteca/peticiones.html", items = list_items_html)
+    return render_template ("biblioteca/peticiones.html", items_cate = list_items_html_cate, items_tema=list_items_html_tema, error=error)
 
 @app.route('/inicio_biblioteca')
 #@login_required
