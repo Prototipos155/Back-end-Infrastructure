@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from string import ascii_uppercase
+from flask import request, jsonify
 
 from db.DB import CC
 from utiles.hash import Encrypt
@@ -526,33 +527,166 @@ def peticiones():
     tipo = request.form.get('tipo')
     nombre = request.form.get('nombre')
     descripcion = request.form.get('descripcion')
-    
-    print(nombre, descripcion)
-    
-    if not (tipo and nombre and descripcion):
-        print("primer if no funciono")
-    
-    try:
-    
-        if tipo == "subtema":
-            cbd.cursor.execute("INSERT INTO subtema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
+    id_categoria = request.form.get("listaTema")
+    id_tema = request.form.get("listaSubtema")
+    error=""
         
-        elif tipo == "categoria":
-            print("si se envio")
-            cbd.cursor.execute("INSERT INTO categoria (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))
-
-        elif tipo == "tema":
-            cbd.cursor.execute("INSERT INTO tema (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))    
-
-        else:
-            print ("no se pudo enviar")
-            
-        cbd.connection.commit()
+        
+    if not (tipo and nombre and descripcion):
+        error="Debe llenar los campos correctamente"
     
-    except Exception as err:
-        print("SU PTM NO JALO")
+    else: 
+        try:
+        
+            if tipo == "categoria":
+
+                try:
+                
+                    if nombre:
+                        
+                        cbd.cursor.execute("SELECT nombre FROM categoria WHERE nombre = %s", (nombre,))
+                        nombre_exist = cbd.cursor.fetchone() 
+
+                        if nombre_exist and nombre_exist[0] == nombre :  
+                            error="La categoria que ingreso ya existe"
+                            #return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
+                            
+                        else:
+                            cbd.cursor.execute("SELECT MAX(codigo) FROM categoria")
+                            ultimo_codigo = cbd.cursor.fetchone()[0]  
+
+                            if ultimo_codigo is None:
+                                ultimo_codigo = 0
+                                
+                            else:
+                                ultimo_codigo = int(ultimo_codigo)
+
+                            codigo = f"{ultimo_codigo + 1}"
+                            print(f"Nuevo código generado: {codigo}")
+                            
+                            cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
+                            cbd.connection.commit()
+                            error="Su categoria fue generada."
+                            #return render_template ("biblioteca/peticiones.html", error= "Su categoria fue generada.")
+                            
+                    else:
+                        error="Debe proporcionar un nombre de categoria válido."
+                        #return render_template ("biblioteca/peticiones.html", error= "Debe proporcionar un nombre de categoria válido.")
+                
+                except Exception as err:
+                    error=f"Error al procesar la solicitud categoria: {err}"
+                    #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud categoria: {err}")
+            
+            elif tipo == "tema":
+
+                if nombre:
+                    try:
+                        cbd.cursor.execute("SELECT nombre FROM tema WHERE nombre = %s", (nombre,))
+                        nombre_exist1 = cbd.cursor.fetchone()
+
+                        if nombre_exist1 and nombre_exist1[0] == nombre:
+                            error="El tema que ingresó ya existe"
+                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
+                        else:
+                            cbd.cursor.execute("SELECT codigo FROM categoria")
+                            codigo_padre = cbd.cursor.fetchone()[0]
+
+                            cbd.cursor.execute("SELECT MAX(codigo) FROM tema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
+                            ultimo_codigo1 = cbd.cursor.fetchone()[0]
+
+                            if not id_categoria:
+                                error="Seleccione una categoria para crear un tema"
+                            else:
+
+                                if ultimo_codigo1 is None:
+                                    nuevo_sub = 1
+                                else:
+                                    nuevo_sub = int(ultimo_codigo1.split('-')[-1]) + 1
+
+                                codigo = f"{codigo_padre}-{nuevo_sub}"
+
+                                cbd.cursor.execute("INSERT INTO tema (codigo, nombre, descripcion, id_categoria) VALUES (%s, %s, %s, %s)",(codigo, nombre, descripcion, id_categoria))
+                                cbd.connection.commit()
+                                error="Tema generado correctamente"
+                            
+                    except Exception as err:
+                        error=f"Error al procesar la solicitud: {err}"
+                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
+                else:
+                    error="Debe proporcionar un nombre de tema válido."
+                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+
+            elif tipo == "subtema":
+                if nombre:
+                    try:
+                        cbd.cursor.execute("SELECT nombre FROM subtema WHERE nombre = %s", (nombre,))
+                        nombre_exist1 = cbd.cursor.fetchone()
+
+                        if nombre_exist1 and nombre_exist1[0] == nombre:
+                            error="El subtema que ingresó ya existe"
+                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
+                        else:
+                            cbd.cursor.execute("SELECT codigo FROM tema ")
+                            codigo_padre = cbd.cursor.fetchone()[0]
+
+                            cbd.cursor.execute("SELECT MAX(codigo) FROM subtema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
+                            ultimo_codigo1 = cbd.cursor.fetchone()[0]
+
+                            if ultimo_codigo1 is None:
+                                nuevo_sub1 = 1
+                            else:
+                                nuevo_sub1 = int(ultimo_codigo1.split('-')[-1]) + 1
+
+                            nuevo_codigo = f"{codigo_padre}-{nuevo_sub1}"
+
+                            if not id_tema:
+                                error = "Seleccione un tema para crear un subtema"
+                            else:
+
+                                cbd.cursor.execute("INSERT INTO subtema (codigo, nombre, descripcion, id_tema) VALUES (%s, %s, %s, %s)",(nuevo_codigo, nombre, descripcion, id_tema))
+                                cbd.connection.commit()
+                                error="Subtema creado con éxito"
+                                #return render_template("biblioteca/peticiones.html", mensaje="Categoría creada con éxito.")
+                    except Exception as err:
+                        error=f"Error al procesar la solicitud: {err}"
+                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
+                else:
+                    error="Debe proporcionar un nombre de subtema válido."
+                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+        
+
+            else:
+                print ("no se pudo enviar") 
+                error="Opción escogida incorrecta"       
+
+        except Exception as err:
+            print("SU PTM NO JALO")
+            error=f"Error no sé: {err}"
+
+    cbd.cursor.execute("SELECT id_categoria, nombre FROM categoria")
+    resultados = cbd.cursor.fetchall()     
+
+    print("resultados: ",resultados)
+
+    list_items_html_cate = ""
+    for resultado in resultados:
+        idc = resultado[0]
+        nombre = resultado[1]
+        list_items_html_cate += f'<option value="{idc}">{nombre}</option>'
+
+
+    cbd.cursor.execute("SELECT id_tema, nombre FROM tema")
+    resultados = cbd.cursor.fetchall()     
+
+    print("resultados: ",resultados)
+
+    list_items_html_tema = ""
+    for resultado in resultados:
+        idt = resultado[0]
+        nombre = resultado[1]
+        list_items_html_tema += f'<option value="{idt}">{nombre}</option>'
  
-    return render_template ("biblioteca/peticiones.html")
+    return render_template ("biblioteca/peticiones.html", items_cate = list_items_html_cate, items_tema=list_items_html_tema, error=error)
 
 @app.route('/inicio_biblioteca')
 #@login_required
@@ -635,64 +769,96 @@ def generar_codigo_unico(length):
     return codigo
 
 
-@app.route('/foro', methods=["POST", "GET"])
+@app.route('/foro', methods=["GET", "POST"])
+#@login_required
 def foro():
-    session.clear()
+    print(f"\n\nUsuario autenticado? {current_user.is_authenticated}\n\n")
+
+    if not current_user.is_authenticated:
+        return current_app.login_manager.unauthorized()
+
+    id_user = current_user.id
+    nombre_usuario = current_user.nombre_usuario
     
     if request.method == "POST":
-        nombre = request.form.get("nombre")
+        #nombre = request.form.get("nombre")
         codigo = request.form.get("codigo")
         unirse = request.form.get("unirse", False)
         crear  = request.form.get("crear", False)
     
-        if not nombre:
-            return render_template("salas/foro.html", error = "Por favor ingrese un nombre", codigo=codigo, nombre = nombre)
+        #if not nombre:
+            #return render_template("salas/foro.html", error = "Por favor ingrese un nombre", codigo=codigo, nombre = nombre)
     
         if unirse != False and not codigo:
-            return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo, nombre = nombre)
+            return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo)
     
+        cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (codigo))
+        sala = cbd.cursor.fetchone()
+        
         room = codigo
         
         if crear != False:
             room = generar_codigo_unico(8)
-            rooms[room] = {"miembros": 0, "mensajes": []}
+            #rooms[room] = {"miembros": 0, "mensajes": []}
+            cbd.cursor.execute("INSERT INTO sala (codigo_sala) VALUES (%s)", (room))
+            cbd.connection.commit()
         
-        elif codigo not in rooms:
-            return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo, nombre=nombre)
+        elif not sala:
+            return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo)
 
         session["room"] = room
-        session["nombre"] = nombre
-        print(("room: ", room), ("nombre: ", nombre))
+        session["id_usuario"] = current_user.id
+        session["nombre"] = current_user.nombre_usuario
+        #print(f"\n\n'room: ', {room}, 'nombre: ', {current_user.nombre_usuario}\n\n")
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
 
 @app.route('/sala')
+# @login_required
 def sala():
     room = session.get("room")
+    cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
+    sala = cbd.cursor.fetchone()
+    #id_user = session.get("id_usuario")
     nombre = session.get("nombre")
-    print(("sala: ", room), ("nombre: ", nombre))
+    #print(("sala: ", room), ("nombre: ", nombre))
     
-    if room is None or nombre is None or room not in rooms:
+    if room is None or nombre is None or not sala:
         return redirect(url_for("inicio"))
+    
+    cbd.cursor.execute("SELECT id_sala FROM sala WHERE codigo_sala = %s", (room))
+    idsala = cbd.cursor.fetchone()
+    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.nombre_usuario,m.id_sala,m.mensaje,DATE_FORMAT(m.fecha,'%%d-%%m-%%Y'),m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
+    mensajes = cbd.cursor.fetchall()
+
+    session["id_sala"] = idsala
         
-    return render_template("salas/sala.html", codigo=room, mensajes=rooms[room]["mensajes"],EstamosEnSalas=True)
+    return render_template("salas/sala.html", codigo=room, mensajes=reversed(mensajes),EstamosEnSalas=True)
 
 @socketio.on("message")
 def message(data):
     room = session.get("room")
-    print(f"\n{room}")
-    if room not in rooms:
+    id_user = session.get("id_usuario")
+    nombre = session.get("nombre")
+    idsala = session.get("id_sala")
+    cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
+    sala = cbd.cursor.fetchone()
+    #print(f"\n{room}")
+    if not sala:
         return 
     
     contenido = {
-        "nombre": session.get("nombre"),
+        "nombre": nombre,
         "mensaje": data["mensaje"]
     }
     send(contenido, to=room)
-    print(rooms)
-    rooms[room]["mensajes"].append(contenido)
-    print(f"{session.get('nombre')} dice: {data['mensaje']}")
+    #print(rooms)
+    #rooms[room]["mensajes"].append(contenido)
+    print(f"{nombre} dice: {data['mensaje']}")
+
+    cbd.cursor.execute("INSERT INTO mensaje (id_usuario,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],datetime.strptime(data["fecha"],'%d-%m-%Y').strftime('%Y-%m-%d'),data["hora"]))
+    cbd.connection.commit()
 
 @socketio.on("connect")
 def conectar(auth):
@@ -700,16 +866,14 @@ def conectar(auth):
     nombre = session.get("nombre")
     if not room or not nombre:
         return
-    if room not in rooms:
-        leave_room(room)
-        return
+    #if room not in rooms:
+    #    leave_room(room)
+    #    return
     
-    print(f"\nSala: {rooms}")
     join_room(room)
     send({"nombre": nombre, "mensaje": "entró a la sala"}, to=room)
-    rooms[room]["miembros"] += 1
+    #rooms[room]["miembros"] += 1
     print(f"{nombre} entró a la sala {room}")
-    print(f"\nSala: {rooms}")
 
 @socketio.on("disconnect")
 def desconectar():
@@ -717,10 +881,10 @@ def desconectar():
     nombre = session.get("nombre")
     leave_room(room)
 
-    if room in rooms:
-        rooms[room]["miembros"] -= 1
-        if rooms[room]["miembros"] <= 0:
-            del rooms[room]
+    #if room in rooms:
+    #    rooms[room]["miembros"] -= 1
+        #if rooms[room]["miembros"] <= 0:
+        #    del rooms[room]
     
     send({"nombre": nombre, "mensaje": "ha salido de la sala"}, to=room)
     print(f"{nombre} ha salido de la sala {room}")

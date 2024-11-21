@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="tituloHead">Knowledge Field</title>
+  <link rel="stylesheet" href="/static/styles/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+    integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+    crossorigin="anonymous" nonce="unique_nonce_value"></script>
+  {% if EstamosEnSalas %}
+    <script src="../static/js/salas.js" defer></script>
+  {% endif %}
+  <!-- <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> -->
+  <!-- <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"> -->
+  {% if num_fieldset %}
+  <meta name="casilla-de-error" content="{{num_fieldset}}">
+  {% endif %}
+
+</head>
+
+<body>
+  <nav class="nav">
+    <ul>
+
+      <li>
+        <span class="nombre-proyecto">Knowledge Field</span>
+        </button>
+      </li>
+
+      <li>
+        <a href="/">
+          <span>Inicio</span>
+        </a>
+      </li>
+      <li><a href="/crudusuariosadmin">Crud Usuarios</a></li>
+      <li><a href="/crudpeticionesadmin">Crud Peticiones</a></li>
+      </li>
+      <!-- <li><button class="cerrarsesion"><a href="/cerrarsesion"></a></button></li> -->
+    </ul>
+  </nav>
+  <main>
+    {% if mensaje1 %}
+    <div class="error">{{ mensaje1 }}</div>
+    {% endif %}
+    {% block content %}
+
+    {% endblock %}
+  </main>
+
+  {% if num_fieldset %}
+  <script type="module" src="../static/js/moverFieldset.js"></script>
+  {% endif %}
+</body>
+
+</html>

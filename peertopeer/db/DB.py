@@ -460,8 +460,10 @@ class CC():
             CREATE TABLE IF NOT EXISTS categoria (
               id_categoria INT UNIQUE AUTO_INCREMENT NOT NULL,
                                 
+              codigo char(64) unique NOT NULL,                  
               nombre VARCHAR(100) NOT NULL,
               descripcion VARCHAR(150) NOT NULL,
+
                                 
               PRIMARY KEY (id_categoria))""")
             
@@ -515,7 +517,7 @@ class CC():
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS sala(
                 id_sala INT UNIQUE AUTO_INCREMENT NOT NULL,
-                id_tema INT UNIQUE NOT NULL,
+                id_tema INT UNIQUE,
                 codigo_sala char(8) UNIQUE NOT NULL,
                 
                 PRIMARY KEY(id_sala),
@@ -537,7 +539,7 @@ class CC():
                 mensaje text NOT NULL,
                 fecha date NOT NULL,
                 hora time NOT NULL,
-                id_mensajeAResponder INT NOT NULL,
+                id_mensajeAResponder INT,
                 
                 PRIMARY KEY(id_msj),
                 FOREIGN KEY(id_mensajeAResponder) REFERENCES mensaje(id_msj),

@@ -46,7 +46,7 @@ nav {
     flex-direction: row;
     margin: 0;
     font-size: 100%;
-    align-items: center;
+    align-items: justify;
   }
 
   li {
@@ -54,14 +54,14 @@ nav {
     text-align: center;
     align-items: center;
     font-size: 100%;
-    margin: 0% 1%; 
+    margin: 0% 1%;
     height: 100%;
     width: auto;
-    flex:auto;
+    flex: auto;
   }
 
   .menu_desplegable {
-    width: 120%;
+    width: 100%;
     height: auto;
     border: 0;
     padding: 0%;
@@ -77,7 +77,7 @@ nav {
     color: #ffffff;
     display: inline;
     position: relative;
-    width: 100%;
+    width: 70%;
   }
 
   .dropdown-content {
@@ -87,7 +87,7 @@ nav {
     display: none;
     border-radius: 7px;
     position: absolute;
-    min-width: 250%;
+    min-width: 170%;
     overflow: auto;
     background-color: #201e1a;
     color: #f2f2f2;
@@ -100,7 +100,7 @@ nav {
 
   .dropdown-content1 {
     text-align: start;
-    padding-top: 5% ;
+    padding-top: 5%;
     margin-top: 1%;
     display: none;
     border-radius: 7px;
@@ -160,114 +160,114 @@ nav {
   justify-content: center;
   flex-direction: row;
   text-align: center;
-}
-
-.datos {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  height: 57vh;
-  font-size: calc(min(3.5vw, 3.5vh));
-  --TransitionDuration: 1s;
-}
-
-.datos fieldset {
-  transition: translate var(--TransitionDuration) ease;
-  position: relative;
-  display: none;
-  width: 70%;
-  min-height: 80%;
-  padding: 4%;
-  border-radius: 28px;
-  border: none;
-  background-color: #68757a;
-  margin-top: 5%;
-}
-
-.fieldactive {
-  display: flex !important;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  flex-wrap: wrap;
-  flex: 0 0 auto;
-}
 
 
-.izquierda,
-.derecha {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #120e11;
-  text-wrap: wrap;
-  min-height: 100%;
-}
+  .datos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    height: 58vh;
+    font-size: calc(min(3.5vw, 3.5vh));
+    --TransitionDuration: 1s;
+  }
 
-.izquierda p {
-  width: 80%;
-}
+  .datos fieldset {
+    transition: translate var(--TransitionDuration) ease;
+    position: relative;
+    display: none;
+    width: 70%;
+    min-height: 80%;
+    padding: 4%;
+    border-radius: 28px;
+    border: none;
+    background-color: #68757a;
+    margin-top: 5%;
+  }
 
-.derecha input {
-  border-radius: 7px;
-  display: block;
-  border: none;
-  width: 90%;
-  height: 6vh;
-  margin: 1%;
-  padding: 1%;
-  font-size: 1em;
-  text-align: justify;
-}
+  .fieldactive {
+    display: flex !important;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+  }
 
-.derecha .input {
-  padding: 0;
-  border: none;
-  margin: 0;
-  background-color: #f2f2f2;
-  width: 100%;
-  height: 100%;
-}
 
-.derecha .input1 {
-  padding: 0;
-  border: none;
-  margin: 0;
-  background-color: #f2f2f2;
-  width: 84%;
-  height: 100%;
-}
+  .izquierda,
+  .derecha {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #120e11;
+    text-wrap: wrap;
+    min-height: 100%;
+  }
 
-.mostrar {
-  width: 15%;
-  height: 100%;
-  background-image: url(/static/fotos/iconos/esconder.png);
-  background-position: center;
-  background-size: 60%;
-  background-repeat: no-repeat;
-  border: none;
-}
+  .izquierda p {
+    width: 80%;
+  }
 
-.derecha .alminp {
-  border-radius: 7px;
-  border: none;
-  width: 100%;
-  height: auto;
-  height: 6vh;
-  margin: 1.5% 0%;
-  padding: 0%;
-  font-size: 1em;
-  text-align: justify;
-  background-color: #f2f2f2;
-  display: flex;
-  align-items: center;
-}
+  .alminp {
+    border-radius: 7px;
+    border: none;
+    width: 100%;
+    min-height: 7vh;
+    margin: 2.7% 0%;
+    padding: 0%;
+    font-size: 1em;
+    text-align: justify;
+    background-color: #f2f2f2;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
 
-.derecha .alminp:focus-within{
-  z-index: 2;
+  .alminp input {
+    border-radius: 4px;
+    outline: none;
+    display: block;
+    border: none;
+    width: 90%;
+    height: 100%;
+    margin: 1%;
+    font-size: 1em;
+    text-align: justify;
+    background-color: #f2f2f2;
+  }
+
+  .alminp label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    color: #120e11;
+    font-size: auto;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: all 0.2s ease-out;
+  }
+
+  .alminp input:focus+label,
+  .alminp input:not(:placeholder-shown)+label {
+    top: -10px;
+    left: 5px;
+    font-size: 12px;
+    color: #f2f2f2;
+  }
+
+  .mostrar {
+    width: 15%;
+    height: 4vh;
+    background-image: url(/static/fotos/iconos/esconder.png);
+    background-position: center;
+    background-size: 60%;
+    background-repeat: no-repeat;
+    border: none;
+  }
+
 }
 
 .derecha #enviar {
@@ -279,12 +279,13 @@ nav {
   color: #f2f2f2;
   background-color: #4d5459;
   cursor: pointer;
+  width: 30%;
 }
 
 .derecha #enviar:hover {
   color: #68757a;
   background-color: #120e11;
-  width: 30%;
+  width: 31%;
 }
 
 .botones {
@@ -358,13 +359,32 @@ nav {
   margin-top: 3%;
   padding: 2%;
   border-radius: 28px;
+  font-size: 110%;
 
   #seleccionar {
     background-color: #ffffff;
-    width: 15%;
+    width: 20%;
     padding: 1%;
     text-align: center;
     align-items: center;
+    margin-left: 40%;
+    margin-right: 40%;
+    border-radius: 5px;
+  }
+
+  select{
+    width: 80%;
+    padding: 3%;
+    font-size: 100%;
+    border: none;
+    border-radius: 4px;
+    margin: 3%;
+    background-color: #68757a;
+    text-align: center;
+  }
+  
+  option:hover{
+    background-color: #25221e;
   }
 
   .texto {
@@ -421,7 +441,6 @@ nav {
   #enviar:hover {
     color: #68757a;
     background-color: #120e11;
-    width: 9.5%;
   }
 }
 
@@ -480,4 +499,47 @@ nav {
   .cleanBar {
     display: none;
   }
+}
+
+.biblioteca {
+
+  aside {
+    background-color: #201e1a;
+    border: 0;
+    padding-top: 3%;
+    align-items: center;
+    padding: 2%;
+    color: #f2f2f2;
+    height: 100%;
+  }
+
+  .buscador {
+    border: 0;
+    background-color: #f2f2f2;
+    height: 12%;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  #buscador {
+    background-color: #f2f2f2;
+    height: 3vh;
+    width: 100%;
+    border-radius: 4px;
+    outline: none;
+    display: block;
+    border: none;
+    width: 90%;
+    height: 100%;
+    margin: 1%;
+    font-size: 1em;
+    text-align: justify;
+  }
+
+  .puntos-mostrar {
+    background-color: #333a3f;
+    border: none;
+    border-radius: 4px;
+  }
+
 }

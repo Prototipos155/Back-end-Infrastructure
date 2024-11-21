@@ -17,17 +17,16 @@
                     {% endif %}
                     <div class="alminp">
                         <input class="input" type="text" name="nombres" id="nombres" class="input"
-                            value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" placeholder="Nombre(s)">
-                        <label>Nombre(s)</label>
+                            value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" placeholder=" ">
+                        <label for="nombres">Nombre(s)</label>
                     </div>
                     {% if mensaje02 %}
                     <div class="error">{{ mensaje02 }}</div>
                     {% endif %}
                     <div class="alminp">
                         <input class="input" type="text" name="apellidos" id="apellidos" class="input"
-                            value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}"
-                            placeholder="Apellido(s)">
-                        <label>Apellido(s)</label>
+                            value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}" placeholder=" ">
+                        <label for="apellidos">Apellido(s)</label>
                     </div>
                 </div>
             </fieldset>
@@ -44,8 +43,8 @@
                     <div class="alminp">
                         <input class="input" type="text" name="nombre_usuario" id="nombre_usuario" class="input"
                             value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}"
-                            placeholder="Nombre de usuario">
-                        <label>Nombre de Usuario</label>
+                            placeholder=" ">
+                        <label for="nombre_usuario">Nombre de Usuario</label>
                     </div>
                 </div>
             </fieldset>
@@ -62,15 +61,15 @@
                     {% endif %}
                     <div class="alminp">
                         <input class="input" type="text" name="telefono" id="telefono" class="input"
-                            value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" placeholder="Telefono">
-                        <label>Teléfono</label>
+                            value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" placeholder=" ">
+                        <label for="telefono">Teléfono</label>
                     </div>
                     {% if mensaje3 %}
                     <div class="error">{{ mensaje3 }}</div>
                     {% endif %}
                     <div class="alminp">
                         <input class="input" type="text" name="correo" id="correo" class="input"
-                            value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder="Correo">
+                            value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder=" ">
                         <label>Correo</label>
                     </div>
                 </div>
@@ -86,9 +85,9 @@
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
                     <div class="alminp"><input type="password" name="contraseña" id="contraseña" class="input1"
-                            placeholder="Contraseña">
+                            placeholder=" ">
+                        <label for="contraseña">Contraseña</label>
                         <button type="button" id="togglePasswordButton" class="mostrar"></button>
-                        <label>Contraseña</label>
                     </div>
                 </div>
             </fieldset>
@@ -103,9 +102,9 @@
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
                     <div class="alminp"><input type="password" name="confirmcontra" id="confirmcontra" class="input1"
-                            placeholder="Confirmar contraseña">
+                            placeholder=" ">
+                        <label for="contraseña">Confirmar Contraseña</label>
                         <button type="button" id="togglePasswordButton" class="mostrar"></button>
-                    <label>Confirmar Contraseña</label>
                     </div>
                     <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
                 </div>
