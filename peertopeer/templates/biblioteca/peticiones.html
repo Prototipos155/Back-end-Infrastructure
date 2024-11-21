@@ -20,12 +20,21 @@
         </select>
     </div>
 
-    <input type="text" name="nombre" class="input" placeholder="Nombre...">
-
     <div id="categoria_tema" hidden>
         <input type="text" name="categoria_tema" id="buscador" class="input" placeholder="Categoría">
-        <ul id="resultados"></ul>
+        <ul id="lista">
+            {{ items|safe }}
+        </ul>
     </div>
+
+    <div id="categoria_subtema" hidden>
+        <input type="text" name="categoria_tema" id="buscador" class="input" placeholder="Categoría">
+        <ul id="lista">
+            {{ items|safe }}
+        </ul>
+    </div>
+
+    <input type="text" name="nombre" class="input" placeholder="Nombre...">
 
     <input type="text" name="descripcion" class="input" placeholder="Descripcion">
 
