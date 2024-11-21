@@ -722,7 +722,7 @@ def generar_codigo_unico(length):
 
 
 @app.route('/foro', methods=["GET", "POST"])
-@login_required
+#@login_required
 def foro():
     print(f"\n\nUsuario autenticado? {current_user.is_authenticated}\n\n")
 
@@ -767,7 +767,7 @@ def foro():
     return render_template("salas/foro.html")
 
 @app.route('/sala')
-@login_required
+# @login_required
 def sala():
     room = session.get("room")
     cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))

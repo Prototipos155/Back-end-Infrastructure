@@ -20,19 +20,19 @@ export let fields = document.querySelectorAll(".datos fieldset")
 window.iniciaCambio = false
 
 
-export function cambiarField(e=null, modo = 1,direccion=null, sigFieldSet=null,duracionAnimando=null) {
-    direccion = (direccion==null)?e.target.direccion:direccion
+export function cambiarField(e = null, modo = 1, direccion = null, sigFieldSet = null, duracionAnimando = null) {
+    direccion = (direccion == null) ? e.target.direccion : direccion
     //modo:
-        // forma de mover el fieldset( animacion)
+    // forma de mover el fieldset( animacion)
     //direccion:
-        //-1=atras       fieldset----->
-        //1=siguiente   <-----fieldset    
+    //-1=atras       fieldset----->
+    //1=siguiente   <-----fieldset    
     if (window.iniciaCambio == true) {
         // alert("ya hay un proceso en curso")
         console.log("ya hay otro proceso en curso")
         return
     }
-    duracionAnimando=(duracionAnimando==null)?e.target.duracion:duracionAnimando;
+    duracionAnimando = (duracionAnimando == null) ? e.target.duracion : duracionAnimando;
     console.log(duracionAnimando)
     window.iniciaCambio = true
 
@@ -46,7 +46,7 @@ export function cambiarField(e=null, modo = 1,direccion=null, sigFieldSet=null,d
         // }
         return
     }
-   sigFieldSet=(sigFieldSet==null)?index - direccion: sigFieldSet;
+    sigFieldSet = (sigFieldSet == null) ? index - direccion : sigFieldSet;
 
     console.log("index=", index)
     if (direccion == 1 && modo == 1) {
@@ -114,25 +114,30 @@ export function obtenerCampoActivo() {
 //MOSTRAR CONTENIDO DE CAMPO CONTRASEÑA
 document.querySelectorAll('.mostrar').forEach(button => {
     button.addEventListener('click', function (e) {
-        const input = this.previousElementSibling;
-        console.error(e.target.parentNode.children[2])
+        e.preventDefault();
+
+        const input = this.parentNode.querySelector('input');
+        const icon = e.target.parentNode.querySelector('img');
+
         if (input.type === "password") {
             input.type = "text";
-            e.target.style.backgroundImage=`url(/static/fotos/iconos/ver.png)`
-
-            e.target.title="Ocultar"
-            // e.target.parentNode.children[2].src="../static/fotos/iconos/ver.png";
-            // this.textContent = "../static/fotos/iconos/ver.png";
-            
+            console.log("ver")
+            this.style.backgroundImage = `url(/static/fotos/iconos/ver.png)`;
+            this.title = "Ocultar";
+            if (icon) {
+                icon.src = "/static/fotos/iconos/ver.png";
+            }
         } else {
             input.type = "password";
-            e.target.title="Mostrar"
-            // this.textContent = "../static/fotos/iconos/esconder.png";
-            // e.target.parentNode.children[2].src="../static/fotos/iconos/esconder.png";
-            e.target.style.backgroundImage=`url(/static/fotos/iconos/esconder.png)`
+            console.log("Ocultar")
+            this.style.backgroundImage = `url(/static/fotos/iconos/esconder.png)`;
+            this.title = "Mostrar";
+            if (icon) {
+                icon.src = "/static/fotos/iconos/esconder.png";
+            }
         }
-        e.preventDefault()
     });
 });
+
 
 //FIN DE MOSTRAR CAMPO
