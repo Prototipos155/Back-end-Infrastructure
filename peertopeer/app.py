@@ -621,17 +621,19 @@ def generar_codigo_unico(length):
     return codigo
 
 
-@app.route('/foro', methods=["POST", "GET"])
+@app.route('/foro', methods=["GET", "POST"])
 @login_required
 def foro():
-    session.clear()
-    #if not current_user.is_authenticated:
-        #return redirect(url_for("iniciar_sesion"))
+    print(f"\n\nUsuario autenticado? {current_user.is_authenticated}\n\n")
+
+    if not current_user.is_authenticated:
+        return current_app.login_manager.unauthorized()
+
     id_user = current_user.id
     nombre_usuario = current_user.nombre_usuario
     
     if request.method == "POST":
-        nombre = request.form.get("nombre")
+        #nombre = request.form.get("nombre")
         codigo = request.form.get("codigo")
         unirse = request.form.get("unirse", False)
         crear  = request.form.get("crear", False)
@@ -640,45 +642,47 @@ def foro():
             #return render_template("salas/foro.html", error = "Por favor ingrese un nombre", codigo=codigo, nombre = nombre)
     
         if unirse != False and not codigo:
-            return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo, nombre = nombre)
+            return render_template("salas/foro.html", error = "Por favor ingrese el codigo de la sala", codigo=codigo)
     
-        cbd.cursor.execute("SELECT codigo_sala FROM sala")
-        salas = cbd.cursor.fetchall()
+        cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (codigo))
+        sala = cbd.cursor.fetchone()
         
         room = codigo
         
         if crear != False:
             room = generar_codigo_unico(8)
-            rooms[room] = {"miembros": 0, "mensajes": []}
+            #rooms[room] = {"miembros": 0, "mensajes": []}
             cbd.cursor.execute("INSERT INTO sala (codigo_sala) VALUES (%s)", (room))
             cbd.connection.commit()
         
-        elif codigo not in salas:
-            return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo, nombre=nombre)
+        elif not sala:
+            return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo)
 
         session["room"] = room
-        session["id_usuario"] = id_user
-        session["nombre"] = nombre_usuario
-        print(("room: ", room), ("nombre: ", nombre_usuario))
+        session["id_usuario"] = current_user.id
+        session["nombre"] = current_user.nombre_usuario
+        #print(f"\n\n'room: ', {room}, 'nombre: ', {current_user.nombre_usuario}\n\n")
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
 
 @app.route('/sala')
+@login_required
 def sala():
     room = session.get("room")
+    cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
+    sala = cbd.cursor.fetchone()
     #id_user = session.get("id_usuario")
     nombre = session.get("nombre")
-    print(("sala: ", room), ("nombre: ", nombre))
+    #print(("sala: ", room), ("nombre: ", nombre))
     
-    if room is None or nombre is None or room not in rooms:
+    if room is None or nombre is None or not sala:
         return redirect(url_for("inicio"))
     
     cbd.cursor.execute("SELECT id_sala FROM sala WHERE codigo_sala = %s", (room))
     idsala = cbd.cursor.fetchone()
-    print(f"\nSala id: {idsala}\n")
-    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.nombre_usuario,m.id_sala,m.mensaje,m.fecha,m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
-    mensajes = cbd.cursor.fetchall
+    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.nombre_usuario,m.id_sala,m.mensaje,DATE_FORMAT(m.fecha,'%%d-%%m-%%Y'),m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
+    mensajes = cbd.cursor.fetchall()
 
     session["id_sala"] = idsala
         
@@ -690,8 +694,10 @@ def message(data):
     id_user = session.get("id_usuario")
     nombre = session.get("nombre")
     idsala = session.get("id_sala")
-    print(f"\n{room}")
-    if room not in rooms:
+    cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
+    sala = cbd.cursor.fetchone()
+    #print(f"\n{room}")
+    if not sala:
         return 
     
     contenido = {
@@ -699,11 +705,11 @@ def message(data):
         "mensaje": data["mensaje"]
     }
     send(contenido, to=room)
-    print(rooms)
-    rooms[room]["mensajes"].append(contenido)
-    print(f"{session.get('nombre')} dice: {data['mensaje']}")
+    #print(rooms)
+    #rooms[room]["mensajes"].append(contenido)
+    print(f"{nombre} dice: {data['mensaje']}")
 
-    cbd.cursor.execute("INSERT INTO mensaje (id_usuario,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],data["fecha"],data["hora"]))
+    cbd.cursor.execute("INSERT INTO mensaje (id_usuario,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],datetime.strptime(data["fecha"],'%d-%m-%Y').strftime('%Y-%m-%d'),data["hora"]))
     cbd.connection.commit()
 
 @socketio.on("connect")
@@ -712,16 +718,14 @@ def conectar(auth):
     nombre = session.get("nombre")
     if not room or not nombre:
         return
-    if room not in rooms:
-        leave_room(room)
-        return
+    #if room not in rooms:
+    #    leave_room(room)
+    #    return
     
-    print(f"\nSala: {rooms}")
     join_room(room)
     send({"nombre": nombre, "mensaje": "entró a la sala"}, to=room)
-    rooms[room]["miembros"] += 1
+    #rooms[room]["miembros"] += 1
     print(f"{nombre} entró a la sala {room}")
-    print(f"\nSala: {rooms}")
 
 @socketio.on("disconnect")
 def desconectar():
@@ -729,10 +733,10 @@ def desconectar():
     nombre = session.get("nombre")
     leave_room(room)
 
-    if room in rooms:
-        rooms[room]["miembros"] -= 1
-        if rooms[room]["miembros"] <= 0:
-            del rooms[room]
+    #if room in rooms:
+    #    rooms[room]["miembros"] -= 1
+        #if rooms[room]["miembros"] <= 0:
+        #    del rooms[room]
     
     send({"nombre": nombre, "mensaje": "ha salido de la sala"}, to=room)
     print(f"{nombre} ha salido de la sala {room}")
