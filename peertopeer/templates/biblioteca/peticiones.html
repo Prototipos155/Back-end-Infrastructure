@@ -20,19 +20,23 @@
         </select>
     </div>
 
-    <div id="categoria_tema" hidden>
-        <input type="text" name="categoria_tema" id="buscador" class="input" placeholder="Categoría">
-        <ul id="lista">
-            {{ items|safe }}
-        </ul>
-    </div>
+    <div id="categoria" hidden>
+        <input type="text" name="categoria_tema" id="buscador" class="buscador input" placeholder="Categoría">
+        <div id="categoria_tema" hidden>
+            <select name="listaTema" id="lista">
+                <option value="0" selected disabled>Seleccione...</option>
+                {{ items_cate|safe }}
+            </select>
+        </div>
 
-    <div id="categoria_subtema" hidden>
-        <input type="text" name="categoria_tema" id="buscador" class="input" placeholder="Categoría">
-        <ul id="lista">
-            {{ items|safe }}
-        </ul>
+        <div id="categoria_subtema" hidden>
+            <select name="listaSubtema" id="lista">
+                <option value="0" selected disabled>Seleccione...</option>
+                {{ items_tema|safe }}
+            </select>
+        </div>
     </div>
+    
 
     <input type="text" name="nombre" class="input" placeholder="Nombre...">
 
