@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const contenido = `
       <div class="text">
           <span><strong>${nombre}</strong>: ${mensaje}</span>
-          <span class="muted">${new Date().toLocaleString()}</span>
+          <span class="muted">${new Date().toLocaleString().replace(/\//g,"-")}</span>
       </div>
       `;
     mensajes.insertAdjacentHTML("beforeend", contenido);
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mensaje = mensajeInput.value.trim()
 
     if (mensaje === "") return;
-    socketio.emit("message", { "nombre": "Tú", "mensaje": mensaje, "fecha":new Date().toLocaleDateString(), "hora":new Date().toLocaleTimeString()});
+    socketio.emit("message", { "nombre": "Tú", "mensaje": mensaje, "fecha":new Date().toLocaleDateString().replace(/\//g,"-"), "hora":new Date().toLocaleTimeString()});
     //crearMensaje("Tú", mensaje);
     mensajeInput.value = "";
   }
