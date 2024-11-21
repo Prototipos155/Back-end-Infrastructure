@@ -543,3 +543,15 @@ nav {
   }
 
 }
+
+.text-msg {
+  margin: 5px 10px;
+  width: 70%;
+  text-wrap: wrap;
+}
+
+.muted {
+  color: gray;
+  justify-content: right;
+  align-items: right;
+}

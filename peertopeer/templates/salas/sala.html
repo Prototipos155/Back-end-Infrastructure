@@ -5,8 +5,8 @@
   <h2>Chat Sala: {{codigo}}</h2>
   <div class="mensajes" id="mensajes">
     {% for mnsj in mensajes %}
-    <div class="text">
-      <span><strong>{{mnsj[2]}}</strong>: {{mnsj[4]}}</span>
+    <div class="text-msg">
+      <span class="msg"><strong>{{mnsj[2]}}</strong>: {{mnsj[4]}}</span> <br>
       <span class="muted">{{mnsj[5]}} {{mnsj[6]}}</span>
     </div>
     {% endfor %}

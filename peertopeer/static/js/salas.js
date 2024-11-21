@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function crearMensaje(nombre, mensaje) {
     const mensajes = document.getElementById("mensajes");
     const contenido = `
-      <div class="text">
-          <span><strong>${nombre}</strong>: ${mensaje}</span>
+      <div class="text-msg">
+          <span class="msg"><strong>${nombre}</strong>: ${mensaje}</span> <br>
           <span class="muted">${new Date().toLocaleString().replace(/\//g,"-")}</span>
       </div>
       `;
