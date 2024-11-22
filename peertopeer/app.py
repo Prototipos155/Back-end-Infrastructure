@@ -484,7 +484,7 @@ def vericorreo_acceso():
                     usuario = Usuario(id_usuario, rol, nombre_usuario, correo, cuenta_activa)
                     login_user(usuario)
 
-                    return render_template("inicio.html", mensaje1=f"id: {id_usuario} nombre_usuario: {nombre_usuario}")
+                    return render_template("inicio.html", mensaje1=f"¡Bienvenido {nombre_usuario}!")
                 
                 else:
                     print("La cuenta no está activa.")
@@ -771,6 +771,7 @@ def inicio_biblioteca():
         ,Subtemas=subtemas,
         limiteTemas=len(temas),
         limiteSubtemas=len(subtemas)
+        ,biblioteca=True
     )
 
 @app.route('/docs')

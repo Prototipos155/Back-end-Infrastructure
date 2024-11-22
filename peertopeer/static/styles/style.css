@@ -1,4 +1,3 @@
-@import url("./biblioteca.css");
 
 @font-face {
   font-family: 'Mifuente';
@@ -21,9 +20,7 @@ body {
   font-family: 'Mifuente';
   background-color: #f2f2f2;
 
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr;
+  
 }
 
 nav {

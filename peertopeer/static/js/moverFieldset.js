@@ -8,9 +8,12 @@ let cmpActivo=obtenerCampoActivo()
 
 let fieldConError=fields[casillaError].querySelector(".error")
 if(fieldConError){
-    fieldConError.innerText=document.querySelector('meta[id="mensajeFieldset"]').getAttribute("content")
-    alert(fieldConError.innerText);
-    // console.log(fieldConError.innerText)
+    let mensaje = document.querySelector('meta[id="mensajeFieldset"]');
+    if (mensaje){
+        fieldConError.innerText = mensaje.getAttribute("content");
+        alert(fieldConError.innerText);
+        // console.log(fieldConError.innerText)
+    }
 }
 
 
