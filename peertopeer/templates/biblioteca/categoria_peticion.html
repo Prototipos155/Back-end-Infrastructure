@@ -4,7 +4,7 @@
 
 <form method="post" enctype="multipart/form-data" class="peticiones">
 
-    <h1>Peticiones</h1>
+<div id="titulo">Generar Categoria, Tema o Subtema</div>
 
     {% if error %}
     <div class="error">{{ error }}</div>
@@ -42,12 +42,9 @@
 
     <input type="text" name="descripcion" class="input" placeholder="Descripcion">
 
-    <div class="texto">Ingrese su archivo para enriquecer nuestra biblioteca:</div>
-
-    <label id="labelarchivo"> Seleccionar archivo<input type="file" name="archivo" id="subir_archivo"
-            class="archivo"></label>
     <button type="submit" id="enviar">Enviar</button>
 
 </form>
 <script type="module" src="../static/js/peticiones.js"></script>
+
 {% endblock %}
