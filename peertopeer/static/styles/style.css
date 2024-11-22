@@ -686,12 +686,29 @@ nav {
     border-radius: 4px;
     margin: 1%;
   }
+}
+
+.mensaje-cuadro {
+  text-align: center;
+  width: 40%;
+}
+
+.mensajes {
+  text-align: left;
+  word-wrap: break-word;
+  word-break: break-word; 
+  white-space: normal; 
+  overflow-wrap: break-word; 
+}
 
   .text-msg {
     margin: 5px 10px;
     width: 70%;
     text-wrap: wrap;
   }
+.text-msg {
+  margin: 10px 10px;
+}
 
   .muted {
     color: gray;
@@ -714,4 +731,7 @@ nav {
     color: #120e11;
   }
 
+.muted {
+  color: gray;
+  text-align: right;
 }
