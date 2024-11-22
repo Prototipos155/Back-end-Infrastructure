@@ -350,9 +350,14 @@ def iniciar_sesion():
             
             errores = {}
 
-            if correo.strip()=="" or nombre_usuario.strip()=="" or contraseña.strip()=="":
-                errores['mensaje1'] = "Todos los campos son obligatorios"
-                errores['num_fieldset']=0
+            indexError=-1
+            for casilla in (correo,nombre_usuario,contraseña):
+                if casilla.strip()=="":
+                    indexError+=1
+                    break
+            if indexError!=-1:
+                errores['mensajeFieldset']= "Todos los campos son obligatorios"
+                errores['num_fieldset']=indexError
                 print("entro aca")
                 return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
 
@@ -361,8 +366,9 @@ def iniciar_sesion():
                 perfil_exist = cbd.cursor.fetchone()
 
                 if perfil_exist is None:
-                    errores ["mensaje1"] = "El usuario no existe."
+                    errores ["mensajeFieldset"] = "El usuario no existe."
                     errores['num_fieldset']=0
+                    print("el usuario no existe")
                     return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                 
                 id_usuario = perfil_exist[0]
@@ -427,7 +433,7 @@ def iniciar_sesion():
                         
                         else:
                             print("Contraseña incorrecta")
-                            errores["mensaje3"] = "Contraseña incorrecta"
+                            errores["mensajeFieldset"] = "Contraseña incorrecta"
                             errores['num_fieldset']=2
                             return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                         
@@ -444,6 +450,7 @@ def iniciar_sesion():
                 return render_template("acceso/iniciar_sesion.html", mensaje="Error al conectar con la base de datos.", form_data=form_data)
             
         except pymysql.Error as err:
+            print("Error en primer Try de inicioSesion")
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
     return render_template("acceso/iniciar_sesion.html", form_data={})
@@ -509,7 +516,7 @@ def cerrarsesion():
     return render_template("inicio.html", mensaje1 = "has cerrado sesion")
 
 
-@app.route('/redireccionar_peticion', methods=["GET", "POST"])
+@app.route('/peticiones', methods=["GET", "POST"])
 def redireccionar_peticion():
     
     if request.method == "POST":
@@ -526,7 +533,7 @@ def redireccionar_peticion():
         else:
             return render_template("inicio.html")
     
-    return render_template("biblioteca/redireccionar_peticion.html")
+    return render_template("biblioteca/peticiones.html")
 
 
 @app.route ('/categoria_peticion', methods=['GET', 'POST'])
@@ -558,7 +565,7 @@ def categoria_peticion():
 
                         if nombre_exist and nombre_exist[0] == nombre :  
                             error="La categoria que ingreso ya existe"
-                            #return render_template("biblioteca/categoria_peticion.html", error = "La categoria que ingreso ya existe")
+                            #return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
                             
                         else:
                             cbd.cursor.execute("SELECT MAX(codigo) FROM categoria")
@@ -576,15 +583,15 @@ def categoria_peticion():
                             cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
                             cbd.connection.commit()
                             error="Su categoria fue generada."
-                            #return render_template ("biblioteca/categoria_peticion.html", error= "Su categoria fue generada.")
+                            #return render_template ("biblioteca/peticiones.html", error= "Su categoria fue generada.")
                             
                     else:
                         error="Debe proporcionar un nombre de categoria válido."
-                        #return render_template ("biblioteca/categoria_peticion.html", error= "Debe proporcionar un nombre de categoria válido.")
+                        #return render_template ("biblioteca/peticiones.html", error= "Debe proporcionar un nombre de categoria válido.")
                 
                 except Exception as err:
                     error=f"Error al procesar la solicitud categoria: {err}"
-                    #return render_template("biblioteca/categoria_peticion.html", error=f"Error al procesar la solicitud categoria: {err}")
+                    #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud categoria: {err}")
             
             elif tipo == "tema":
 
@@ -595,7 +602,7 @@ def categoria_peticion():
 
                         if nombre_exist1 and nombre_exist1[0] == nombre:
                             error="El tema que ingresó ya existe"
-                            #return render_template("biblioteca/categoria_peticion.html", error="La categoría que ingresó ya existe")
+                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
                         else:
                             cbd.cursor.execute("SELECT codigo FROM categoria")
                             codigo_padre = cbd.cursor.fetchone()[0]
@@ -620,10 +627,10 @@ def categoria_peticion():
                             
                     except Exception as err:
                         error=f"Error al procesar la solicitud: {err}"
-                        #return render_template("biblioteca/categoria_peticion.html", error=f"Error al procesar la solicitud: {err}")
+                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
                 else:
                     error="Debe proporcionar un nombre de tema válido."
-                    #return render_template("biblioteca/categoria_peticion.html", error="Debe proporcionar un nombre de categoría válido.")
+                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
 
             elif tipo == "subtema":
                 if nombre:
@@ -633,7 +640,7 @@ def categoria_peticion():
 
                         if nombre_exist1 and nombre_exist1[0] == nombre:
                             error="El subtema que ingresó ya existe"
-                            #return render_template("biblioteca/categoria_peticion.html", error="La categoría que ingresó ya existe")
+                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
                         else:
                             cbd.cursor.execute("SELECT codigo FROM tema ")
                             codigo_padre = cbd.cursor.fetchone()[0]
@@ -655,13 +662,14 @@ def categoria_peticion():
                                 cbd.cursor.execute("INSERT INTO subtema (codigo, nombre, descripcion, id_tema) VALUES (%s, %s, %s, %s)",(nuevo_codigo, nombre, descripcion, id_tema))
                                 cbd.connection.commit()
                                 error="Subtema creado con éxito"
-                                #return render_template("biblioteca/categoria_peticion.html", mensaje="Categoría creada con éxito.")
+                                #return render_template("biblioteca/peticiones.html", mensaje="Categoría creada con éxito.")
                     except Exception as err:
                         error=f"Error al procesar la solicitud: {err}"
-                        #return render_template("biblioteca/categoria_peticion.html", error=f"Error al procesar la solicitud: {err}")
+                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
                 else:
                     error="Debe proporcionar un nombre de subtema válido."
-                    #return render_template("biblioteca/categoria_peticion.html", error="Debe proporcionar un nombre de categoría válido.")
+                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+        
 
             else:
                 print ("no se pudo enviar") 
@@ -693,13 +701,11 @@ def categoria_peticion():
         idt = resultado[0]
         nombre = resultado[1]
         list_items_html_tema += f'<option value="{idt}">{nombre}</option>'
-        
-        
     return render_template ("biblioteca/categoria_peticion.html", items_cate = list_items_html_cate, items_tema=list_items_html_tema, error=error)
 
 
 @app.route('/documento_peticion', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def documento_peticion():
     if request.method == "POST":
         try:
@@ -748,7 +754,7 @@ def documento_peticion():
 
 
 @app.route('/inicio_biblioteca')
-#@login_required
+@login_required
 def inicio_biblioteca():
     cbd.cursor.execute("select id_categoria,nombre,descripcion from categoria order by id_categoria asc;")
     categorias=cbd.cursor.fetchall()
