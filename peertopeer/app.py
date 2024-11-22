@@ -537,7 +537,7 @@ def redireccionar_peticion():
 
 
 @app.route ('/categoria_peticion', methods=['GET', 'POST'])
-#@login_required
+@login_required
 def categoria_peticion(): 
     
     tipo = request.form.get('tipo')

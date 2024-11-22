@@ -16,7 +16,7 @@ main {
 
 body {
   width: 100%;
-  height: 100vh;
+  height: auto;
   margin: 0%;
   font-family: 'Mifuente';
   background-color: #f2f2f2;
@@ -186,7 +186,7 @@ nav {
     border-radius: 28px;
     border: none;
     background-color: #68757a;
-    margin-top: 5%;
+    margin-top: 4%;
   }
 
   .fieldactive {
@@ -359,7 +359,7 @@ nav {
   align-items: center;
   text-align: center;
   background-color: #68757a;
-  margin-top: 4%;
+  margin-top: 3%;
   margin-bottom: 4%;
   border: none;
   border-radius: 28px;
@@ -368,12 +368,12 @@ nav {
   flex-direction: row;
   position: relative;
   width: 75%;
-  height: 100%;
+  height: auto;
   padding: 4%;
 
   #icono {
-    height: 40%;
-    margin-bottom: 2%;
+    height: 15%;
+    margin-bottom: 1%;
     padding: 1%;
     font-size: 170%;
     color: #f2f2f2;
@@ -637,7 +637,7 @@ nav {
   text-align: center;
   background-color: #68757a;
   width: 90%;
-  height: 100%;
+  height: auto;
   margin-top: 4%;
   margin-bottom: 5%;
   padding: 2%;
@@ -646,27 +646,28 @@ nav {
 
   #titulo {
     font-size: 200%;
-    height: 12%;
-    margin: 1.5%;
+    height: auto;
+    margin: 2%;
   }
 
   input {
     border: none;
     border-radius: 4px;
-    padding: 1%;
+    padding: 1.2%;
     width: 70%;
-    margin-left: 15%;
-    margin-right: 15%;
+    margin: 1% 15%;
+    font-size: 90%;
   }
 
   button {
-    width: 11%;
-    padding: 1%;
+    width: 12%;
+    padding: 1.5%;
     margin: 1%;
     border: none;
     border-radius: 4px;
     background-color: #25221e;
     color: #f2f2f2;
+    font-size: 90%;
   }
 
   button:hover {
@@ -683,6 +684,7 @@ nav {
   border-radius: 20px;
   color: #f1f1f1;
 
+
   input {
     padding: 1%;
     width: 50%;
@@ -690,12 +692,7 @@ nav {
     border-radius: 4px;
     margin: 1%;
   }
-}
 
-.mensaje-cuadro {
-  text-align: center;
-  width: 40%;
-}
 
 .mensajes {
   text-align: left;
@@ -738,4 +735,5 @@ nav {
 .muted {
   color: gray;
   text-align: right;
+}
 }
