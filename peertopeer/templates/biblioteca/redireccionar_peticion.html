@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<form method="post" action="/redireccionar_peticion" class="redireccionar_peticion">
+
+    <div id="icono">Knowledge Field</div>
+
+    <div class="titulo">Elija el tipo de peticion que desea hacer:</div>
+
+    <div class="opcion">
+        <label>¿Quieres crear alguna categoria?:</label>
+        <button type="submit" name="boton" id="boton" value="categoria">Crear Categorias</button>
+    </div>
+    <div class="opcion">
+        <label>¿Quieres crear o aportar con algun documento?:</label>
+        <button type="submit" name="boton" id="boton" value="documentos">Aportar con Documento</button>
+    </div>
+
+</form>
+
+{% endblock %}

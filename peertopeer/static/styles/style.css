@@ -351,39 +351,122 @@ nav {
 
 }
 
+.redireccionar_peticion {
+  align-items: center;
+  text-align: center;
+  background-color: #68757a;
+  margin-top: 4%;
+  margin-bottom: 4%;
+  border: none;
+  border-radius: 28px;
+  font-size: 110%;
+  justify-content: center;
+  flex-direction: row;
+  position: relative;
+  width: 75%;
+  height: 100%;
+  padding: 4%;
+
+  #icono {
+    height: 40%;
+    margin-bottom: 2%;
+    padding: 1%;
+    font-size: 170%;
+    color: #f2f2f2;
+  }
+
+  .titulo {
+    font-size: 150%;
+    height: 12%;
+    font-weight: 600;
+    margin-bottom: 3%;
+  }
+
+  .opcion {
+    background-color: #4d5459;
+    width: 100%;
+    padding: 1.5%;
+    margin: 1.5%;
+    border-radius: 5px;
+    align-items: center;
+  }
+
+  label {
+    font-weight: 200;
+    font-size: 135%;
+    text-align: center;
+  }
+
+  #boton {
+    color: #f2f2f2;
+    background-color: #4d5459;
+    border: none;
+    padding: 1%;
+    margin: 1.5%;
+    border-radius: 4px;
+    font-size: 120%;
+    width: 95%;
+  }
+
+  .opcion:hover {
+    background-color: #201e1a;
+    color: #f2f2f2;
+
+    #boton {
+      background-color: #201e1a;
+      color: #f2f2f2;
+    }
+  }
+
+}
+
 .peticiones {
   align-items: center;
   text-align: center;
-  background-color: #4d5459;
+  background-color: #68757a;
   width: 90%;
-  margin-top: 3%;
+  height: 100%;
+  margin-top: 4%;
+  margin-bottom: 5%;
   padding: 2%;
   border-radius: 28px;
   font-size: 110%;
+  transition: 1s;
+
+  #titulo {
+    font-size: 220%;
+    height: 12%;
+  }
 
   #seleccionar {
     background-color: #ffffff;
-    width: 20%;
+    width: 40%;
     padding: 1%;
     text-align: center;
     align-items: center;
-    margin-left: 40%;
-    margin-right: 40%;
+    margin: 1.5% 30%;
     border-radius: 5px;
+    font-size: 100%;
   }
 
-  select{
+  select {
     width: 80%;
     padding: 3%;
     font-size: 100%;
     border: none;
     border-radius: 4px;
     margin: 3%;
-    background-color: #68757a;
+    background-color: #333a3f;
+    color: #f2f2f2;
     text-align: center;
   }
-  
-  option:hover{
+
+  select:focus {
+    background-color: #4d5459;
+    color: #f2f2f2;
+  }
+
+  option:hover {
     background-color: #25221e;
   }
 
@@ -399,9 +482,10 @@ nav {
     border: none;
     width: 80%;
     height: 6vh;
-    margin: 1%;
+    margin: 2%;
     font-size: 1em;
     text-align: center;
+    padding: 2%;
   }
 
   #labelarchivo {
@@ -409,10 +493,10 @@ nav {
     border-radius: 3px;
     border: none;
     margin-top: 3%;
-    padding: 1%;
+    padding: 1.01%;
     width: 30%;
     color: #f2f2f2;
-    background-color: #2b4d5b;
+    background-color: #333a3f;
     cursor: pointer;
 
     input {
@@ -430,11 +514,11 @@ nav {
   #enviar {
     border-radius: 3px;
     border: none;
-    margin-top: 3%;
-    padding: 1.1%;
-    width: 9%;
+    margin: 2%;
+    padding: 1.2%;
+    width: 12%;
     color: #f2f2f2;
-    background-color: #2b4d5b;
+    background-color: #333a3f;
     cursor: pointer;
   }
 
@@ -544,14 +628,90 @@ nav {
 
 }
 
-.text-msg {
-  margin: 5px 10px;
-  width: 70%;
-  text-wrap: wrap;
+.foro {
+  align-items: center;
+  text-align: center;
+  background-color: #68757a;
+  width: 90%;
+  height: 100%;
+  margin-top: 4%;
+  margin-bottom: 5%;
+  padding: 2%;
+  border-radius: 28px;
+  font-size: 110%;
+
+  #titulo {
+    font-size: 200%;
+    height: 12%;
+    margin: 1.5%;
+  }
+
+  input {
+    border: none;
+    border-radius: 4px;
+    padding: 1%;
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+  }
+
+  button {
+    width: 11%;
+    padding: 1%;
+    margin: 1%;
+    border: none;
+    border-radius: 4px;
+    background-color: #25221e;
+    color: #f2f2f2;
+  }
+
+  button:hover {
+    background-color: #3a5e6e;
+  }
+
 }
 
-.muted {
-  color: gray;
-  justify-content: right;
-  align-items: right;
+.mensaje-cuadro {
+  background-color: #2e2e2e;
+  padding: 2%;
+  width: 78%;
+  margin: 3%;
+  border-radius: 20px;
+  color: #f1f1f1;
+
+  input {
+    padding: 1%;
+    width: 50%;
+    border: none;
+    border-radius: 4px;
+    margin: 1%;
+  }
+
+  .text-msg {
+    margin: 5px 10px;
+    width: 70%;
+    text-wrap: wrap;
+  }
+
+  .muted {
+    color: gray;
+    justify-content: right;
+    align-items: right;
+  }
+
+  button {
+    padding: 1%;
+    width: 10%;
+    border: none;
+    border-radius: 4px;
+    background-color: #1a3a4f;
+    color: #f1f1f1;
+    font-size: 100%;
+  }
+
+  button:hover{
+    background-color: #f2f2f2;
+    color: #120e11;
+  }
+
 }
