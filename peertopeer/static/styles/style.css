@@ -544,14 +544,24 @@ nav {
 
 }
 
+.mensaje-cuadro {
+  text-align: center;
+  width: 40%;
+}
+
+.mensajes {
+  text-align: left;
+  word-wrap: break-word;
+  word-break: break-word; 
+  white-space: normal; 
+  overflow-wrap: break-word; 
+}
+
 .text-msg {
-  margin: 5px 10px;
-  width: 70%;
-  text-wrap: wrap;
+  margin: 10px 10px;
 }
 
 .muted {
   color: gray;
-  justify-content: right;
-  align-items: right;
+  text-align: right;
 }
