@@ -1,5 +1,5 @@
 import eventlet.wsgi
-from flask import Flask, render_template, current_app, redirect, request, session, url_for,Response, send_file, flash
+from flask import Flask, render_template, current_app, redirect, request, session, url_for,Response, send_file, flash,send_from_directory,send_file
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_socketio import join_room, leave_room, send, SocketIO
 from functools import wraps
@@ -35,6 +35,9 @@ encriptado = Encrypt()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("PASSWORD4")
 app.secret_key = os.getenv("PASSWORD1")
+
+UPLOAD_FOLDER=os.path.join(os.getcwd(),'uploads')
+app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'iniciar_sesion'
@@ -691,7 +694,7 @@ def peticiones():
 @app.route('/inicio_biblioteca')
 #@login_required
 def inicio_biblioteca():
-    cbd.cursor.execute("select * from categoria order by id_categoria asc;")
+    cbd.cursor.execute("select id_categoria,nombre,descripcion from categoria order by id_categoria asc;")
     categorias=cbd.cursor.fetchall()
     
     cbd.cursor.execute("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc;")
@@ -707,6 +710,21 @@ def inicio_biblioteca():
         limiteTemas=len(temas),
         limiteSubtemas=len(subtemas)
     )
+
+@app.route('/docs')
+def documentos():
+    cbd.cursor.execute("select id_documento,nombre_archivo from documentos")
+    docs=cbd.cursor.fetchall()
+
+    return render_template("biblioteca/documentos.html",docs=docs)
+    
+@app.route('/uploads/<int:id>')
+def view_file(id):
+    cbd.cursor.execute("select nombre_archivo,documento from documentos where id=%s"%(id))
+    doc=cbd.cursor.fetchone()
+    if(doc):
+        return send_file(io.BytesIO(doc['documento']),nombre=doc['nombre_archivo'],as_attachment=True)
+    return "DOC NO ENCONTRADO"
 
 def separarSubCategorias(tupla):
     nuevoOrden=()

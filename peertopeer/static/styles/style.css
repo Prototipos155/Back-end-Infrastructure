@@ -16,10 +16,14 @@ main {
 
 body {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   margin: 0%;
   font-family: 'Mifuente';
   background-color: #f2f2f2;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
 }
 
 nav {
@@ -501,7 +505,7 @@ nav {
   }
 }
 
-.biblioteca {
+/* .biblioteca {
 
   aside {
     background-color: #201e1a;
@@ -542,7 +546,7 @@ nav {
     border-radius: 4px;
   }
 
-}
+} */
 
 .text-msg {
   margin: 5px 10px;
