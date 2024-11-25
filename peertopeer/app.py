@@ -129,7 +129,7 @@ def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
     nombreregex = r"[^a-zA-Z\s]"
     apodoregex = r"[^\w.-]"
     correoregex = r"^[\w.]+@[a-zA-Z0-9]+\.+[a-zA-Z.]{1,}$"
-    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.-])([\w!.-]|[^\s]){8,}$"
+    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.-_])([\w!.-_]|[^\s]){8,}$"
 
     if nombres.strip()=="" or len(nombres.strip())>50 or re.search(nombreregex, nombres):
         valido = False
@@ -158,7 +158,7 @@ def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
 
     elif contraseña.strip()==""  or len(contraseña.strip())<8 or len(contraseña.strip())>30 or not re.search(contraregex, contraseña):
         valido = False
-        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial y sin espacios"
+        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial (!.-_) y sin espacios"
         errores['num_fieldset']= 3
 
     return valido, errores
