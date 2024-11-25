@@ -129,7 +129,7 @@ def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
     nombreregex = r"[^a-zA-Z\s]"
     apodoregex = r"[^\w.-]"
     correoregex = r"^[\w.]+@[a-zA-Z0-9]+\.+[a-zA-Z.]{1,}$"
-    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#.-])([\w!#.-]|[^\s]){8,}$"
+    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.-])([\w!.-]|[^\s]){8,}$"
 
     if nombres.strip()=="" or len(nombres.strip())>50 or re.search(nombreregex, nombres):
         valido = False
@@ -443,7 +443,9 @@ def iniciar_sesion():
 
                 else:
                     print("El nombre de usuario o correo no coinciden.")
-                    return render_template("acceso/iniciar_sesion.html", mensaje="El nombre de usuario o correo no coinciden.", form_data=form_data)
+                    errores ["mensajeFieldset"] = "El nombre de usuario o correo no coinciden."
+                    errores['num_fieldset']=0
+                    return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
             
             except pymysql.Error as err:
                 print(f"Error de base de datos: {err}")
