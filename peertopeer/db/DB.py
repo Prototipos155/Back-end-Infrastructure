@@ -3,7 +3,19 @@ from colorama import Back,Fore
 import re
 import os
 from hashlib import sha256
+if(__name__=="__main__"):
+    from bdTablas import *
+else:
+    from .bdTablas import *
 
+def abrirArchivo(archivo,modo):
+    try:
+        #intenta abrir el archivo
+        return open(archivo,modo)
+    except:
+        #no existe o se ingreso un modo invalido
+        return None
+    
 class CC():
     def __init__(self,auto_destruir=None):
         try:
@@ -16,6 +28,7 @@ class CC():
                     self.auto_destruccion(auto_destruir)
                 self.crearTablas()
                 self.crearProcedimientos()
+                self.hacerInserts()
 
             except pymysql.Error as err:
                 print("\n error al intentar crear las tablas o procedimientos: " .format(err))
@@ -54,6 +67,8 @@ class CC():
                 print("se pudo borrar la tabla ",tabla[0])
             except Exception as ex:
                 print("no se pudo borrar la tabla ",tabla[0],ex)
+        
+        abrirArchivo("inserts.txt","w") # reinicia el txt para que haga inserts de nuevo
 
     def detectarPuertosXampp(rutaXampp='C:/xampp/mysql/bin/my.ini'):
         try:
@@ -115,50 +130,86 @@ class CC():
     # else:
     #     print("No se pudo encontrar")
 
+    def ejecutarCreaciones(self,lista_funciones,confirmarCommit=False):
+        if(not isinstance(lista_funciones,tuple)):
+            #en caso de solo recibir una sola funcion(sin tupla) la convierte en iterable
+            lista_funciones=(lista_funciones),
+        
+        for funciones in lista_funciones :
+            try:
+                #ejecuta la consulta
+                self.cursor.execute(funciones())
+                if(confirmarCommit):
+                    #la confirma si asi se desea(pensado para los inserts)
+                    self.connection.commit()
+                print("+",funciones.__name__," se ha ejecutado con exito")
+            except Exception as ex:
+                print("-",funciones.__name__," ha tenido un error: ",ex)
+
     def crearTablas(self):
         try:
-            print("empezo la creacion de tablas")
-            self.tabla_perfil()
-            self.tabla_buzon_quejas()
-            self.tabla_categoria()
-            self.tabla_tema()
-            self.tabla_subtema()
-            self.tabla_sala()
-            self.tabla_mensaje()
-            self.tabla_peticiones()
-            self.tabla_documentos()
-            self.tabla_links()
+            print("##########empezo la creacion de tablas")
+            #funciones que crearan las tablas
+            tablas=(codigo_tabla_foto_perfil,codigo_tabla_rol,codigo_tabla_perfil,codigo_tabla_buzon_quejas,codigo_tabla_categoria,codigo_tabla_tema,codigo_tabla_subtema,codigo_tabla_sala,codigo_tabla_mensaje,codigo_tabla_peticiones,codigo_tabla_documentos,codigo_tabla_links,codigo_tabla_articulo,codigo_tabla_articulo_calificado,codigo_tabla_calificacion_comentario,codigo_tabla_comentario_articulo)
 
-            self.tabla_articulo()
-            self.tabla_articulo_calificado()
-            self.tabla_calificacion_comentario()
-            self.tabla_comentario_articulo()
+            self.ejecutarCreaciones(tablas)
+            # self.tabla_perfil()
+            # self.tabla_buzon_quejas()
+            # self.tabla_categoria()
+            # self.tabla_tema()
+            # self.tabla_subtema()
+            # self.tabla_sala()
+            # self.tabla_mensaje()
+            # self.tabla_peticiones()
+            # self.tabla_documentos()
+            # self.tabla_links()
+
+            # self.tabla_articulo()
+            # self.tabla_articulo_calificado()
+            # self.tabla_calificacion_comentario()
+            # self.tabla_comentario_articulo()
             
 
         except pymysql.Error as err:
             print("\n error al intentar crear las tablas " .format(err))
     def crearProcedimientos(self):
         try:
-            print("empezo la creacion de procedimientos")
-            self.funcion_CrearSoloMateria()
-            self.funcion_CrearSoloTema()
-            self.funcion_CrearSoloSubtema()
-            self.funcion_CrearMateriaCompleta()
+            print("##########empezo la creacion de procedimientos")
+            # funciones que crearan los stored procedures sql
+            funciones =(codigo_funcion_CrearSoloMateria,codigo_funcion_CrearSoloTema,codigo_funcion_CrearSoloSubtema,codigo_funcion_CrearMateriaCompleta,codigo_funcion_sacarPromedio,codigo_funcion_crearArticulo,codigo_funcion_calificarArticulo)
 
-            self.funcion_sacarPromedio()
-            self.funcion_crearArticulo()
-            self.funcion_calificarArticulo()
+            self.ejecutarCreaciones(funciones)
+            # self.funcion_CrearSoloMateria()
+            # self.funcion_CrearSoloTema()
+            # self.funcion_CrearSoloSubtema()
+            # self.funcion_CrearMateriaCompleta()
+
+            # self.funcion_sacarPromedio()
+            # self.funcion_crearArticulo()
+            # self.funcion_calificarArticulo()
             
 
         except pymysql.Error as err:
             print("\n error al intentar crear los procedimientos " .format(err))
-            
-#/////////////////////////////////////////////////////////////////////////
-#                            F U N C I O N E S
-#///////////////////////////////////////////////////////////////////////////
+    
+    def hacerInserts(self):
+        # txt="" o None->debe hacer inserts
+        # txt="False" ->No debe hacer nada
+        hacerInserts=abrirArchivo("inserts.txt","r") #abrimos el txt
+        if(hacerInserts==None or hacerInserts.read()==""):
+            #debe insertar
+            abrirArchivo("inserts.txt","w").write("False")
+        else:
+            #hacerInserts.read() debe ser "False"
+            #no quiero que insertes
+            return 
+        
+        print("############rmpezaron los inserts")
+        #funiones que haran los inserts
+        inserts=(codigo_insert_Roles)
+        self.ejecutarCreaciones(inserts,True)
 
     @staticmethod
-
     def crearHashParaBd(data):
         # Datos a hashear
         data = data.encode()
@@ -175,702 +226,12 @@ class CC():
         # print(f"('{nombre_Materia}',' desc ','{tema}','{subtema}')")
         self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,tema,subtema))
 
-    def funcion_CrearSoloMateria(self):
-        try:
-            self.cursor.execute("""
-            create procedure crearCategoria(
-                in nomb varchar(100), 
-                in descripcion varchar(150),
-                out resultado int)
-            deterministic
-            begin
-                etiqueta: begin
-                    if ((select id_categoria from categoria where nombre=nomb) is not null) then
-                        set resultado= -1;# ya existe la categoria/materia
-                        leave etiqueta;
-                    end if;
-                    insert into categoria(nombre,descripcion) values(nomb,descripcion); #creamos la categoria
-                    
-                    set resultado=(select id_categoria from categoria where nombre=nomb);
-                end etiqueta;
-            end""")
-        except Exception as ex:
-            print("no se pudo crear el procedimiento 'CrearCategoria'",ex)
-    
-    def funcion_CrearSoloTema(self):
-        try:
-            self.cursor.execute("""
-            create procedure creartema(
-                in nomb varchar(100), 
-                in descripcion varchar(150),
-                in id_categ int,
-                in codigotema char(64),
-                out resultado int)
-            deterministic
-            begin
-                etiqueta: begin
-                    if((select codigo from tema where codigo=codigotema) is not null) then 
-                        set resultado= -3; # ya existe la tema
-                        leave etiqueta;
-                    end if;
-                    #se debe crear la tema
-                    insert into tema(codigo,id_categoria,nombre,descripcion) values(codigotema,id_categ,nomb,descripcion);
-                    
-                    set resultado=(select id_tema from tema where codigo=codigotema);
-                end etiqueta;
-            end""")
-        except Exception as ex:
-            print("no se pudo crear la funcion 'creartema'/",ex)
-    
-    def funcion_CrearSoloSubtema(self):
-        try:
-            self.cursor.execute("""
-            create procedure crearsubtema(
-                in nomb varchar(100), 
-                in descripcion varchar(150),
-                in idtema int,
-                in codigosubtema char(64),
-                out resultado int)
-            deterministic
-            begin
-                etiqueta: begin
-                    if((select id_subtema from subtema where codigo=codigosubtema)is not null) then 
-                        set resultado= -5;
-                        leave etiqueta;
-                    end if;
-                    #se debe crear el subtema 'General' dentro de la tema antes creada
-                    insert into subtema(codigo,id_tema,nombre,descripcion) values(codigosubtema,idtema,nomb,descripcion);
-                    set resultado=1;
-                end etiqueta;
-            end""")
-        except Exception as ex:
-            print("no se pudo crear la funcion 'Crearsubtema'",ex)
-
-    def funcion_CrearMateriaCompleta(self):
-        try:
-            self.cursor.execute("""
-            create procedure crearCategoriaCompleta (
-                in nomb varchar(100),
-                in descripcion varchar(150),
-                in codigotema char(64),
-                in codigosubtema char(64),
-                out resultado int
-            )
-            deterministic
-            begin
-                etiqueta: begin
-                    call crearCategoria(nomb, descripcion, @idCateg);
-                    if(@idCateg=-1) then
-                        set resultado=-1; #ya existe la categoria
-                        -- signal sqlstate '45000' set message_text="error -1";
-                        leave etiqueta;
-                    end if;
-                    if (@idCateg is null) then
-                        set resultado= -2; # no se pudo hacer el registro de la Categoria
-                        leave etiqueta;
-                    end if;
-                    ######################################################################
-                    #se debe crear la tema 'General'
-                    call creartema('General',CONCAT('Apartado general de ',nomb),@idCateg,codigotema,@idtema);
-                    if(@idtema =-3) then
-                        set resultado=-3; # ya existe la categoria
-                        leave etiqueta;
-                    end if;
-                    if(@idtema is null) then
-                        set resultado= -4; # no se pudo hacer el registro de la tema
-                        leave etiqueta;
-                    end if;
-                    ######################################################################
-                    call crearsubtema('General',CONCAT('Apartado general de ',nomb),@idtema,codigosubtema,@idsubtema);
-                    
-                    if(@idsubtema=-5) then
-                        set resultado =-5;
-                        leave etiqueta;
-                    end if;
-                    if(@idsubtema is null) then
-                        set resultado =-6;
-                        leave etiqueta;
-                    end if;
-                    set resultado=1;
-                end etiqueta;
-            end""")
-            print("funcion 'CrearMateria' creada con exito")
-        except Exception as ex:
-            print("no se pudo crear la funcion 'CrearMateriaCompleta'",ex)
-
-    def funcion_crearArticulo(self):
-        try:
-            self.cursor.execute("""
-            create procedure crearArticulo(
-                in nombre varchar(150),
-                in idsubtema int,
-                in idAutor int,
-                out resultado tinyint
-            )
-            deterministic
-            begin
-                if exists(select id_subtema from subtema where id_subtema=idsubtema) 
-                    and exists(select id_usuario from perfil where id_usuario=idAutor)
-                    and not exists(select id_articulo from articulo where nombre_articulo=nombre) then 
-                    
-                    insert into articulo(
-                        nombre_articulo,id_autor,id_subtema,id_sala,fecha_creacion,ultima_modificacion,calificacion,num_calificaciones
-                    ) values(
-                        #modifical 'id_sala'
-                        nombre,idAutor,idsubtema,0,(select utc_date()),(select utc_date()),null,0
-                    );
-                    set resultado=True;
-                else 
-                    set resultado=False;
-                end if;
-            end""")
-            print("la funcion crearArticulo fue creada")
-        except pymysql.Error as err:
-            print("la funcion crearArticulo no fue creada ",err)
-    
-    def funcion_calificarArticulo(self):
-        try:
-            self.cursor.execute("""
-            create procedure calificarArticulo(
-                in idArticulo int,
-                in Calif_ingresada decimal (3,2),
-                in idUsuario int,
-                in Comentario varchar(100),
-                out resultado tinyint
-            )
-            deterministic
-            begin    
-                label :begin
-                    select 
-                        calificacion,num_calificaciones 
-                    into 
-                        @calif,@num 
-                    from articulo where id_articulo=idArticulo;
-                    
-                    -- signal sqlstate '45000' set message_text=@calif;
-                    if exists(select id_calificacion from articulo_es_calificado where id_usuario=idUsuario and id_articulo=idArticulo)then 
-                        set resultado=False;
-                        leave label;
-                    end if;
-                    
-                    if not exists(select id_usuario from perfil where id_usuario=idUsuario) 
-                        or not exists(select  @num )then 
-                        #no existe el usuario o el articulo
-                        set resultado=False;
-                        leave label ;
-                    end if;
-                    
-                    if(Calif_ingresada>5) then 
-                        set Calif_ingresada=5;
-                    end if;
-                    
-                    set @nuevaCalif:=null;
-                    
-                    if(@num=0) then 
-                        set @nuevaCalif=Calif_ingresada;
-                    else
-                        set @nuevaCalif=(select SacarPromedio(@calif, @num,Calif_ingresada));
-                    end if;
-                    -- set @txt=concat(idArticulo,id_Usuario);
-                    
-                    set @num=@num+1;
-                    
-                    -- signal sqlstate '45000' set message_text=@txt;
-                    insert into articulo_es_calificado(id_articulo,id_usuario,fecha) values(idArticulo,idUsuario,(select utc_timestamp()));
-                    update articulo set calificacion =@nuevaCalif, num_calificaciones=@num where id_articulo=idArticulo;
-                    
-                    if (comentario != "") then 
-                        insert into calificacion_tiene_comentario(comentario,id_usuario,id_calificacion ) 
-                            values(Comentario,idUsuario,(select id_calificacion from articulo_es_calificado 
-                            where id_articulo=idArticulo and id_usuario=IdUsuario));
-                    end if;
-                    set resultado=True;
-                end label;
-            end""")
-            print("la funcion calificarArticulo fue creada")
-        except pymysql.Error as err:
-            print("la funcion calificarArticulo no fue creada ",err)
-    
-    def funcion_sacarPromedio(self):
-        try:
-            self.cursor.execute("""
-            create function sacarPromedio(cantidad double, numero_objetos int, nuevo_elemento double)
-            returns double
-            deterministic
-            begin
-                set @resultado=((cantidad*numero_objetos)+nuevo_elemento);
-                set numero_objetos=numero_objetos+1;
-                #signal sqlstate '45000' set message_text=@resultado;
-                set @resultado=(@resultado/(numero_objetos));
-                return @resultado;
-            end""")
-            print("la funcion sacarPromedio fue creada")
-        except pymysql.Error as err:
-            print("la funcion sacarPromedio no fue creada ",err)
-            
-#/////////////////////////////////////////////////////////////////////////
-#                           F I N   F U N C I O N E S
-#///////////////////////////////////////////////////////////////////////////  
-
-#/////////////////////////////////////////////////////////////////////////
-#                            T A B L A S
-#///////////////////////////////////////////////////////////////////////////         
-
-    def tabla_perfil(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS perfil (
-                id_usuario INT UNIQUE AUTO_INCREMENT NOT NULL,
-                rol VARCHAR (15) NOT NULL, 
-                nombres VARCHAR (50) NOT NULL,
-                apellidos VARCHAR (50) NOT NULL,
-                nombre_usuario VARCHAR(20) UNIQUE NOT NULL,
-                correo VARCHAR(150) UNIQUE NOT NULL,
-                telefono VARCHAR(13) UNIQUE NOT NULL,
-                contraseña_encript VARCHAR (256) NOT NULL,
-                cuenta_activa BOOLEAN NOT NULL)""")
-            
-            print("la tabla perfil creada ")
-
-        except pymysql.Error as err:
-            print("la tabla perfil no fue creada ",err)
-
-    def tabla_buzon_quejas(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS buzon_quejas (
-                id_buzon_quejas INT UNIQUE AUTO_INCREMENT NOT NULL,
-                id_usuario INT NOT NULL,
-                                
-                mensaje VARCHAR(256) NOT NULL,
-                fecha DATETIME NOT NULL,
-                hora DATETIME NOT NULL,
-                                
-                PRIMARY KEY (id_buzon_quejas),
-                FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario))""")
-            
-            print("la tabla buzon_quejas creada ")
-
-        except pymysql.Error as err:
-            print("la tabla buzon_quejas no fue creada ",err)
-
-    def tabla_categoria(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS categoria (
-              id_categoria INT UNIQUE AUTO_INCREMENT NOT NULL,
-                                
-              codigo char(64) unique NOT NULL,                  
-              nombre VARCHAR(100) NOT NULL,
-              descripcion VARCHAR(150) NOT NULL,
-
-                                
-              PRIMARY KEY (id_categoria))""")
-            
-            print("la tabla categoria creada ")
-
-        except pymysql.Error as err:
-            print("la tabla categoria no fue creada ",err)
-
-    def tabla_tema(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS tema (
-            id_tema INT AUTO_INCREMENT NOT NULL,
-            codigo char(64) unique NOT NULL,
-            id_categoria INT NOT NULL,
-
-            nombre VARCHAR(100) NOT NULL,
-            descripcion VARCHAR(150) NOT NULL,
-                                
-            PRIMARY KEY (id_tema),
-            FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
-            );""")
-            
-            print("la tabla tema creada ")
-
-        except pymysql.Error as err:
-            print("la tabla tema no fue creada ",err)
-
-    def tabla_subtema(self):
-        try:
-            self.cursor.execute("""
-            create table if not exists subtema(
-                id_subtema int auto_increment not null,
-                codigo char(64) unique not null,
-                id_tema int not null,
-                
-                nombre VARCHAR(100) NOT NULL,
-                descripcion VARCHAR(150) NOT NULL,
-                
-                primary key(id_subtema),
-                FOREIGN KEY (id_tema) REFERENCES tema(id_tema)
-            );""")
-            
-            print("la tabla subtema creada ")
-
-        except pymysql.Error as err:
-            print("la tabla subtema no fue creada ",err)
-
-    def tabla_sala(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sala(
-                id_sala INT UNIQUE AUTO_INCREMENT NOT NULL,
-                id_tema INT UNIQUE,
-                codigo_sala char(8) UNIQUE NOT NULL,
-                
-                PRIMARY KEY(id_sala),
-                FOREIGN KEY(id_tema) REFERENCES tema(id_tema)
-            );""")
-
-            print("la tabla sala creada ")
-
-        except pymysql.Error as err:
-            print("la tabla sala no fue creada: ",err)
-
-    def tabla_mensaje(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS mensaje(
-                id_msj INT UNIQUE AUTO_INCREMENT NOT NULL,
-                id_usuario INT NOT NULL,
-                id_sala INT NOT NULL,
-                mensaje text NOT NULL,
-                fecha date NOT NULL,
-                hora time NOT NULL,
-                id_mensajeAResponder INT,
-                
-                PRIMARY KEY(id_msj),
-                FOREIGN KEY(id_mensajeAResponder) REFERENCES mensaje(id_msj),
-                FOREIGN KEY(id_usuario) REFERENCES perfil(id_usuario),
-                FOREIGN KEY(id_sala) REFERENCES sala(id_sala)
-            );""")
-
-            print("la tabla mensaje creada ")
-
-        except pymysql.Error as err:
-            print("la tabla mensaje no fue creada: ",err)
-
-    def tabla_articulo(self):
-        try:
-            self.cursor.execute("""
-            create table if not exists articulo (
-                id_articulo int not null auto_increment,
-                nombre_articulo varchar(150) unique not null,
-                
-                id_autor int not null,
-                id_subtema int not null,
-                id_sala int,
-                
-                fecha_creacion date not null,
-                ultima_modificacion date not null,
-                
-                calificacion decimal(3,2),
-                num_calificaciones int not null,
-                
-                primary key(id_articulo),
-                foreign key (id_autor) references perfil(id_usuario),
-                foreign key (id_subtema) references subtema(id_subtema)
-                -- foreign key a la tabla sala
-            );""")
-            
-            print("la tabla articulo creada ")
-
-        except pymysql.Error as err:
-            print("la tabla articulo no fue creada ",err)
-
-    def tabla_articulo_calificado(self):
-        try:
-            self.cursor.execute("""
-            create table if not exists articulo_es_calificado(
-                id_calificacion int not null auto_increment,
-                id_articulo int not null,
-                id_usuario int not null,
-                fecha datetime not null,
-                
-                primary key(id_calificacion),
-                foreign key(id_articulo) references articulo(id_articulo),
-                foreign key(id_usuario) references perfil (id_usuario)
-            );""")
-            
-            print("la tabla articulo_es_calificado creada ")
-
-        except pymysql.Error as err:
-            print("la tabla articulo_es_calificado no fue creada ",err)
-
-    def tabla_calificacion_comentario(self):
-        try:
-            self.cursor.execute("""
-            create table if not exists calificacion_tiene_comentario(
-                id_registro int not null auto_increment,
-                comentario varchar(100) not null,
-                id_usuario int not null,
-                id_calificacion int not null,
-                
-                primary key(id_registro),
-                foreign key(id_usuario) references perfil(id_usuario),
-                foreign key (id_calificacion) references articulo_es_calificado(id_calificacion)
-            );""")
-            
-            print("la tabla calificacion_tiene_comentario creada ")
-
-        except pymysql.Error as err:
-            print("la tabla calificacion_tiene_comentario no fue creada ",err)
-
-    def tabla_comentario_articulo(self):
-        try:
-            self.cursor.execute("""
-            create table if not exists comentarios_de_articulo(
-                id_comentario int not null auto_increment,
-                id_usuario int not null,
-                mensaje varchar (250),
-                respondiendo_a_mensaje int not null,
-                
-                id_articulo int not null,
-                
-                primary key(id_comentario),
-                foreign key(id_articulo) references articulo(id_articulo),
-                foreign key (respondiendo_a_mensaje) references comentarios_de_articulo(id_comentario)
-            );""")
-            
-            print("la tabla comentarios_de_articulo creada ")
-
-        except pymysql.Error as err:
-            print("la tabla 'comentarios_de_articulo' no fue creada ",err)
-
-
-    # def tabla_mensajes_from_seccion(self):
-    #     try:
-    #         self.cursor.execute("""
-    #         CREATE TABLE IF NOT EXISTS mensajes_from_seccion (
-    #           id_mensaje INT NOT NULL AUTO_INCREMENT,
-    #           id_seccion INT NOT NULL,
-    #           id_usuario INT NOT NULL,
-    #           mensaje VARCHAR(256) NOT NULL,
-    #           fecha VARCHAR(11) NOT NULL,
-    #           hora VARCHAR(12) NOT NULL,
-    #           PRIMARY KEY (id_mensaje),
-    #           INDEX fk_mensaje_seccion1_idx (id_seccion ASC) VISIBLE,
-    #           INDEX fk_mensaje_perfil1_idx (id_usuario ASC) VISIBLE,
-    #           CONSTRAINT fk_mensaje_seccion1
-    #             FOREIGN KEY (id_seccion)
-    #             REFERENCES peertopeer.seccion (id_seccion)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION,
-    #           CONSTRAINT fk_mensaje_perfil1
-    #             FOREIGN KEY (id_usuario)
-    #             REFERENCES peertopeer.perfil (id_usuario)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION)
-    #         ENGINE = InnoDB
-    #         DEFAULT CHARACTER SET = utf8mb3""")
-    #         print("la tabla mensajes_from_seccion creada ")
-    #     except pymysql.Error as er:
-    #         print("la tabla mensajes_from_seccion no fue creada ",er)
-
-    def tabla_peticiones(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS peticiones (
-                id_peticiones INT UNIQUE AUTO_INCREMENT NOT NULL, 
-                id_usuario INT NOT NULL,
-                                    
-                mensaje VARCHAR(200) NULL,
-                archivo MEDIUMBLOB NULL,
-                nombre_archivo varchar(256) NULL,
-                link VARCHAR(256) NULL,
-                fecha DATE NOT NULL,
-                hora TIME NOT NULL,
-                                    
-                PRIMARY KEY(id_peticiones),
-                FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario))""") 
-            
-            print("la tabla peticones creada ")
-
-        except pymysql.Error as err:
-            print("la tabla peticion no fue creada ",err)
-
-    def tabla_documentos(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS documentos (
-              id_documento INT UNIQUE AUTO_INCREMENT NOT NULL,
-                                
-              documento MEDIUMBLOB NOT NULL,
-              nombre_archivo varchar(256) NULL,
-                                
-              PRIMARY KEY (id_documento))""")
-            
-            print("la tabla documentos creada ")
-
-        except pymysql.Error as er:
-            print("la tabla documentos no fue creada ",er)
-
-    def tabla_links(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS links (
-              id_link INT UNIQUE AUTO_INCREMENT NOT NULL,
-                                
-              link VARCHAR(256) NOT NULL,
-                                
-              PRIMARY KEY (id_link))""")
-            
-            print("la tabla links creada ")
-
-        except pymysql.Error as err:
-            print("la tabla links no fue creada ",err)
-
-    # """def tabla_peticion_has_files(self):
-    #     try:
-    #         self.cursor.execute(
-    #         CREATE TABLE IF NOT EXISTS peticion_has_files (
-    #           id_archivo INT NOT NULL AUTO_INCREMENT,
-    #           id_peticion INT NOT NULL,
-    #           id_material INT NOT NULL,
-    #           tipo TINYINT NOT NULL,
-    #           verificado TINYINT NULL,
-    #           PRIMARY KEY (id_archivo),
-    #           INDEX fk_peticion_has_files_peticion1_idx (id_peticion ASC) VISIBLE,
-    #           CONSTRAINT fk_peticion_has_files_peticion1
-    #             FOREIGN KEY (id_peticion)
-    #             REFERENCES peertopeer.peticion (id_peticion)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION))
-    #         print("la tabla peticion_has_files creada ")
-    #     except pymysql.Error as er:
-    #         print("la tabla peticion_has_files no fue creada ",er)"""
-
-    def tabla_motivos_de_quejas(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS motivos_de_quejas (
-              id_motivo INT UNIQUE AUTO_INCREMENT NOT NULL,
-                                
-              motivo VARCHAR(30) NOT NULL,
-                                
-              PRIMARY KEY (`id_motivo`))""")
-            
-            print("la tabla motivos_de_quejas creada ")
-
-        except pymysql.Error as err:
-            print("la tabla motivos_de_quejas no fue creada ",err)
-
-    # def tabla_queja_has_motivos(self):
-    #     try:
-    #         self.cursor.execute("""
-    #         CREATE TABLE IF NOT EXISTS queja_has_motivos (
-    #           id_registro INT NOT NULL AUTO_INCREMENT,
-    #           id_queja INT NOT NULL,
-    #           id_motivo INT NOT NULL,
-    #           INDEX `fk_queja_has_motivos_buzon_quejas1_idx` (`id_queja` ASC) VISIBLE,
-    #           INDEX `fk_queja_has_motivos_motivos_de_quejas1_idx` (`id_motivo` ASC) VISIBLE,
-    #           PRIMARY KEY (`id_registro`),
-    #           CONSTRAINT `fk_queja_has_motivos_buzon_quejas1`
-    #             FOREIGN KEY (`id_queja`)
-    #             REFERENCES `peertopeer`.`buzon_quejas` (`id_buzon_quejas`)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION,
-    #           CONSTRAINT `fk_queja_has_motivos_motivos_de_quejas1`
-    #             FOREIGN KEY (`id_motivo`)
-    #             REFERENCES `peertopeer`.`motivos_de_quejas` (`id_motivo`)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION)
-    #         ENGINE = InnoDB""")
-    #         print("la tabla queja_has_motivos creada ")
-    #     except pymysql.Error as er:
-    #         print("la tabla queja_has_motivos no fue creada ",er)
-
-    # def tabla_queja_has_razon_extra(self):
-    #     try:
-    #         self.cursor.execute("""
-    #         CREATE TABLE IF NOT EXISTS queja_has_razon_extra (
-    #           `id_registro` INT NOT NULL AUTO_INCREMENT,
-    #           `razon` VARCHAR(250) NOT NULL,
-    #           `id_queja` INT NOT NULL,
-    #           INDEX `fk_queja_has_razon_extra_buzon_quejas1_idx` (`id_queja` ASC) VISIBLE,
-    #           PRIMARY KEY (`id_registro`),
-    #           CONSTRAINT `fk_queja_has_razon_extra_buzon_quejas1`
-    #             FOREIGN KEY (`id_queja`)
-    #             REFERENCES `peertopeer`.`buzon_quejas` (`id_buzon_quejas`)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION)
-    #         ENGINE = InnoDB""")
-    #         print("la tabla queja_has_razon_extra creada ")
-    #     except pymysql.Error as er:
-    #         print("la tabla queja_has_razon_extra no fue creada ",er)
-
-    def tabla_bloqueados(self):
-        try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS bloqueados (
-              id_bloqueo` INT NOT NULL AUTO_INCREMENT,
-              id_usuario_bloqueado INT NOT NULL,
-                                
-              PRIMARY KEY (id_bloqueo),
-              FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario)""")
-            print("la tabla bloqueados creada ")
-        except pymysql.Error as err:
-            print("la tabla bloqueados no fue creada ",err)
-
-    # def tabla_preguntas(self):
-    #     try:
-    #         self.cursor.execute("""
-    #         CREATE TABLE IF NOT EXISTS preguntas (
-    #           `id_preguntas` INT NOT NULL AUTO_INCREMENT,
-    #           `pregunta` VARCHAR(256) NOT NULL,
-    #           `fecha` DATE NOT NULL,
-    #           `hora` TIME NOT NULL,
-    #           `solucionada` TINYINT NOT NULL,
-    #           `id_seccion` INT NOT NULL,
-    #           PRIMARY KEY (`id_preguntas`),
-    #           INDEX `fk_preguntas_seccion1_idx` (`id_seccion` ASC) VISIBLE,
-    #           CONSTRAINT `fk_preguntas_seccion1`
-    #             FOREIGN KEY (`id_seccion`)
-    #             REFERENCES `peertopeer`.`seccion` (`id_seccion`)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION)
-    #         ENGINE = InnoDB""")
-    #         print("la tabla preguntas creada ")
-    #     except pymysql.Error as er:
-    #         print("la tabla preguntas no fue creada ",er)
-
-    # def tabla_pregunta_has_respuestas(self):
-    #     try:
-    #         self.cursor.execute("""
-    #         CREATE TABLE IF NOT EXISTS pregunta_has_respuestas (
-    #           `id_respuesta` INT NOT NULL AUTO_INCREMENT,
-    #           `id_pregunta` INT NOT NULL,
-    #           `id_salvador` INT NOT NULL,
-    #           `mensaje` VARCHAR(250) NOT NULL,
-    #           `fecha` DATE NOT NULL,
-    #           `hora` TIME NOT NULL,
-    #           `likes` INT NOT NULL,
-    #           `fijado` TINYINT NOT NULL,
-    #           PRIMARY KEY (`id_respuesta`),
-    #           INDEX `fk_pregunta_has_respuestas_preguntas1_idx` (`id_pregunta` ASC) VISIBLE,
-    #           INDEX `fk_pregunta_has_respuestas_perfil1_idx` (`id_salvador` ASC) VISIBLE,
-    #           CONSTRAINT `fk_pregunta_has_respuestas_preguntas1`
-    #             FOREIGN KEY (`id_pregunta`)
-    #             REFERENCES `peertopeer`.`preguntas` (`id_preguntas`)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION,
-    #           CONSTRAINT `fk_pregunta_has_respuestas_perfil1`
-    #             FOREIGN KEY (`id_salvador`)
-    #             REFERENCES `peertopeer`.`perfil` (`id_usuario`)
-    #             ON DELETE NO ACTION
-    #             ON UPDATE NO ACTION)
-    #         ENGINE = InnoDB""")
-    #         print("la tabla pregunta_has_respuestas creada ")
-    #     except pymysql.Error as er:
-    #         print("la tabla pregunta_has_respuestas no fue creada ",er)
-#/////////////////////////////////////////////////////////////////////////
-#                               F I N  T A B L A S
-#///////////////////////////////////////////////////////////////////////////
 cx=None
+
+
 if(__name__=="__main__"):
-    # cx=CC(('perfil','categoria','tema','subtema'))
-    # cx=CC(('perfil'))
-    cx=CC()
+    # cx=CC(('perfil','categoria','tema','subtema')) # con esta linea eliminas todo con excepcion de las tablas ahi mencionadas
+    # cx=CC(('perfil')) # con esta linea reinicias todo, con excepcion de la tabla 'perfil'
+    # # cx=CC(('')) #con esta linea restauras toda la bd
+    cx=CC() # inicio normal sin autodestruccion
     input("Eviando que sierre...")
