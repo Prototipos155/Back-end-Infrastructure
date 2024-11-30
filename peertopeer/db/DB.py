@@ -204,9 +204,10 @@ class CC():
             #no quiero que insertes
             return 
         
-        print("############rmpezaron los inserts")
+        print("############ermpezaron los inserts")
         #funiones que haran los inserts
-        inserts=(codigo_insert_Roles)
+        inserts=(codigo_insert_Imagenes)
+        # inserts=(codigo_insert_Roles,codigo_insert_Imagenes)
         self.ejecutarCreaciones(inserts,True)
 
     @staticmethod
@@ -226,6 +227,24 @@ class CC():
         # print(f"('{nombre_Materia}',' desc ','{tema}','{subtema}')")
         self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,tema,subtema))
 
+    def ejecutarQuery(self,query,commit=False,fetch=None):
+        try:
+            self.cursor.execute(query)
+            if(commit):
+                self.connection.commit()
+            if(fetch==None):
+                return True
+            
+            if(fetch==1):
+                return self.cursor.fetchone()
+            if(fetch==0):
+                return self.cursor.fetchall()
+            if(fetch>0):
+                return self.cursor.fetchmany(fetch)
+        except Exception as ex:
+            print("#--",ex)
+            return False
+
 cx=None
 
 
@@ -235,3 +254,14 @@ if(__name__=="__main__"):
     # # cx=CC(('')) #con esta linea restauras toda la bd
     cx=CC() # inicio normal sin autodestruccion
     input("Eviando que sierre...")
+    # from io import BytesIO
+    # from PIL import Image
+
+    # res=cx.ejecutarQuery("select * from fotos_perfil",fetch=0)
+    # for r in res:
+    #     print("-",r[1][:20],"...")
+    #     try:
+    #         Image.open(BytesIO(r[1])).show()
+    #     except Exception as ex:
+    #         print("fallido")
+    #         pass

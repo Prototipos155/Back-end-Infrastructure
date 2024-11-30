@@ -1,5 +1,5 @@
 import eventlet.wsgi
-from flask import Flask, render_template, current_app, redirect, request, session, url_for,Response, send_file, flash,send_from_directory,send_file
+from flask import Flask, render_template, current_app, redirect, request, session, url_for,Response, send_file, flash,send_from_directory,send_file,make_response
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_socketio import join_room, leave_room, send, SocketIO
 from functools import wraps
@@ -67,7 +67,7 @@ def load_user(id_usuario):
     
     try:
     
-        cbd.cursor.execute("SELECT id_usuario, rol, nombre_usuario, correo, cuenta_activa FROM perfil WHERE id_usuario = %s", (id_usuario,))
+        cbd.cursor.execute("SELECT id_usuario, id_rol, nombre_usuario, correo, cuenta_activa FROM perfil WHERE id_usuario = %s", (id_usuario,))
         current_user_data = cbd.cursor.fetchone()
         print("Datos de usuario: ", current_user_data)
 
@@ -92,7 +92,7 @@ def admin_required(f):
         if not current_user.is_authenticated:
             return redirect(url_for('inicio'))
 
-        elif current_user.rol != 'administrador':
+        elif current_user.rol != 1:
             errores ['mensaje'] = "No tienes permiso para acceder a esta página.", "warning"
             return redirect(url_for('inicio'))
         return f(*args, **kwargs)
@@ -103,7 +103,8 @@ def admin_required(f):
 def apply_csp(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["X-Frame-Options"] = "DENY"
+    # response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers['Content-Security-Policy'] = (
     "default-src 'self'; "
     "script-src 'self' 'nonce-unique_nonce_value' https://cdn.socket.io https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js; "
@@ -312,7 +313,9 @@ def vericorreo_registro():
             contraseña_encript = payload['contraseña_encript']
             
             try:
-                cbd.cursor.execute("INSERT INTO perfil (rol,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES ('usuario', %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
+                print("#_#_#_#_#_#_#_=QUERY=INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
+
+                cbd.cursor.execute("INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
 
                 return render_template("acceso/iniciar_sesion.html", mensaje1 = "Registro exitoso",form_data={})
@@ -362,7 +365,7 @@ def iniciar_sesion():
                 return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
 
             try:
-                cbd.cursor.execute("SELECT id_usuario, rol, nombre_usuario, correo, telefono, contraseña_encript, cuenta_activa FROM perfil WHERE nombre_usuario = %s AND correo = %s", (nombre_usuario, correo))
+                cbd.cursor.execute("SELECT id_usuario, id_rol, nombre_usuario, correo, telefono, contraseña_encript, cuenta_activa FROM perfil WHERE nombre_usuario = %s AND correo = %s", (nombre_usuario, correo))
                 perfil_exist = cbd.cursor.fetchone()
 
                 if perfil_exist is None:
@@ -778,18 +781,31 @@ def inicio_biblioteca():
 
 @app.route('/docs')
 def documentos():
-    cbd.cursor.execute("select id_documento,nombre_archivo from documentos")
+    print("#_#_#_#_ ENTRASTE A DOCS")
+    # cbd.cursor.execute("select id_documento,nombre_archivo from documentos")
+    # docs=cbd.cursor.fetchall()
+    cbd.cursor.execute("select id_foto,foto from fotos_perfil")
     docs=cbd.cursor.fetchall()
+
 
     return render_template("biblioteca/documentos.html",docs=docs)
     
 @app.route('/uploads/<int:id>')
 def view_file(id):
-    cbd.cursor.execute("select nombre_archivo,documento from documentos where id=%s"%(id))
+    cbd.cursor.execute("select foto from fotos_perfil where id_foto=%s"%(id))
     doc=cbd.cursor.fetchone()
     if(doc):
-        return send_file(io.BytesIO(doc['documento']),nombre=doc['nombre_archivo'],as_attachment=True)
+        response= make_response(doc[0])
+        response.headers.set('Content-Type','image/webp')
+        response.headers.set('Content-Disposition','inline')
+        return response
+        # return send_file(io.BytesIO(doc[0]),as_attachment=True)
     return "DOC NO ENCONTRADO"
+    # cbd.cursor.execute("select nombre_archivo,documento from documentos where id=%s"%(id))
+    # doc=cbd.cursor.fetchone()
+    # if(doc):
+    #     return send_file(io.BytesIO(doc['documento']),nombre=doc['nombre_archivo'],as_attachment=True)
+    # return "DOC NO ENCONTRADO"
 
 def separarSubCategorias(tupla):
     nuevoOrden=()
