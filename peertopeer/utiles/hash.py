@@ -9,7 +9,7 @@ load_dotenv()
 
 class Encrypt:
         
-    def encriptar_gcm(self, encriptar: str, password: str = os.getenv("PASSWORD3")) -> str:
+    def encrypted_gcm(self, encriptar: str, password: str = os.getenv("PASSWORD3")) -> str:
         salt = os.urandom(AES.block_size)
         private_key = hashlib.scrypt(password.encode(), salt=salt, n=2**14, r=8, p=1, dklen=32)
 
@@ -37,7 +37,7 @@ class Encrypt:
         return cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8')
 
 
-    def verificar_gcm(self, encriptar: str, encrypted_data: str, password: str = os.getenv("PASSWORD3")) -> bool:
+    def verify_gcm(self, encriptar: str, encrypted_data: str, password: str = os.getenv("PASSWORD3")) -> bool:
         # Asegura que encrypted_data tenga el padding adecuado para ser decodificado
         encrypted_data += "=" * ((4 - len(encrypted_data) % 4) % 4)
         
@@ -62,25 +62,19 @@ class Encrypt:
             return encriptar == decrypted.decode('utf-8')
         except (ValueError, KeyError):
             return False
-        
-    # Instancia de la clase que contiene los métodos encrypt_gcm y verify_gcm
-    
-"""# Instancia de la clase de cifrado
+            
+"""
 encryption_manager = Encrypt()
 
-# Solicita al usuario ingresar el texto original
 texto_original = input("Ingresa el texto que deseas cifrar: ")
 password = os.getenv("PASSWORD3")  # Asegúrate de tener "PASSWORD3" en las variables de entorno
 
-# Cifrado del texto
 encrypted_text = encryption_manager.encriptar_gcm(texto_original, password)
 print("Texto cifrado:", encrypted_text)
 
-# Verificación positiva: debería ser True
 resultado_verificacion_correcta = encryption_manager.verificar_gcm(texto_original, encrypted_text, password)
 print("Verificación correcta:", resultado_verificacion_correcta)  # Espera True
 
-# Condicional de verificación
 if resultado_verificacion_correcta:
     print("La verificación fue exitosa.")
 else:

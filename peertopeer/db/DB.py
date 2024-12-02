@@ -19,7 +19,7 @@ def abrirArchivo(archivo,modo):
 class CC():
     def __init__(self,auto_destruir=None):
         try:
-            self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp, db='peertopeer')
+            self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp, db='knowledgefield')
             self.cursor = self.connection.cursor()
             print("\n Conexion exitosa")
 
@@ -36,9 +36,9 @@ class CC():
         except pymysql.Error as err:
             self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp)
             self.cursor = self.connection.cursor()
-            self.cursor.execute("CREATE DATABASE IF NOT EXISTS peertopeer")
+            self.cursor.execute("CREATE DATABASE IF NOT EXISTS knowledgefield")
             self.connection.commit()
-            self.cursor.execute("USE peertopeer")
+            self.cursor.execute("USE knowledgefield")
             print("\nCreacion exitosa")
 
             try:
@@ -56,7 +56,7 @@ class CC():
             adicional+=f"and table_name!='{tabla}' "
 
         try:
-            self.cursor.execute(f"select table_name from INFORMATION_SCHEMA.tables where table_schema='peertopeer' {adicional} order by create_time desc ;")
+            self.cursor.execute(f"select table_name from INFORMATION_SCHEMA.tables where table_schema='knowledgefield' {adicional} order by create_time desc ;")
         except Exception as ex:
             print("Error en InformationSChema ",ex)
         tablas_borrar=self.cursor.fetchall()

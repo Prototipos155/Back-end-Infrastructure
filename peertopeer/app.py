@@ -11,6 +11,7 @@ from string import ascii_uppercase
 from flask import request, jsonify
 
 from db.DB import CC
+from utiles.email.email_validation import verify_email
 from utiles.hash import Encrypt
 
 import eventlet
@@ -28,7 +29,8 @@ import re
 
 load_dotenv()
 cbd = CC()
-encriptado = Encrypt()
+verify_domain = verify_email()
+encrypted = Encrypt()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("PASSWORD4")
@@ -38,7 +40,7 @@ UPLOAD_FOLDER=os.path.join(os.getcwd(),'uploads')
 app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
 
 login_manager = LoginManager(app)
-login_manager.login_view = 'iniciar_sesion'
+login_manager.login_view = 'login'
 
 socketio = SocketIO(app, async_mode="eventlet")
 logging.basicConfig(level=logging.DEBUG) 
@@ -48,36 +50,36 @@ socketio = SocketIO(app, logger=True, engineio_logger=True)
 rooms = {}
 
 class Usuario(UserMixin):
-    def __init__(self, id_usuario, rol, nombre_usuario, correo, cuenta_activa):
+    def __init__(self, id_usuario, rol, username, email, active_account):
         self.id = id_usuario
         self.rol = rol
-        self.nombre_usuario = nombre_usuario
-        self.correo = correo
-        self.cuenta_activa = cuenta_activa 
+        self.username = username
+        self.email = email
+        self.active_account = active_account 
 
     def get_id(self):
         return str(self.id)
 
     def is_active(self):
-        return self.cuenta_activa == 1
+        return self.active_account == 1
 
 
 @login_manager.user_loader
-def load_user(id_usuario):
+def load_user(id_user):
     
     try:
     
-        cbd.cursor.execute("SELECT id_usuario, id_rol, nombre_usuario, correo, cuenta_activa FROM perfil WHERE id_usuario = %s", (id_usuario,))
+        cbd.cursor.execute("SELECT id_user, id_roleeee, username, email, active_account FROM perfil WHERE id_user = %s", (id_user,))
         current_user_data = cbd.cursor.fetchone()
         print("Datos de usuario: ", current_user_data)
 
         if current_user_data:
             return Usuario(
-                id_usuario=current_user_data[0],
+                id_user=current_user_data[0],
                 rol=current_user_data[1],
-                nombre_usuario=current_user_data[2],
-                correo=current_user_data[3],
-                cuenta_activa=current_user_data[4]
+                username=current_user_data[2],
+                email=current_user_data[3],
+                active_account=current_user_data[4]
             )
         return None
     
@@ -124,175 +126,164 @@ def inicio():
 
     return render_template("inicio.html")
 
-def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
-    errores = {}
-    valido = True
-    nombreregex = r"[^a-zA-Z\s]"
-    apodoregex = r"[^\w.-]"
-    correoregex = r"^[\w.]+@[a-zA-Z0-9]+\.+[a-zA-Z.]{1,}$"
-    contraregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.-_])([\w!.-_]|[^\s]){8,}$"
+def validaciones(names,surnames,username,phone_number,email,password):
+    errors = {}
+    valid = True
+    nameregex = r"[^a-zA-Z\s]"
+    usernameregex = r"[^\w.-]"
+    emailregex = r"^(?!.*\.\.)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    passwordregex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!.-_])([\w!.-_]|[^\s]){8,}$"
 
-    if nombres.strip()=="" or len(nombres.strip())>50 or re.search(nombreregex, nombres):
-        valido = False
-        errores['mensaje01'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
-        errores['num_fieldset']= 0
+    if names.strip()=="" or len(names.strip())>50 or re.search(nameregex, names):
+        valid = False
+        errors['mensaje01'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
+        errors['num_fieldset']= 0
 
-    if apellidos.strip()=="" or len(apellidos.strip())>50 or re.search(nombreregex, apellidos):
-        valido = False
-        errores['mensaje02'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
-        errores['num_fieldset']= 0
+    if surnames.strip()=="" or len(surnames.strip())>50 or re.search(nameregex, surnames):
+        valid = False
+        errors['mensaje02'] = "Campo requerido, no más de 50 caracteres y sin caracteres especiales"
+        errors['num_fieldset']= 0
 
-    elif nomusuario.strip()=="" or len(nomusuario.strip())>20 or re.search(apodoregex, nomusuario):
-        valido = False
-        errores['mensaje1'] = "Campo requerido, no más de 20 caracteres y sin espacios ni caracteres especiales"
-        errores['num_fieldset']= 1
+    elif username.strip()=="" or len(username.strip())>20 or re.search(usernameregex, username):
+        valid = False
+        errors['mensaje1'] = "Campo requerido, no más de 20 caracteres y sin espacios ni caracteres especiales"
+        errors['num_fieldset']= 1
 
-    elif telefono.strip()==""  or len(telefono.strip())<10 or len(telefono.strip())>13 or not telefono.isdigit():
-        valido = False
-        errores['mensaje2'] = "Campo de teléfono requerido, entre 10 y 13 caracteres"
-        errores['num_fieldset']= 2
+    elif phone_number.strip()==""  or len(phone_number.strip())<10 or len(phone_number.strip())>13 or not phone_number.isdigit():
+        valid = False
+        errors['mensaje2'] = "Campo de teléfono requerido, entre 10 y 13 caracteres"
+        errors['num_fieldset']= 2
 
-    elif correo.strip()==""  or len(correo.strip())<10 or len(correo.strip())>150 or not re.search(correoregex, correo):
-        valido = False
-        errores['mensaje3'] = "Campo de correo requerido, entre 10 y 150 caracteres"
-        errores['num_fieldset']= 2
+    elif email.strip()==""  or len(email.strip())<10 or len(email.strip())>150 or not re.search(emailregex, email):
+        valid = False
+        errors['mensaje3'] = "Campo de email requerido, entre 10 y 150 caracteres"
+        errors['num_fieldset']= 2
 
-    elif contraseña.strip()==""  or len(contraseña.strip())<8 or len(contraseña.strip())>30 or not re.search(contraregex, contraseña):
-        valido = False
-        errores['mensaje4'] = "Contraseña requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial (!.-_) y sin espacios"
-        errores['num_fieldset']= 3
+    elif password.strip()==""  or len(password.strip())<8 or len(password.strip())>30 or not re.search(passwordregex, password):
+        valid = False
+        errors['mensaje4'] = "password requerida, entre 8 y 30 caracteres, con una letra mayúscula, una minúscula, un número, un caracter especial (!.-_) y sin espacios"
+        errors['num_fieldset']= 3
 
-    return valido, errores
+    return valid, errors
 
 
-@app.route ('/registro',  methods=['GET', 'POST'])
-def registro():
+@app.route ('/registration',  methods=['GET', 'POST'])
+def registration():
 
     print(f"metodo en uso: {request.method}")
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == "POST":
 
-        nombres = request.form.get('nombres')
-        apellidos = request.form.get('apellidos')
-        nombre_usuario = request.form.get('nombre_usuario')
-        telefono = request.form.get('telefono')
-        correo = request.form.get('correo')
-        contraseña = request.form.get('contraseña')
-        confirmcontra = request.form.get('confirmcontra')
+        names = request.form.get('names')
+        surnames = request.form.get('surnames')
+        username = request.form.get('username')
+        phone_number = request.form.get('phone_number')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
 
         try:            
             form_data = {
-                'nombres': nombres,
-                'apellidos': apellidos,
-                'nombre_usuario': nombre_usuario,
-                'telefono': telefono,
-                'correo': correo
+                'names': names,
+                'surnames': surnames,
+                'username': username,
+                'phone_number': phone_number,
+                'email': email
             }
 
             errores = {}
     
-            valido, errores = validaciones(nombres, apellidos, nombre_usuario, telefono, correo, contraseña)
-            if not valido:
-                return render_template("acceso/registro.html", **errores,  form_data=form_data)
+            valid, errores = validaciones(names, surnames, username, phone_number, email, password)
+            if not valid:
+                return render_template("acceso/registration.html", **errores,  form_data=form_data)
 
             try:
-                cbd.cursor.execute("SELECT nombre_usuario FROM perfil WHERE nombre_usuario = %s", (nombre_usuario,))
-                nombre_usuario_exist = cbd.cursor.fetchone()
+                cbd.cursor.execute("SELECT username FROM perfil WHERE username = %s", (username,))
+                username_exist = cbd.cursor.fetchone()
 
-                cbd.cursor.execute("SELECT correo FROM perfil WHERE correo = %s", (correo,))
-                correo_exist = cbd.cursor.fetchone()
+                cbd.cursor.execute("SELECT email FROM perfil WHERE email = %s", (email,))
+                email_exist = cbd.cursor.fetchone()
 
-                cbd.cursor.execute("SELECT telefono FROM perfil WHERE telefono = %s", (telefono,))
-                telefono_exist = cbd.cursor.fetchone()
+                cbd.cursor.execute("SELECT phone_number FROM perfil WHERE phone_number = %s", (phone_number,))
+                phone_number_exist = cbd.cursor.fetchone()
+                
+            except pymysql.Error as err:
+                print(f"Error en la base de datos: {err}")
+                errores['mensajes_db'] = "Hubo un problema en el registro, intente nuevamente"
 
                 error_en_login=None
 
-                if nombre_usuario_exist:
+            try:            
+                if username_exist:
                     errores['mensaje1'] = "Este nombre de usuario ya está en uso"
                     error_en_login=1
 
-                elif telefono_exist:
+                elif phone_number_exist:
                     errores["mensaje2"] = "Este teléfono ya está en uso"
                     error_en_login=2
 
-                elif correo_exist:
-                    errores["mensaje3"] = "Este correo ya está en uso" 
+                elif email_exist:
+                    errores["mensaje3"] = "Este email ya está en uso" 
                     error_en_login=2
                 
-                elif contraseña != confirmcontra:
-                    errores["mensaje4"] =  "Las contraseñas que ingresaste no coinciden"
+                elif password != confirm_password:
+                    errores["mensaje4"] =  "Las passwords que ingresaste no coinciden"
                     error_en_login=3
 
                 else:        
-                    confirmcontra1 = str(confirmcontra)
+                    confirm_password1 = str(confirm_password)
                     
                     cpe = os.getenv("PASSWORD3")
-
-                    contraseña_encript = encriptado.encriptar_gcm(confirmcontra1, cpe)
+                    
+                    encrypted_password = encrypted.encrypted_gcm(confirm_password1, cpe)
 
                     payload = {
-                    'nombres' : nombres,
-                    'apellidos' : apellidos,
-                    'nombre_usuario' : nombre_usuario,
-                    'telefono' : telefono,
-                    'correo' : correo,
-                    'contraseña_encript' : contraseña_encript,
+                    'names' : names,
+                    'surnames' : surnames,
+                    'username' : username,
+                    'phone_number' : phone_number,
+                    'email' : email,
+                    'encrypted_password' : encrypted_password,
                     'exp' : datetime.now(timezone.utc) + timedelta(hours=1)
                     }
                     
-                    tokenregistro = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
+                    tokenregistro = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256') 
+                    
+            except jwt.DecodeError as err:
+                print("El error de jwt es: ", err)
+                
+            except jwt.InvalidTokenError as err:
+                print("El error de jwt es: ", err)
+                
+            try:
+                verify_domain.send_email(email, username)
+                print("se envio el correo")
+                
+                session['tokenregistro'] = tokenregistro
+                
+                return render_template ("acceso/vericorreo_registration.html", mensaje1="Ingrese el código que le enviamos por correo")
+            
+            except Exception as err:
+                print(f"el error de este pedo es: {err}")
 
-                    remitente = "peertopeerverificacion@gmail.com"
-                    password = os.getenv("PASSWORD")
-                    destinatario = (f"{correo}")
-                    codigoveri = random.randint(100000, 999999)
+            print("quiere retonar el pendejo")     
 
-                    asunto = "Correo de Verificación"
-                    body = f"Hola, {nombre_usuario}. El código para verificar que ingresaste un correo que está en tu propiedad es: {codigoveri}"
-
-                    try:
-                                    
-                        em = EmailMessage()
-                        em["From"] = remitente
-                        em["To"] = destinatario
-                        em["Subject"] = asunto
-
-                        em.set_content(body)
-
-                        context = ssl.create_default_context()
-
-                        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = context) as smtp:
-                            smtp.login(remitente, password)
-                            smtp.sendmail(remitente, destinatario, em.as_string())
-
-                    except smtplib.SMTPException as err:
-                        errores['mensaje_email'] = f"No se pudo enviar el correo: {err}"
-
-                    session['codigoveri'] = codigoveri
-                    session['tokenregistro'] = tokenregistro
-
-                    return render_template ("acceso/vericorreo_registro.html", mensaje1="Ingrese el código que le enviamos por correo")
-                        
-            except pymysql.Error as err:
-                print(f"Error en la base de datos: {err}")
-                errores['mensajes_db'] = "Hubo un problema en el registro, intente nuevamente"     
-
-            if(error_en_login):
+            """if(error_en_login):
                 print("NUM_FIELDSET ERROR",error_en_login)
-                errores['num_fieldset']=error_en_login
+                errores['num_fieldset']=error_en_login"""
 
-            return render_template("acceso/registro.html", **errores,  form_data=form_data)    
+            return render_template("acceso/registration.html", **errores,  form_data=form_data)    
            
         except pymysql.Error as err:
-            return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
+            return render_template("acceso/registration.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
-    return render_template ("acceso/registro.html",form_data={})
+    return render_template ("acceso/registration.html",form_data={})
 
 
-@app.route ('/vericorreo_registro', methods=['GET', 'POST'])
-def vericorreo_registro():
+@app.route ('/v_e_r', methods=['GET', 'POST'])
+def v_e_r():
 
-    codigoveri = session.get('codigoveri')
+    verification_code = session.get('verification_code')
     tokenregistro = session.get('tokenregistro')
     
     if request.method == "POST":
@@ -300,61 +291,61 @@ def vericorreo_registro():
         codigo = request.form.get('codigo')
         
         if not (str(codigo) == str(codigoveri)):
-            return render_template("acceso/vericorreo_registro.html", mensaje1= "Los códigos de verificación no coinciden")
+            return render_template("acceso/v_e_r.html", mensaje1= "Los códigos de verificación no coinciden")
 
         try:
             payload = jwt.decode(tokenregistro, os.getenv("PASSWORD2"), algorithms=['HS256'])
 
-            nombres = payload['nombres']
-            apellidos = payload['apellidos']
-            nombre_usuario = payload['nombre_usuario']
-            telefono = payload['telefono']
-            correo = payload['correo']
-            contraseña_encript = payload['contraseña_encript']
+            names = payload['names']
+            surnames = payload['surnames']
+            username = payload['username']
+            phone_number = payload['phone_number']
+            email = payload['email']
+            encrypted_password = payload['encrypted_password']
             
             try:
-                print("#_#_#_#_#_#_#_=QUERY=INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
+                print("INSERT INTO perfil (id_role, id_foto_perfil,  names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( names, surnames, username, phone_number, email, encrypted_password ))
 
-                cbd.cursor.execute("INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
+                cbd.cursor.execute("INSERT INTO perfil (id_roleeeee, id_foto_perfil,  names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( names, surnames, username, phone_number, email, encrypted_password ))
                 cbd.connection.commit()
 
-                return render_template("acceso/iniciar_sesion.html", mensaje1 = "Registro exitoso",form_data={})
+                return render_template("acceso/login.html", mensaje1 = "Registro exitoso",form_data={})
                 
             except pymysql.Error as er:
                 print(er)
-                return render_template("acceso/vericorreo_registro.html", mensaje1 = "No se pudieron insertar los valores del registro")
+                return render_template("acceso/v_e_r.html", mensaje1 = "No se pudieron insertar los valores del registro")
 
         except jwt.InvalidTokenError:
             print("Token inválido.")
-            return render_template("acceso/vericorreo_registro.html")
+            return render_template("acceso/v_e_r.html")
 
-    return render_template("acceso/vericorreo_registro.html")
+    return render_template("acceso/v_e_r.html")
 
 
-@app.route ('/iniciar_sesion', methods=['GET', 'POST'])
-def iniciar_sesion():
+@app.route ('/login', methods=['GET', 'POST'])
+def login():
 
     print(f"metodo en uso: {request.method}")
 
     form_data = request.form.to_dict() if request.method == 'POST' else {}
-    if request.method == "POST" and 'correo' in request.form and 'nombre_usuario' in request.form:
+    if request.method == "POST" and 'email' in request.form and 'username' in request.form:
 
-        correo = request.form.get('correo')
-        nombre_usuario = request.form.get('nombre_usuario')
-        contraseña = request.form.get('contraseña')
+        email = request.form.get('email')
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-        print(correo, nombre_usuario, contraseña)
+        print(email, username, password)
         
         try:            
             form_data = {
-                'correo': correo,
-                'nombre_usuario': nombre_usuario
+                'email': email,
+                'username': username
             }
             
             errores = {}
 
             indexError=-1
-            for casilla in (correo,nombre_usuario,contraseña):
+            for casilla in (email,username,password):
                 if casilla.strip()=="":
                     indexError+=1
                     break
@@ -362,43 +353,43 @@ def iniciar_sesion():
                 errores['mensajeFieldset']= "Todos los campos son obligatorios"
                 errores['num_fieldset']=indexError
                 print("entro aca")
-                return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
+                return render_template("acceso/login.html", **errores, form_data=form_data)
 
             try:
-                cbd.cursor.execute("SELECT id_usuario, id_rol, nombre_usuario, correo, telefono, contraseña_encript, cuenta_activa FROM perfil WHERE nombre_usuario = %s AND correo = %s", (nombre_usuario, correo))
+                cbd.cursor.execute("SELECT id_user, id_role, username, email, phone_number, encrypted_password, active_account FROM perfil WHERE username = %s AND email = %s", (username, email))
                 perfil_exist = cbd.cursor.fetchone()
 
                 if perfil_exist is None:
                     errores ["mensajeFieldset"] = "El usuario no existe."
                     errores['num_fieldset']=0
                     print("el usuario no existe")
-                    return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
+                    return render_template("acceso/login.html", **errores, form_data=form_data)
                 
                 id_usuario = perfil_exist[0]
                 rol = perfil_exist[1]
-                nombre_usuario_exist = perfil_exist[2]
-                correo_exist = perfil_exist[3]
-                telefono_exist = perfil_exist[4]
-                contraseña_encript = perfil_exist[5]  
-                cuenta_activa = perfil_exist[6]
+                username_exist = perfil_exist[2]
+                email_exist = perfil_exist[3]
+                phone_number_exist = perfil_exist[4]
+                encrypted_password = perfil_exist[5]  
+                active_account = perfil_exist[6]
 
                 print(perfil_exist)
 
-                if (nombre_usuario == nombre_usuario_exist and correo == correo_exist):
+                if (username == username_exist and email == email_exist):
                     
                     try:
                         cpe = os.getenv("PASSWORD3")
-                        comprobacion_contraseña = encriptado.verificar_gcm(contraseña, contraseña_encript, cpe)
+                        comprobacion_password = encrypted.verify_gcm(password, encrypted_password, cpe)
                         
-                        if comprobacion_contraseña:
+                        if comprobacion_password:
                             
                             print("si llego al token")
                             payload = {
                             'id_usuario': id_usuario,
                             'rol': rol,
-                            'nombre_usuario': nombre_usuario,
-                            'correo' : correo,
-                            'cuenta_activa': cuenta_activa,
+                            'username': username,
+                            'email' : email,
+                            'active_account': active_account,
                             'exp': datetime.now(timezone.utc) + timedelta(minutes=10) 
                             }
 
@@ -407,12 +398,12 @@ def iniciar_sesion():
 
                             remitente = "peertopeerverificacion@gmail.com"
                             password = os.getenv("PASSWORD")
-                            destinatario = correo
+                            destinatario = email
                             codigoveri = random.randint(100000, 999999)
 
                             try:
-                                asunto = "Correo de Verificación"
-                                body = (f"Hola, {nombre_usuario}. Tu código para verificar que ingresaste un correo de tu propiedad es: {codigoveri}")
+                                asunto = "email de Verificación"
+                                body = (f"Hola, {username}. Tu código para verificar que ingresaste un email de tu propiedad es: {codigoveri}")
                                                                                 
                                 em = EmailMessage()
                                 em["From"] = remitente
@@ -427,42 +418,42 @@ def iniciar_sesion():
                                     smtp.sendmail(remitente, destinatario, em.as_string())
 
                             except smtplib.SMTPException as err:
-                                print(f"El correo no ha podido ser enviado: {err}")
-                                return render_template("acceso/iniciar_sesion.html", mensaje="Error al enviar el correo de verificación.", form_data=form_data)
+                                print(f"El email no ha podido ser enviado: {err}")
+                                return render_template("acceso/login.html", mensaje="Error al enviar el email de verificación.", form_data=form_data)
 
                             session['tokenacceso'] = tokenacceso
                             session['codigoveri'] = codigoveri
-                            return redirect(url_for('vericorreo_acceso'))
+                            return redirect(url_for('veriemail_acceso'))
                         
                         else:
-                            print("Contraseña incorrecta")
-                            errores["mensajeFieldset"] = "Contraseña incorrecta"
+                            print("password incorrecta")
+                            errores["mensajeFieldset"] = "password incorrecta"
                             errores['num_fieldset']=2
-                            return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
+                            return render_template("acceso/login.html", **errores, form_data=form_data)
                         
                     except Exception as err:
-                        print(f"Error durante la verificación de la contraseña o generación del token: {err}")
-                        return render_template("acceso/iniciar_sesion.html", mensaje="Error interno al iniciar sesión", form_data=form_data)
+                        print(f"Error durante la verificación de la password o generación del token: {err}")
+                        return render_template("acceso/login.html", mensaje="Error interno al iniciar sesión", form_data=form_data)
 
                 else:
-                    print("El nombre de usuario o correo no coinciden.")
-                    errores ["mensajeFieldset"] = "El nombre de usuario o correo no coinciden."
+                    print("El nombre de usuario o email no coinciden.")
+                    errores ["mensajeFieldset"] = "El nombre de usuario o email no coinciden."
                     errores['num_fieldset']=0
-                    return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
+                    return render_template("acceso/login.html", **errores, form_data=form_data)
             
             except pymysql.Error as err:
                 print(f"Error de base de datos: {err}")
-                return render_template("acceso/iniciar_sesion.html", mensaje="Error al conectar con la base de datos.", form_data=form_data)
+                return render_template("acceso/login.html", mensaje="Error al conectar con la base de datos.", form_data=form_data)
             
         except pymysql.Error as err:
             print("Error en primer Try de inicioSesion")
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
-    return render_template("acceso/iniciar_sesion.html", form_data={})
+    return render_template("acceso/login.html", form_data={})
 
 
-@app.route ('/vericorreo_acceso', methods=['GET', 'POST'])
-def vericorreo_acceso():
+@app.route ('/veriemail_acces', methods=['GET', 'POST'])
+def veriemail_acceso():
 
     codigoveri = session.get('codigoveri')
     tokenacceso = session.get('tokenacceso')
@@ -481,35 +472,35 @@ def vericorreo_acceso():
                 
                 id_usuario = payload['id_usuario']
                 rol = payload['rol']
-                nombre_usuario = payload['nombre_usuario']
-                correo = payload['correo']
-                cuenta_activa = payload['cuenta_activa']
+                username = payload['username']
+                email = payload['email']
+                active_account = payload['active_account']
                 
-                if cuenta_activa == 1:
-                    usuario = Usuario(id_usuario, rol, nombre_usuario, correo, cuenta_activa)
+                if active_account == 1:
+                    usuario = Usuario(id_usuario, rol, username, email, active_account)
                     login_user(usuario)
 
-                    return render_template("inicio.html", mensaje1=f"¡Bienvenido {nombre_usuario}!")
+                    return render_template("inicio.html", mensaje1=f"¡Bienvenido {username}!")
                 
                 else:
                     print("La cuenta no está activa.")
-                    return render_template("acceso/vericorreo_acceso.html", mensaje1="La cuenta no está activa. Contacta con el administrador.")
+                    return render_template("acceso/veriemail_acceso.html", mensaje1="La cuenta no está activa. Contacta con el administrador.")
                 
             except jwt.ExpiredSignatureError:
-                return render_template("acceso/vericorreo_acceso.html", mensaje1="El token ha expirado")
+                return render_template("acceso/veriemail_acceso.html", mensaje1="El token ha expirado")
             
             except jwt.InvalidTokenError:
-                return render_template("acceso/vericorreo_acceso.html", mensaje1="El token es inválido")
+                return render_template("acceso/veriemail_acceso.html", mensaje1="El token es inválido")
             
             except Exception as err:
                 print("Error al decodificar el token:", err)
-                return render_template("acceso/vericorreo_acceso.html", mensaje1="No se pudo separar el token")
+                return render_template("acceso/veriemail_acceso.html", mensaje1="No se pudo separar el token")
         
         else:
             print("Tu código de verificación no coincide")
-            return render_template("acceso/vericorreo_acceso.html", mensaje1="Tu código de verificación no coincide")
+            return render_template("acceso/veriemail_acceso.html", mensaje1="Tu código de verificación no coincide")
 
-    return render_template("acceso/vericorreo_acceso.html")
+    return render_template("acceso/veriemail_acceso.html")
 
 
 @app.route ('/cerrarsesion')
@@ -566,9 +557,9 @@ def categoria_peticion():
                     if nombre:
                         
                         cbd.cursor.execute("SELECT nombre FROM categoria WHERE nombre = %s", (nombre,))
-                        nombre_exist = cbd.cursor.fetchone() 
+                        name_exist = cbd.cursor.fetchone() 
 
-                        if nombre_exist and nombre_exist[0] == nombre :  
+                        if name_exist and name_exist[0] == nombre :  
                             error="La categoria que ingreso ya existe"
                             #return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
                             
@@ -603,9 +594,9 @@ def categoria_peticion():
                 if nombre:
                     try:
                         cbd.cursor.execute("SELECT nombre FROM tema WHERE nombre = %s", (nombre,))
-                        nombre_exist1 = cbd.cursor.fetchone()
+                        name_exist1 = cbd.cursor.fetchone()
 
-                        if nombre_exist1 and nombre_exist1[0] == nombre:
+                        if name_exist1 and name_exist1[0] == nombre:
                             error="El tema que ingresó ya existe"
                             #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
                         else:
@@ -641,9 +632,9 @@ def categoria_peticion():
                 if nombre:
                     try:
                         cbd.cursor.execute("SELECT nombre FROM subtema WHERE nombre = %s", (nombre,))
-                        nombre_exist1 = cbd.cursor.fetchone()
+                        name_exist1 = cbd.cursor.fetchone()
 
-                        if nombre_exist1 and nombre_exist1[0] == nombre:
+                        if name_exist1 and name_exist1[0] == nombre:
                             error="El subtema que ingresó ya existe"
                             #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
                         else:
@@ -877,7 +868,7 @@ def foro():
         return current_app.login_manager.unauthorized()
 
     id_user = current_user.id
-    nombre_usuario = current_user.nombre_usuario
+    username = current_user.username
     
     if request.method == "POST":
         #nombre = request.form.get("nombre")
@@ -907,8 +898,8 @@ def foro():
 
         session["room"] = room
         session["id_usuario"] = current_user.id
-        session["nombre"] = current_user.nombre_usuario
-        #print(f"\n\n'room: ', {room}, 'nombre: ', {current_user.nombre_usuario}\n\n")
+        session["nombre"] = current_user.username
+        #print(f"\n\n'room: ', {room}, 'nombre: ', {current_user.username}\n\n")
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
@@ -928,7 +919,7 @@ def sala():
     
     cbd.cursor.execute("SELECT id_sala FROM sala WHERE codigo_sala = %s", (room))
     idsala = cbd.cursor.fetchone()
-    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.nombre_usuario,m.id_sala,m.mensaje,DATE_FORMAT(m.fecha,'%%d-%%m-%%Y'),m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
+    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.username,m.id_sala,m.mensaje,DATE_FORMAT(m.fecha,'%%d-%%m-%%Y'),m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
     mensajes = cbd.cursor.fetchall()
 
     session["id_sala"] = idsala
@@ -1031,7 +1022,7 @@ def convertirarchivos():
 @admin_required
 def crudusuariosadmin():
     try:
-        cbd.cursor.execute("SELECT id_usuario, nombre_usuario, nombres, apellidos, correo, telefono, cuenta_activa FROM perfil")
+        cbd.cursor.execute("SELECT id_usuario, username, names, surnames, email, phone_number, active_account FROM perfil")
         perfiles = cbd.cursor.fetchall()
 
     except pymysql.Error as err:
@@ -1050,11 +1041,11 @@ def changeStatusAccount(statusAcc):
 
     try: 
         if statusAcc == 1:
-            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 0 WHERE id_usuario = %s", (id_usuario))
+            cbd.cursor.execute("UPDATE perfil SET active_account = 0 WHERE id_usuario = %s", (id_usuario))
             cbd.connection.commit()
         
         elif statusAcc == 0:
-            cbd.cursor.execute("UPDATE perfil SET cuenta_activa = 1 WHERE id_usuario = %s", (id_usuario))
+            cbd.cursor.execute("UPDATE perfil SET active_account = 1 WHERE id_usuario = %s", (id_usuario))
             cbd.connection.commit()
         
     except pymysql.Error as err:
@@ -1067,7 +1058,7 @@ def changeStatusAccount(statusAcc):
 @admin_required
 def crudpeticionesadmin():
     try:
-        cbd.cursor.execute("SELECT pet.id_peticiones, pet.id_usuario, per.nombre_usuario, per.correo, pet.mensaje, pet.archivo, pet.link, pet.fecha, pet.hora FROM perfil per JOIN peticiones pet ON per.id_usuario = pet.id_usuario")
+        cbd.cursor.execute("SELECT pet.id_peticiones, pet.id_usuario, per.username, per.email, pet.mensaje, pet.archivo, pet.link, pet.fecha, pet.hora FROM perfil per JOIN peticiones pet ON per.id_usuario = pet.id_usuario")
         peticiones = cbd.cursor.fetchall()
         
         #id_peticiones = peticiones[0]

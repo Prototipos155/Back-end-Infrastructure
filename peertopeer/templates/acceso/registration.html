@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <form action="/registro" name="form-registro" id="form-registro" class="form-registro" method="post">
+    <form action="/registration" name="form-registro" id="form-registro" class="form-registro" method="post">
 
         <div class="datos">
             <fieldset class="fieldactive">
@@ -11,22 +11,26 @@
                     <h3>Registro</h3>
                 </div>
 
+                {% if mensaje %}
+                <div class="error">{{ mensaje }}</div>
+                {% endif %}
+
                 <div class="derecha">
                     {% if mensaje01 %}
                     <div class="error">{{ mensaje01 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="nombres" id="nombres" class="input"
-                            value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" placeholder=" ">
-                        <label for="nombres">Nombre(s)</label>
+                        <input class="input" type="text" name="names" id="names" class="input"
+                            value="{{ form_data['names'] if form_data['names'] else '' }}" placeholder=" ">
+                        <label for="names">Nombre(s)</label>
                     </div>
                     {% if mensaje02 %}
                     <div class="error">{{ mensaje02 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="apellidos" id="apellidos" class="input"
-                            value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}" placeholder=" ">
-                        <label for="apellidos">Apellido(s)</label>
+                        <input class="input" type="text" name="surnames" id="surnames" class="input"
+                            value="{{ form_data['surnames'] if form_data['surnames'] else '' }}" placeholder=" ">
+                        <label for="surnames">Apellido(s)</label>
                     </div>
                 </div>
             </fieldset>
@@ -41,10 +45,10 @@
                     <div class="error">{{ mensaje1 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="nombre_usuario" id="nombre_usuario" class="input"
-                            value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}"
+                        <input class="input" type="text" name="username" id="username" class="input"
+                            value="{{ form_data['username'] if form_data['username'] else '' }}"
                             placeholder=" ">
-                        <label for="nombre_usuario">Nombre de Usuario</label>
+                        <label for="username">Nombre de Usuario</label>
                     </div>
                 </div>
             </fieldset>
@@ -60,16 +64,16 @@
                     <div class="error">{{ mensaje2 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="telefono" id="telefono" class="input"
-                            value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" placeholder=" ">
-                        <label for="telefono">Teléfono</label>
+                        <input class="input" type="text" name="phone_number" id="phone_number" class="input"
+                            value="{{ form_data['phone_number'] if form_data['phone_number'] else '' }}" placeholder=" ">
+                        <label for="phone_number">Teléfono</label>
                     </div>
                     {% if mensaje3 %}
                     <div class="error">{{ mensaje3 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="correo" id="correo" class="input"
-                            value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder=" ">
+                        <input class="input" type="text" name="email" id="email" class="input"
+                            value="{{ form_data['email'] if form_data['email'] else '' }}" placeholder=" ">
                         <label>Correo</label>
                     </div>
                 </div>
@@ -84,9 +88,9 @@
                     {% if mensaje4 %}
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
-                    <div class="alminp"><input type="password" name="contraseña" id="contraseña" class="input1"
+                    <div class="alminp"><input type="password" name="password" id="password" class="input1"
                             placeholder=" ">
-                        <label for="contraseña">Contraseña</label>
+                        <label for="password">password</label>
                         <button type="button" id="togglePasswordButton" class="mostrar"></button>
                     </div>
                 </div>
@@ -101,9 +105,9 @@
                     {% if mensaje4 %}
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
-                    <div class="alminp"><input type="password" name="confirmcontra" id="confirmcontra" class="input1"
+                    <div class="alminp"><input type="password" name="confirm_password" id="confirm_password" class="input1"
                             placeholder=" ">
-                        <label for="contraseña">Confirmar Contraseña</label>
+                        <label for="password">Confirmar password</label>
                         <button type="button" id="togglePasswordButton" class="mostrar"></button>
                     </div>
                     <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
@@ -119,5 +123,5 @@
 </div>
 
 <!-- Script para diseño -->
-<script type="module" src="../static/js/diseño.js"></script>
+<script type="module" src="../static/js/design.js"></script>
 {% endblock %}

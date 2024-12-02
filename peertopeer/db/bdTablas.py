@@ -123,7 +123,7 @@ def codigo_funcion_crearArticulo():
         deterministic
         begin
             if exists(select id_subtema from subtema where id_subtema=idsubtema) 
-                and exists(select id_usuario from perfil where id_usuario=idAutor)
+                and exists(select id_user from perfil where id_user=idAutor)
                 and not exists(select id_articulo from articulo where nombre_articulo=nombre) then 
                 
                 insert into articulo(
@@ -157,12 +157,12 @@ def codigo_funcion_calificarArticulo():
                 from articulo where id_articulo=idArticulo;
                 
                 -- signal sqlstate '45000' set message_text=@calif;
-                if exists(select id_calificacion from articulo_es_calificado where id_usuario=idUsuario and id_articulo=idArticulo)then 
+                if exists(select id_calificacion from articulo_es_calificado where id_user=idUsuario and id_articulo=idArticulo)then 
                     set resultado=False;
                     leave label;
                 end if;
                 
-                if not exists(select id_usuario from perfil where id_usuario=idUsuario) 
+                if not exists(select id_user from perfil where id_user=idUsuario) 
                     or not exists(select  @num )then 
                     #no existe el usuario o el articulo
                     set resultado=False;
@@ -180,18 +180,18 @@ def codigo_funcion_calificarArticulo():
                 else
                     set @nuevaCalif=(select SacarPromedio(@calif, @num,Calif_ingresada));
                 end if;
-                -- set @txt=concat(idArticulo,id_Usuario);
+                -- set @txt=concat(idArticulo,id_user);
                 
                 set @num=@num+1;
                 
                 -- signal sqlstate '45000' set message_text=@txt;
-                insert into articulo_es_calificado(id_articulo,id_usuario,fecha) values(idArticulo,idUsuario,(select utc_timestamp()));
+                insert into articulo_es_calificado(id_articulo,id_user,fecha) values(idArticulo,idUsuario,(select utc_timestamp()));
                 update articulo set calificacion =@nuevaCalif, num_calificaciones=@num where id_articulo=idArticulo;
                 
                 if (comentario != "") then 
-                    insert into calificacion_tiene_comentario(comentario,id_usuario,id_calificacion ) 
+                    insert into calificacion_tiene_comentario(comentario,id_user,id_calificacion ) 
                         values(Comentario,idUsuario,(select id_calificacion from articulo_es_calificado 
-                        where id_articulo=idArticulo and id_usuario=IdUsuario));
+                        where id_articulo=idArticulo and id_user=IdUsuario));
                 end if;
                 set resultado=True;
             end label;
@@ -229,7 +229,7 @@ def codigo_tabla_foto_perfil():
 def codigo_tabla_rol():
     return """
     create table if not exists roles(
-	id_rol int primary key auto_increment,
+	id_role int primary key auto_increment,
     nombre varchar(30) not null,
     descripcion varchar(200) not null
     );"""
@@ -237,18 +237,18 @@ def codigo_tabla_rol():
 def codigo_tabla_perfil():
     return """
         CREATE TABLE IF NOT EXISTS perfil (
-            id_usuario INT primary key AUTO_INCREMENT NOT NULL,
-            id_rol int not null,
-            nombres VARCHAR (50) NOT NULL,
-            apellidos VARCHAR (50) NOT NULL,
-            nombre_usuario VARCHAR(20) UNIQUE NOT NULL,
-            correo VARCHAR(150) UNIQUE NOT NULL,
-            telefono VARCHAR(13) UNIQUE NOT NULL,
-            contraseña_encript VARCHAR (256) NOT NULL,
-            cuenta_activa BOOLEAN NOT NULL,
+            id_user INT primary key AUTO_INCREMENT NOT NULL,
+            id_role int not null,
+            names VARCHAR (50) NOT NULL,
+            surnames VARCHAR (50) NOT NULL,
+            username VARCHAR(20) UNIQUE NOT NULL,
+            email VARCHAR(150) UNIQUE NOT NULL,
+            phone_number VARCHAR(13) UNIQUE NOT NULL,
+            encrypted_password VARCHAR (256) NOT NULL,
+            active_account BOOLEAN NOT NULL,
             id_foto_perfil int not null,
             
-            foreign key(id_rol) references roles(id_rol),
+            foreign key(id_role) references roles(id_role),
             FOREIGN KEY (id_foto_perfil) REFERENCES fotos_perfil (id_foto)
         )"""
         
@@ -258,14 +258,14 @@ def codigo_tabla_buzon_quejas():
     return """
         CREATE TABLE IF NOT EXISTS buzon_quejas (
             id_buzon_quejas INT UNIQUE AUTO_INCREMENT NOT NULL,
-            id_usuario INT NOT NULL,
+            id_user INT NOT NULL,
                             
             mensaje VARCHAR(256) NOT NULL,
             fecha DATETIME NOT NULL,
             hora DATETIME NOT NULL,
                             
             PRIMARY KEY (id_buzon_quejas),
-            FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario)
+            FOREIGN KEY (id_user) REFERENCES perfil(id_user)
         )"""
         
 
@@ -333,7 +333,7 @@ def codigo_tabla_mensaje():
     return """
         CREATE TABLE IF NOT EXISTS mensaje(
             id_msj INT UNIQUE AUTO_INCREMENT NOT NULL,
-            id_usuario INT NOT NULL,
+            id_user INT NOT NULL,
             id_sala INT NOT NULL,
             mensaje text NOT NULL,
             fecha date NOT NULL,
@@ -342,7 +342,7 @@ def codigo_tabla_mensaje():
             
             PRIMARY KEY(id_msj),
             FOREIGN KEY(id_mensajeAResponder) REFERENCES mensaje(id_msj),
-            FOREIGN KEY(id_usuario) REFERENCES perfil(id_usuario),
+            FOREIGN KEY(id_user) REFERENCES perfil(id_user),
             FOREIGN KEY(id_sala) REFERENCES sala(id_sala)
         );"""
 
@@ -365,7 +365,7 @@ def codigo_tabla_articulo():
             num_calificaciones int not null,
             
             primary key(id_articulo),
-            foreign key (id_autor) references perfil(id_usuario),
+            foreign key (id_autor) references perfil(id_user),
             foreign key (id_subtema) references subtema(id_subtema)
             -- foreign key a la tabla sala
         );"""
@@ -377,12 +377,12 @@ def codigo_tabla_articulo_calificado():
         create table if not exists articulo_es_calificado(
             id_calificacion int not null auto_increment,
             id_articulo int not null,
-            id_usuario int not null,
+            id_user int not null,
             fecha datetime not null,
             
             primary key(id_calificacion),
             foreign key(id_articulo) references articulo(id_articulo),
-            foreign key(id_usuario) references perfil (id_usuario)
+            foreign key(id_user) references perfil (id_user)
         );"""
         
 
@@ -392,11 +392,11 @@ def codigo_tabla_calificacion_comentario():
         create table if not exists calificacion_tiene_comentario(
             id_registro int not null auto_increment,
             comentario varchar(100) not null,
-            id_usuario int not null,
+            id_user int not null,
             id_calificacion int not null,
             
             primary key(id_registro),
-            foreign key(id_usuario) references perfil(id_usuario),
+            foreign key(id_user) references perfil(id_user),
             foreign key (id_calificacion) references articulo_es_calificado(id_calificacion)
         );"""
         
@@ -406,7 +406,7 @@ def codigo_tabla_comentario_articulo():
     return """
         create table if not exists comentarios_de_articulo(
             id_comentario int not null auto_increment,
-            id_usuario int not null,
+            id_user int not null,
             mensaje varchar (250),
             respondiendo_a_mensaje int not null,
             
@@ -422,7 +422,7 @@ def codigo_tabla_peticiones():
     return """
         CREATE TABLE IF NOT EXISTS peticiones (
             id_peticiones INT UNIQUE AUTO_INCREMENT NOT NULL, 
-            id_usuario INT NOT NULL,
+            id_user INT NOT NULL,
                                 
             mensaje VARCHAR(200) NULL,
             archivo MEDIUMBLOB NULL,
@@ -432,7 +432,7 @@ def codigo_tabla_peticiones():
             hora TIME NOT NULL,
                                 
             PRIMARY KEY(id_peticiones),
-            FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario))""" 
+            FOREIGN KEY (id_user) REFERENCES perfil(id_user))""" 
         
 
 
@@ -472,31 +472,31 @@ def codigo_tabla_bloqueados():
     return """
         CREATE TABLE IF NOT EXISTS bloqueados (
             id_bloqueo` INT NOT NULL AUTO_INCREMENT,
-            id_usuario_bloqueado INT NOT NULL,
+            id_user_bloqueado INT NOT NULL,
                             
             PRIMARY KEY (id_bloqueo),
-            FOREIGN KEY (id_usuario) REFERENCES perfil(id_usuario)"""
+            FOREIGN KEY (id_user) REFERENCES perfil(id_user)"""
 
 # def codigo_tabla_mensajes_from_seccion():
 #     return """
 #         CREATE TABLE IF NOT EXISTS mensajes_from_seccion (
 #           id_mensaje INT NOT NULL AUTO_INCREMENT,
 #           id_seccion INT NOT NULL,
-#           id_usuario INT NOT NULL,
+#           id_user INT NOT NULL,
 #           mensaje VARCHAR(256) NOT NULL,
 #           fecha VARCHAR(11) NOT NULL,
 #           hora VARCHAR(12) NOT NULL,
 #           PRIMARY KEY (id_mensaje),
 #           INDEX fk_mensaje_seccion1_idx (id_seccion ASC) VISIBLE,
-#           INDEX fk_mensaje_perfil1_idx (id_usuario ASC) VISIBLE,
+#           INDEX fk_mensaje_perfil1_idx (id_user ASC) VISIBLE,
 #           CONSTRAINT fk_mensaje_seccion1
 #             FOREIGN KEY (id_seccion)
 #             REFERENCES peertopeer.seccion (id_seccion)
 #             ON DELETE NO ACTION
 #             ON UPDATE NO ACTION,
 #           CONSTRAINT fk_mensaje_perfil1
-#             FOREIGN KEY (id_usuario)
-#             REFERENCES peertopeer.perfil (id_usuario)
+#             FOREIGN KEY (id_user)
+#             REFERENCES peertopeer.perfil (id_user)
 #             ON DELETE NO ACTION
 #             ON UPDATE NO ACTION)
 #         ENGINE = InnoDB
@@ -594,7 +594,7 @@ def codigo_tabla_bloqueados():
 #             ON UPDATE NO ACTION,
 #           CONSTRAINT `fk_pregunta_has_respuestas_perfil1`
 #             FOREIGN KEY (`id_salvador`)
-#             REFERENCES `peertopeer`.`perfil` (`id_usuario`)
+#             REFERENCES `peertopeer`.`perfil` (`id_user`)
 #             ON DELETE NO ACTION
 #             ON UPDATE NO ACTION)
 #         ENGINE = InnoDB"""
@@ -606,7 +606,7 @@ def codigo_tabla_bloqueados():
 #///////////////////////////////////////////////////////////////////////////
 def codigo_insert_Roles():
     return """
-    insert into roles(id_rol,nombre,descripcion) values
+    insert into roles(id_role,nombre,descripcion) values
 	(1,'Administrador','Administra a los moderadores y genera reportes de actividad del sistema con la finalidad de mejorarlo')
     ,(2,'Moderador','Coordinan la actividad, relaciones y publicaciones de los miembros de la comunidad')
     ,(3,'Miembro de la Comunidad','Persona interesada en compartir y buscar conocimientos sobre los dievrsos temas de las salas');
