@@ -26,6 +26,13 @@ import filetype
 import io
 import re
 
+from utiles.myprint import myprint
+
+# def myprint(objeto,cadena):
+#     for obj in objeto :
+#         myprint(f'{obj}', end=" ")
+#     myprint(f'{cadena}{Fore.RESET,Back.RESET}', end="\n")
+
 load_dotenv()
 cbd = CC()
 encriptado = Encrypt()
@@ -69,7 +76,7 @@ def load_user(id_usuario):
     
         cbd.cursor.execute("SELECT id_usuario, id_rol, nombre_usuario, correo, cuenta_activa FROM perfil WHERE id_usuario = %s", (id_usuario,))
         current_user_data = cbd.cursor.fetchone()
-        print("Datos de usuario: ", current_user_data)
+        myprint("Datos de usuario: ", current_user_data)
 
         if current_user_data:
             return Usuario(
@@ -82,7 +89,7 @@ def load_user(id_usuario):
         return None
     
     except Exception as err:
-        print("Error de load_user: ", err)
+        myprint("Error de load_user: ", err)
         return None
 
 def admin_required(f):
@@ -168,7 +175,7 @@ def validaciones(nombres,apellidos,nomusuario,telefono,correo,contraseña):
 @app.route ('/registro',  methods=['GET', 'POST'])
 def registro():
 
-    print(f"metodo en uso: {request.method}")
+    myprint(f"metodo en uso: {request.method}")
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == "POST":
 
@@ -274,11 +281,11 @@ def registro():
                     return render_template ("acceso/vericorreo_registro.html", mensaje1="Ingrese el código que le enviamos por correo")
                         
             except pymysql.Error as err:
-                print(f"Error en la base de datos: {err}")
+                myprint(f"Error en la base de datos: {err}")
                 errores['mensajes_db'] = "Hubo un problema en el registro, intente nuevamente"     
 
             if(error_en_login):
-                print("NUM_FIELDSET ERROR",error_en_login)
+                myprint("NUM_FIELDSET ERROR",error_en_login)
                 errores['num_fieldset']=error_en_login
 
             return render_template("acceso/registro.html", **errores,  form_data=form_data)    
@@ -313,7 +320,7 @@ def vericorreo_registro():
             contraseña_encript = payload['contraseña_encript']
             
             try:
-                print("#_#_#_#_#_#_#_=QUERY=INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
+                myprint("#_#_#_#_#_#_#_=QUERY=INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
 
                 cbd.cursor.execute("INSERT INTO perfil (id_rol, id_foto_perfil,  nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript, cuenta_activa) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( nombres, apellidos, nombre_usuario, telefono, correo, contraseña_encript ))
                 cbd.connection.commit()
@@ -321,11 +328,11 @@ def vericorreo_registro():
                 return render_template("acceso/iniciar_sesion.html", mensaje1 = "Registro exitoso",form_data={})
                 
             except pymysql.Error as er:
-                print(er)
+                myprint(er)
                 return render_template("acceso/vericorreo_registro.html", mensaje1 = "No se pudieron insertar los valores del registro")
 
         except jwt.InvalidTokenError:
-            print("Token inválido.")
+            myprint("Token inválido.")
             return render_template("acceso/vericorreo_registro.html")
 
     return render_template("acceso/vericorreo_registro.html")
@@ -334,7 +341,7 @@ def vericorreo_registro():
 @app.route ('/iniciar_sesion', methods=['GET', 'POST'])
 def iniciar_sesion():
 
-    print(f"metodo en uso: {request.method}")
+    myprint(f"metodo en uso: {request.method}")
 
     form_data = request.form.to_dict() if request.method == 'POST' else {}
     if request.method == "POST" and 'correo' in request.form and 'nombre_usuario' in request.form:
@@ -343,7 +350,7 @@ def iniciar_sesion():
         nombre_usuario = request.form.get('nombre_usuario')
         contraseña = request.form.get('contraseña')
 
-        print(correo, nombre_usuario, contraseña)
+        myprint(correo, nombre_usuario, contraseña)
         
         try:            
             form_data = {
@@ -361,7 +368,7 @@ def iniciar_sesion():
             if indexError!=-1:
                 errores['mensajeFieldset']= "Todos los campos son obligatorios"
                 errores['num_fieldset']=indexError
-                print("entro aca")
+                myprint("entro aca")
                 return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
 
             try:
@@ -371,7 +378,7 @@ def iniciar_sesion():
                 if perfil_exist is None:
                     errores ["mensajeFieldset"] = "El usuario no existe."
                     errores['num_fieldset']=0
-                    print("el usuario no existe")
+                    myprint("el usuario no existe")
                     return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                 
                 id_usuario = perfil_exist[0]
@@ -382,17 +389,19 @@ def iniciar_sesion():
                 contraseña_encript = perfil_exist[5]  
                 cuenta_activa = perfil_exist[6]
 
-                print(perfil_exist)
+                myprint(perfil_exist)
 
                 if (nombre_usuario == nombre_usuario_exist and correo == correo_exist):
                     
+                    # myprint("#=#=#=#=#=#=C1==",contraseña)
+                    # myprint("#=#=#=#=#=#=C2==",contraseña_encript)
                     try:
                         cpe = os.getenv("PASSWORD3")
                         comprobacion_contraseña = encriptado.verificar_gcm(contraseña, contraseña_encript, cpe)
                         
                         if comprobacion_contraseña:
                             
-                            print("si llego al token")
+                            myprint("si llego al token")
                             payload = {
                             'id_usuario': id_usuario,
                             'rol': rol,
@@ -403,7 +412,7 @@ def iniciar_sesion():
                             }
 
                             tokenacceso = jwt.encode(payload, os.getenv("PASSWORD2"), algorithm='HS256')
-                            print("token generado: ",tokenacceso)
+                            myprint("token generado: ",tokenacceso)
 
                             remitente = "peertopeerverificacion@gmail.com"
                             password = os.getenv("PASSWORD")
@@ -427,7 +436,7 @@ def iniciar_sesion():
                                     smtp.sendmail(remitente, destinatario, em.as_string())
 
                             except smtplib.SMTPException as err:
-                                print(f"El correo no ha podido ser enviado: {err}")
+                                myprint(f"El correo no ha podido ser enviado: {err}")
                                 return render_template("acceso/iniciar_sesion.html", mensaje="Error al enviar el correo de verificación.", form_data=form_data)
 
                             session['tokenacceso'] = tokenacceso
@@ -435,27 +444,27 @@ def iniciar_sesion():
                             return redirect(url_for('vericorreo_acceso'))
                         
                         else:
-                            print("Contraseña incorrecta")
+                            myprint("Contraseña incorrecta")
                             errores["mensajeFieldset"] = "Contraseña incorrecta"
                             errores['num_fieldset']=2
                             return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
                         
                     except Exception as err:
-                        print(f"Error durante la verificación de la contraseña o generación del token: {err}")
+                        myprint(f"Error durante la verificación de la contraseña o generación del token: {err}")
                         return render_template("acceso/iniciar_sesion.html", mensaje="Error interno al iniciar sesión", form_data=form_data)
 
                 else:
-                    print("El nombre de usuario o correo no coinciden.")
+                    myprint("El nombre de usuario o correo no coinciden.")
                     errores ["mensajeFieldset"] = "El nombre de usuario o correo no coinciden."
                     errores['num_fieldset']=0
                     return render_template("acceso/iniciar_sesion.html", **errores, form_data=form_data)
             
             except pymysql.Error as err:
-                print(f"Error de base de datos: {err}")
+                myprint(f"Error de base de datos: {err}")
                 return render_template("acceso/iniciar_sesion.html", mensaje="Error al conectar con la base de datos.", form_data=form_data)
             
         except pymysql.Error as err:
-            print("Error en primer Try de inicioSesion")
+            myprint("Error en primer Try de inicioSesion")
             return render_template("acceso/registro.html", mensaje="Error al procesar el registro",**errores, form_data=form_data)
 
     return render_template("acceso/iniciar_sesion.html", form_data={})
@@ -471,10 +480,10 @@ def vericorreo_acceso():
 
         codigo = request.form.get('codigo')
         
-        print (codigo,codigoveri)
+        myprint (codigo,codigoveri)
 
         if str(codigo).strip() == str(codigoveri).strip():
-            print("si entro aca", codigo, codigoveri)
+            myprint("si entro aca", codigo, codigoveri)
 
             try:
                 payload = jwt.decode(tokenacceso, os.getenv("PASSWORD2"), algorithms=['HS256'])
@@ -492,7 +501,7 @@ def vericorreo_acceso():
                     return render_template("inicio.html", mensaje1=f"¡Bienvenido {nombre_usuario}!")
                 
                 else:
-                    print("La cuenta no está activa.")
+                    myprint("La cuenta no está activa.")
                     return render_template("acceso/vericorreo_acceso.html", mensaje1="La cuenta no está activa. Contacta con el administrador.")
                 
             except jwt.ExpiredSignatureError:
@@ -502,11 +511,11 @@ def vericorreo_acceso():
                 return render_template("acceso/vericorreo_acceso.html", mensaje1="El token es inválido")
             
             except Exception as err:
-                print("Error al decodificar el token:", err)
+                myprint("Error al decodificar el token:", err)
                 return render_template("acceso/vericorreo_acceso.html", mensaje1="No se pudo separar el token")
         
         else:
-            print("Tu código de verificación no coincide")
+            myprint("Tu código de verificación no coincide")
             return render_template("acceso/vericorreo_acceso.html", mensaje1="Tu código de verificación no coincide")
 
     return render_template("acceso/vericorreo_acceso.html")
@@ -527,9 +536,10 @@ def redireccionar_peticion():
     if request.method == "POST":
         boton = request.form.get("boton")
         
-        print("boton: ", boton)  
+        myprint("boton: ", boton)  
         
         if boton == "categoria":
+            return redirect(url_for('categoria_peticion'))
             return render_template("biblioteca/categoria_peticion.html")
         
         elif boton == "documentos":
@@ -544,169 +554,210 @@ def redireccionar_peticion():
 @app.route ('/categoria_peticion', methods=['GET', 'POST'])
 @login_required
 def categoria_peticion(): 
+    myprint(f"categoria peticion")
     
-    tipo = request.form.get('tipo')
-    nombre = request.form.get('nombre')
-    descripcion = request.form.get('descripcion')
-    id_categoria = request.form.get("listaTema")
-    id_tema = request.form.get("listaSubtema")
     error=""
-        
-        
-    if not (tipo and nombre and descripcion):
-        error="Debe llenar los campos correctamente"
-    
-    else: 
-        try:
-        
-            if tipo == "categoria":
-
-                try:
-                
-                    if nombre:
-                        
-                        cbd.cursor.execute("SELECT nombre FROM categoria WHERE nombre = %s", (nombre,))
-                        nombre_exist = cbd.cursor.fetchone() 
-
-                        if nombre_exist and nombre_exist[0] == nombre :  
-                            error="La categoria que ingreso ya existe"
-                            #return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
-                            
-                        else:
-                            cbd.cursor.execute("SELECT MAX(codigo) FROM categoria")
-                            ultimo_codigo = cbd.cursor.fetchone()[0]  
-
-                            if ultimo_codigo is None:
-                                ultimo_codigo = 0
-                                
-                            else:
-                                ultimo_codigo = int(ultimo_codigo)
-
-                            codigo = f"{ultimo_codigo + 1}"
-                            print(f"Nuevo código generado: {codigo}")
-                            
-                            cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
-                            cbd.connection.commit()
-                            error="Su categoria fue generada."
-                            #return render_template ("biblioteca/peticiones.html", error= "Su categoria fue generada.")
-                            
-                    else:
-                        error="Debe proporcionar un nombre de categoria válido."
-                        #return render_template ("biblioteca/peticiones.html", error= "Debe proporcionar un nombre de categoria válido.")
-                
-                except Exception as err:
-                    error=f"Error al procesar la solicitud categoria: {err}"
-                    #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud categoria: {err}")
+    fallido=None
+    id_tema=-1
+    id_categoria=-1
+    tipo= ""
+    if(request.method=='POST'):
+        tipo = request.form.get('tipo')
+        nombre = request.form.get('nombre')
+        descripcion = request.form.get('descripcion')
+        id_categoria = request.form.get("listaTema")
+        id_tema = request.form.get("listaSubtema")
             
-            elif tipo == "tema":
-
-                if nombre:
-                    try:
-                        cbd.cursor.execute("SELECT nombre FROM tema WHERE nombre = %s", (nombre,))
-                        nombre_exist1 = cbd.cursor.fetchone()
-
-                        if nombre_exist1 and nombre_exist1[0] == nombre:
-                            error="El tema que ingresó ya existe"
-                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
-                        else:
-                            cbd.cursor.execute("SELECT codigo FROM categoria")
-                            codigo_padre = cbd.cursor.fetchone()[0]
-
-                            cbd.cursor.execute("SELECT MAX(codigo) FROM tema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
-                            ultimo_codigo1 = cbd.cursor.fetchone()[0]
-
-                            if not id_categoria:
-                                error="Seleccione una categoria para crear un tema"
-                            else:
-
-                                if ultimo_codigo1 is None:
-                                    nuevo_sub = 1
-                                else:
-                                    nuevo_sub = int(ultimo_codigo1.split('-')[-1]) + 1
-
-                                codigo = f"{codigo_padre}-{nuevo_sub}"
-
-                                cbd.cursor.execute("INSERT INTO tema (codigo, nombre, descripcion, id_categoria) VALUES (%s, %s, %s, %s)",(codigo, nombre, descripcion, id_categoria))
-                                cbd.connection.commit()
-                                error="Tema generado correctamente"
-                            
-                    except Exception as err:
-                        error=f"Error al procesar la solicitud: {err}"
-                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
-                else:
-                    error="Debe proporcionar un nombre de tema válido."
-                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
-
-            elif tipo == "subtema":
-                if nombre:
-                    try:
-                        cbd.cursor.execute("SELECT nombre FROM subtema WHERE nombre = %s", (nombre,))
-                        nombre_exist1 = cbd.cursor.fetchone()
-
-                        if nombre_exist1 and nombre_exist1[0] == nombre:
-                            error="El subtema que ingresó ya existe"
-                            #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
-                        else:
-                            cbd.cursor.execute("SELECT codigo FROM tema ")
-                            codigo_padre = cbd.cursor.fetchone()[0]
-
-                            cbd.cursor.execute("SELECT MAX(codigo) FROM subtema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
-                            ultimo_codigo1 = cbd.cursor.fetchone()[0]
-
-                            if ultimo_codigo1 is None:
-                                nuevo_sub1 = 1
-                            else:
-                                nuevo_sub1 = int(ultimo_codigo1.split('-')[-1]) + 1
-
-                            nuevo_codigo = f"{codigo_padre}-{nuevo_sub1}"
-
-                            if not id_tema:
-                                error = "Seleccione un tema para crear un subtema"
-                            else:
-
-                                cbd.cursor.execute("INSERT INTO subtema (codigo, nombre, descripcion, id_tema) VALUES (%s, %s, %s, %s)",(nuevo_codigo, nombre, descripcion, id_tema))
-                                cbd.connection.commit()
-                                error="Subtema creado con éxito"
-                                #return render_template("biblioteca/peticiones.html", mensaje="Categoría creada con éxito.")
-                    except Exception as err:
-                        error=f"Error al procesar la solicitud: {err}"
-                        #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
-                else:
-                    error="Debe proporcionar un nombre de subtema válido."
-                    #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+            
+        if not (tipo and nombre and descripcion):
+            error="Debe llenar los campos correctamente"
         
+        else: 
+            try:
+            
+                if tipo == "categoria":
 
-            else:
-                print ("no se pudo enviar") 
-                error="Opción escogida incorrecta"       
+                    myprint(f"nombre={nombre}-/-{descripcion}")
+                    res=cbd.crearCategoriaCompleta(nombre,descripcion)
+                    
+                    # cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
+                    # cbd.connection.commit()
+                    myprint(f"res={res}")
+                    if(res==1):
+                        error="Su categoria fue generada."
+                    else:
 
-        except Exception as err:
-            print("SU PTM NO JALO")
-            error=f"Error no sé: {err}"
+                        errores=('ya existe la categoria','no se pudo hacer el registro de la categ','ya existe el tema general','no se pudo hacer el registro del tema','ya existe el subtema general','no se pudo hacer el registro del subtema')
+                        error=errores[(res*-1)-1]
+                    print(error)
+
+                    # try:
+                    
+                    #     if nombre:
+                            
+                    #         cbd.cursor.execute("SELECT nombre FROM categoria WHERE nombre = %s", (nombre,))
+                    #         nombre_exist = cbd.cursor.fetchone() 
+
+                    #         if nombre_exist and nombre_exist[0] == nombre :  
+                    #             error="La categoria que ingreso ya existe"
+                    #             #return render_template("biblioteca/peticiones.html", error = "La categoria que ingreso ya existe")
+                                
+                    #         else:
+                    #             cbd.cursor.execute("SELECT MAX(codigo) FROM categoria")
+                    #             ultimo_codigo = cbd.cursor.fetchone()[0]  
+
+                    #             if ultimo_codigo is None:
+                    #                 ultimo_codigo = 0
+                                    
+                    #             else:
+                    #                 ultimo_codigo = int(ultimo_codigo)
+
+                    #             codigo = f"{ultimo_codigo + 1}"
+                                
+                    #             #return render_template ("biblioteca/peticiones.html", error= "Su categoria fue generada.")
+                                
+                    #     else:
+                    #         error="Debe proporcionar un nombre de categoria válido."
+                    #         #return render_template ("biblioteca/peticiones.html", error= "Debe proporcionar un nombre de categoria válido.")
+                    
+                    # except Exception as err:
+                    #     error=f"Error al procesar la solicitud categoria: {err}"
+                    #     #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud categoria: {err}")
+                
+                elif tipo == "tema":
+
+                    if nombre:
+                        try:
+                            if not id_categoria:
+                                myprint("selecciona una categ")
+                                error="DEBES SELECCIONAR UNA CATEGORIA"
+                                fallido=1
+                            else:
+                                myprint("categ=",id_categoria)
+                                # -3->Ya existe el tema
+                                # !=0->exito
+                                res=cbd.crearTema(id_categoria,nombre,descripcion)
+                                if(res<0):
+                                    error="Ya existe el Tema en la categoria"
+                                else:
+                                    error="Tema generado correctamente"
+                            # cbd.cursor.execute("SELECT nombre FROM tema WHERE nombre = %s", (nombre,))
+                            # nombre_exist1 = cbd.cursor.fetchone()
+
+                            # if nombre_exist1 and nombre_exist1[0] == nombre:
+                            #     error="El tema que ingresó ya existe"
+                            #     #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
+                            # else:
+                            #     cbd.cursor.execute("SELECT codigo FROM categoria")
+                            #     codigo_padre = cbd.cursor.fetchone()[0]
+
+                            #     cbd.cursor.execute("SELECT MAX(codigo) FROM tema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
+                            #     ultimo_codigo1 = cbd.cursor.fetchone()[0]
+
+                            #     if not id_categoria:
+                            #         error="Seleccione una categoria para crear un tema"
+                            #     else:
+
+                            #         if ultimo_codigo1 is None:
+                            #             nuevo_sub = 1
+                            #         else:
+                            #             nuevo_sub = int(ultimo_codigo1.split('-')[-1]) + 1
+
+                            #         codigo = f"{codigo_padre}-{nuevo_sub}"
+
+                            #         cbd.cursor.execute("INSERT INTO tema (codigo, nombre, descripcion, id_categoria) VALUES (%s, %s, %s, %s)",(codigo, nombre, descripcion, id_categoria))
+                            #         cbd.connection.commit()
+                            #         error="Tema generado correctamente"
+                                
+                        except Exception as err:
+                            error=f"Error al procesar la solicitud: {err}"
+                            #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
+                    else:
+                        error="Debe proporcionar un nombre de tema válido."
+                        #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+
+                elif tipo == "subtema":
+                    if nombre:
+                        try:
+                            
+                            if not id_tema:
+                                error="DEBES SELECCIONAR UN TEMA"
+                                fallido=2
+                            else:
+                                # -5->ya xiste
+                                # 1-> exito
+                                res=cbd.crearSubtema(id_tema,nombre,descripcion)
+                                myprint(res)
+                                if(res<0):
+                                    error="Ya existe el Subtema en el tema"
+                                else:
+                                    error="SubTema generado correctamente"
+                            # cbd.cursor.execute("SELECT nombre FROM subtema WHERE nombre = %s", (nombre,))
+                            # nombre_exist1 = cbd.cursor.fetchone()
+
+                            # if nombre_exist1 and nombre_exist1[0] == nombre:
+                            #     error="El subtema que ingresó ya existe"
+                            #     #return render_template("biblioteca/peticiones.html", error="La categoría que ingresó ya existe")
+                            # else:
+                            #     cbd.cursor.execute("SELECT codigo FROM tema ")
+                            #     codigo_padre = cbd.cursor.fetchone()[0]
+
+                            #     cbd.cursor.execute("SELECT MAX(codigo) FROM subtema WHERE codigo LIKE %s", (f"{codigo_padre}-%",))
+                            #     ultimo_codigo1 = cbd.cursor.fetchone()[0]
+
+                            #     if ultimo_codigo1 is None:
+                            #         nuevo_sub1 = 1
+                            #     else:
+                            #         nuevo_sub1 = int(ultimo_codigo1.split('-')[-1]) + 1
+
+                            #     nuevo_codigo = f"{codigo_padre}-{nuevo_sub1}"
+
+                            #     if not id_tema:
+                            #         error = "Seleccione un tema para crear un subtema"
+                            #     else:
+
+                            #         cbd.cursor.execute("INSERT INTO subtema (codigo, nombre, descripcion, id_tema) VALUES (%s, %s, %s, %s)",(nuevo_codigo, nombre, descripcion, id_tema))
+                            #         cbd.connection.commit()
+                            #         error="Subtema creado con éxito"
+                            #         #return render_template("biblioteca/peticiones.html", mensaje="Categoría creada con éxito.")
+                        except Exception as err:
+                            error=f"Error al procesar la solicitud: {err}"
+                            #return render_template("biblioteca/peticiones.html", error=f"Error al procesar la solicitud: {err}")
+                    else:
+                        error="Debe proporcionar un nombre de subtema válido."
+                        #return render_template("biblioteca/peticiones.html", error="Debe proporcionar un nombre de categoría válido.")
+            
+
+                else:
+                    myprint ("no se pudo enviar") 
+                    error="Opción escogida incorrecta"       
+
+            except Exception as err:
+                myprint("SU PTM NO JALO")
+                error=f"Error no sé: {err}"
 
     cbd.cursor.execute("SELECT id_categoria, nombre FROM categoria")
     resultados = cbd.cursor.fetchall()     
 
-    print("resultados: ",resultados)
-
     list_items_html_cate = ""
     for resultado in resultados:
         idc = resultado[0]
-        nombre = resultado[1]
-        list_items_html_cate += f'<option value="{idc}">{nombre}</option>'
+        nombre = resultado[1] 
+
+        list_items_html_cate += f'<option value="{idc}" {"selected" if int(id_categoria)==idc else ""}>{nombre}</option>'
 
 
     cbd.cursor.execute("SELECT id_tema, nombre FROM tema")
     resultados = cbd.cursor.fetchall()     
-
-    print("resultados: ",resultados)
+    myprint("resultados: ",resultados)
 
     list_items_html_tema = ""
     for resultado in resultados:
         idt = resultado[0]
-        nombre = resultado[1]
-        list_items_html_tema += f'<option value="{idt}">{nombre}</option>'
-    return render_template ("biblioteca/categoria_peticion.html", items_cate = list_items_html_cate, items_tema=list_items_html_tema, error=error)
+        nombre = resultado[1] 
+        list_items_html_tema += f'<option value="{idt}" {"selected" if int(id_tema)==idt else ""} >{nombre}</option>'
+
+    return render_template ("biblioteca/categoria_peticion.html", items_cate = list_items_html_cate, items_tema=list_items_html_tema, error=error if error!="" else None, tipo=tipo)
 
 
 @app.route('/documento_peticion', methods=['GET', 'POST'])
@@ -761,17 +812,17 @@ def documento_peticion():
 @app.route('/inicio_biblioteca')
 @login_required
 def inicio_biblioteca():
-    cbd.cursor.execute("select id_categoria,nombre,descripcion from categoria order by id_categoria asc;")
+    cbd.cursor.execute("select id_categoria,nombre,descripcion from categoria order by id_categoria asc ,nombre asc;")
     categorias=cbd.cursor.fetchall()
     
-    cbd.cursor.execute("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc;")
+    cbd.cursor.execute("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc ,nombre asc;")
     temas=separarSubCategorias(cbd.cursor.fetchall())
 
     cbd.cursor.execute("select id_subtema,id_tema,nombre,descripcion from subtema order by id_tema;")
     subtemas=separarSubCategorias(cbd.cursor.fetchall())
     
-    print("temas=",temas)
-    print("subtemas=",subtemas)
+    myprint("temas=",temas)
+    myprint("subtemas=",subtemas)
     return render_template("biblioteca/inicio_biblioteca.html",categorias=categorias,Temas=temas
         ,Subtemas=subtemas,
         limiteTemas=len(temas),
@@ -781,7 +832,7 @@ def inicio_biblioteca():
 
 @app.route('/docs')
 def documentos():
-    print("#_#_#_#_ ENTRASTE A DOCS")
+    myprint("#_#_#_#_ ENTRASTE A DOCS")
     # cbd.cursor.execute("select id_documento,nombre_archivo from documentos")
     # docs=cbd.cursor.fetchall()
     cbd.cursor.execute("select id_foto,foto from fotos_perfil")
@@ -816,12 +867,12 @@ def separarSubCategorias(tupla):
             nivel+=tupla[index][1],
         #nivel+=tupla[index],
         nivel+=(tupla[index][0],tupla[index][2],tupla[index][3]),
-        #print(nivel)
+        #myprint(nivel)
         try:
             if(tupla[index][1]!=tupla[index+1][1]):
                 #este es el ultimo elemento del nivel
                 nuevoOrden+=nivel, #agregamos al nuevo orden
-                #print("f===",nivel)
+                #myprint("f===",nivel)
                 nivel=() #refrescamos el nivel
         except Exception as ex:
             nuevoOrden+=nivel,
@@ -844,7 +895,7 @@ def verarchivo(idpeticion):
             tipomime = filetype.guess(archivo[0])
             nombrearchivo = archivo[1]
             archivobinario.name = nombrearchivo
-            print("\nTipo archivo: ",tipomime.mime, " Nombre: ", archivobinario.name)
+            myprint("\nTipo archivo: ",tipomime.mime, " Nombre: ", archivobinario.name)
 
             return Response(archivobinario, headers={"Content-Disposition": f"inline; filename=\"{nombrearchivo}\""}, mimetype=tipomime.mime)
         
@@ -852,7 +903,7 @@ def verarchivo(idpeticion):
             return render_template("inicio.html", mensaje1 = "No se pudo obtener el archivo")
 
     except pymysql.Error as err:
-        print("Error: ", err)
+        myprint("Error: ", err)
         return redirect(url_for('crudpeticionesadmin'))
     
     
@@ -871,7 +922,7 @@ def generar_codigo_unico(length):
 @app.route('/foro', methods=["GET", "POST"])
 @login_required
 def foro():
-    print(f"\n\nUsuario autenticado? {current_user.is_authenticated}\n\n")
+    myprint(f"\n\nUsuario autenticado? {current_user.is_authenticated}\n\n")
 
     if not current_user.is_authenticated:
         return current_app.login_manager.unauthorized()
@@ -908,7 +959,7 @@ def foro():
         session["room"] = room
         session["id_usuario"] = current_user.id
         session["nombre"] = current_user.nombre_usuario
-        #print(f"\n\n'room: ', {room}, 'nombre: ', {current_user.nombre_usuario}\n\n")
+        #myprint(f"\n\n'room: ', {room}, 'nombre: ', {current_user.nombre_usuario}\n\n")
         return redirect(url_for('sala'))
                     
     return render_template("salas/foro.html")
@@ -921,7 +972,6 @@ def sala():
     sala = cbd.cursor.fetchone()
     #id_user = session.get("id_usuario")
     nombre = session.get("nombre")
-    #print(("sala: ", room), ("nombre: ", nombre))
     
     if room is None or nombre is None or not sala:
         return redirect(url_for("inicio"))
@@ -943,7 +993,7 @@ def message(data):
     idsala = session.get("id_sala")
     cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
     sala = cbd.cursor.fetchone()
-    #print(f"\n{room}")
+    #myprint(f"\n{room}")
     if not sala:
         return 
     
@@ -952,9 +1002,9 @@ def message(data):
         "mensaje": data["mensaje"]
     }
     send(contenido, to=room)
-    #print(rooms)
+    #myprint(rooms)
     #rooms[room]["mensajes"].append(contenido)
-    print(f"{nombre} dice: {data['mensaje']}")
+    myprint(f"{nombre} dice: {data['mensaje']}")
 
     cbd.cursor.execute("INSERT INTO mensaje (id_usuario,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],datetime.strptime(data["fecha"],'%d-%m-%Y').strftime('%Y-%m-%d'),data["hora"]))
     cbd.connection.commit()
@@ -972,7 +1022,7 @@ def conectar(auth):
     join_room(room)
     send({"nombre": nombre, "mensaje": "entró a la sala"}, to=room)
     #rooms[room]["miembros"] += 1
-    print(f"{nombre} entró a la sala {room}")
+    myprint(f"{nombre} entró a la sala {room}")
 
 @socketio.on("disconnect")
 def desconectar():
@@ -986,7 +1036,7 @@ def desconectar():
         #    del rooms[room]
     
     send({"nombre": nombre, "mensaje": "ha salido de la sala"}, to=room)
-    print(f"{nombre} ha salido de la sala {room}")
+    myprint(f"{nombre} ha salido de la sala {room}")
 
 
 
@@ -1035,7 +1085,7 @@ def crudusuariosadmin():
         perfiles = cbd.cursor.fetchall()
 
     except pymysql.Error as err:
-        print(f"Error al obtener los datos de los perfiles: {err}")
+        myprint(f"Error al obtener los datos de los perfiles: {err}")
 
     return render_template("admin/crud-usuarios-admin.html", perfiles = perfiles)
 
@@ -1058,7 +1108,7 @@ def changeStatusAccount(statusAcc):
             cbd.connection.commit()
         
     except pymysql.Error as err:
-        print(f"No se pudo actualizar el estado de la cuenta: {err}")
+        myprint(f"No se pudo actualizar el estado de la cuenta: {err}")
 
     return redirect(url_for('crudusuariosadmin'))
 
@@ -1077,7 +1127,7 @@ def crudpeticionesadmin():
         #session['id_usuario_peticion'] = id_usuario_peticion
         
     except pymysql.Error as err:
-        print(f"Error al obtener los datos de los perfiles: {err}")
+        myprint(f"Error al obtener los datos de los perfiles: {err}")
 
     return render_template("admin/crud-peticiones-admin.html", peticiones = peticiones)
 
@@ -1094,7 +1144,7 @@ def rechazarpeticion():
         cbd.connection.commit()
 
     except pymysql.Error as err:
-        print(f"Error al eliminar la petición de la tabla: {err}")
+        myprint(f"Error al eliminar la petición de la tabla: {err}")
     
     return redirect(url_for("crudpeticionesadmin"))
 
@@ -1121,7 +1171,7 @@ def aceptarpeticion(idpeticion):
         cbd.connection.commit()
 
     except pymysql.Error as err:
-        print(f"Error al mover la petición de la tabla: {err}")
+        myprint(f"Error al mover la petición de la tabla: {err}")
 
     return redirect(url_for("crudpeticionesadmin"))
 
@@ -1133,24 +1183,37 @@ def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
 
 
+# Directorio actual y rutas para los certificados
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
 cert_path = os.path.join(current_dir,'utiles', 'server.crt')
 key_path = os.path.join(current_dir,'utiles', 'server.key')
 
+# Crear un contexto SSL con la verificación desactivada
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certfile=cert_path, keyfile=key_path)
 
+# Desactivar la verificación del hostname y del certificado
+context.check_hostname = False  # Desactiva la verificación del nombre del host
+context.verify_mode = ssl.CERT_NONE  # Desactiva la verificación del certificado del cliente
 
 if __name__ == "__main__":    
+    #myprint('INICIA')  
     
+    # server = eventlet.wrap_ssl(
+    #     eventlet.listen(('127.0.0.1', 5000)),
+    #     certfile = cert_path,
+    #     keyfile = key_path,
+    #     server_side=True
+    # )
+    
+    # eventlet.wsgi.server(server, app) 
+    # Usar el contexto SSL modificado
     server = eventlet.wrap_ssl(
-    eventlet.listen(('127.0.0.1', 5000)),
-    certfile = cert_path,
-    keyfile = key_path,
-    server_side=True
-)
-
+        eventlet.listen(('127.0.0.1', 5000)),
+        certfile=cert_path,
+        keyfile=key_path,
+        server_side=True,
+        ssl_context=context  # Pasar el contexto SSL personalizado
+    )
     
     eventlet.wsgi.server(server, app)
-    

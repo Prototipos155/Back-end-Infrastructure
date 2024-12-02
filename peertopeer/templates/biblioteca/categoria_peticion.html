@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<form method="post" enctype="multipart/form-data" class="peticiones">
+<form method="post" action="/categoria_peticion" enctype="multipart/form-data" class="peticiones">
 
 <div id="titulo">Generar Categoria, Tema o Subtema</div>
 
@@ -12,39 +12,39 @@
 
     <div id="seleccionar">
         <label for="tipo">¿Qué desea crear?:</label>
-        <select id="tipo" name="tipo">
+        <select id="tipo" name="tipo" required autofocus data-selected="{{tipo}}">
             <option value="">Seleccione...</option>
-            <option value="categoria">Categoría</option>
-            <option value="tema">Tema</option>
-            <option value="subtema">Subtema</option>
+            <option value="categoria" >Categoría</option>
+            <option value="tema" >Tema</option>
+            <option value="subtema" >Subtema</option>
         </select>
-    </div>
+    </div> 
 
-    <div id="categoria" hidden>
+    <div id="categoria" hidden class=>
         <input type="text" name="categoria_tema" id="buscador" class="buscador input" placeholder="Categoría">
-        <div id="categoria_tema" hidden>
+        <div id="categoria_tema" hidden >
             <select name="listaTema" id="lista">
-                <option value="0" selected disabled>Seleccione...</option>
+                <option value="0" disabled>Seleccione...</option>
                 {{ items_cate|safe }}
             </select>
         </div>
 
-        <div id="categoria_subtema" hidden>
+        <div id="categoria_subtema"  hidden  >
             <select name="listaSubtema" id="lista">
-                <option value="0" selected disabled>Seleccione...</option>
+                <option value="0" disabled>Seleccione...</option>
                 {{ items_tema|safe }}
             </select>
         </div>
     </div>
     
 
-    <input type="text" name="nombre" class="input" placeholder="Nombre...">
+    <input type="text" name="nombre" class="input" placeholder="Nombre..." required>
 
-    <input type="text" name="descripcion" class="input" placeholder="Descripcion">
+    <input type="text" name="descripcion" class="input" placeholder="Descripcion" required>
 
     <button type="submit" id="enviar">Enviar</button>
 
 </form>
-<script type="module" src="../static/js/peticiones.js"></script>
+<script type="module" src="/static/js/peticiones.js"></script>
 
 {% endblock %}

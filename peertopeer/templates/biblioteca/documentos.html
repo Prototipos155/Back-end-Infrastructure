@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>EMPIEZA</h1>
+<section>
+    {% for doc in docs %}
+        <!-- <iframe src="{{ url_for('view_file',id=doc.0 ) }}" frameborder="0">
+            NO SE ENCONTRó
+        </iframe> -->
+        <img src="{{ url_for('view_file',id=doc.0 ) }}">
+        </img>
+    {% endfor %}
+</section>
+{% endblock %}

@@ -16,7 +16,7 @@
                     <div class="error">{{ mensaje01 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="nombres" id="nombres" class="input"
+                        <input pattern="[a-zA-Z]+" class="input" type="text" name="nombres" id="nombres" class="input"
                             value="{{ form_data['nombres'] if form_data['nombres'] else '' }}" placeholder=" ">
                         <label for="nombres">Nombre(s)</label>
                     </div>
@@ -24,7 +24,7 @@
                     <div class="error">{{ mensaje02 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="apellidos" id="apellidos" class="input"
+                        <input pattern="[a-zA-Z]+" class="input" type="text" name="apellidos" id="apellidos" class="input"
                             value="{{ form_data['apellidos'] if form_data['apellidos'] else '' }}" placeholder=" ">
                         <label for="apellidos">Apellido(s)</label>
                     </div>
@@ -60,7 +60,7 @@
                     <div class="error">{{ mensaje2 }}</div>
                     {% endif %}
                     <div class="alminp">
-                        <input class="input" type="text" name="telefono" id="telefono" class="input"
+                        <input class="input" type="tel" name="telefono" id="telefono" class="input"
                             value="{{ form_data['telefono'] if form_data['telefono'] else '' }}" placeholder=" ">
                         <label for="telefono">Teléfono</label>
                     </div>
@@ -106,14 +106,14 @@
                         <label for="contraseña">Confirmar Contraseña</label>
                         <button type="button" id="togglePasswordButton" class="mostrar"></button>
                     </div>
-                    <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
+                    <input id="enviar" class="btn-registrarse" value="Confirmar registro" readonly>
                 </div>
             </fieldset>
         </div>
 
         <div class="botones">
-            <button id="atras" class="mover">Atrás</button>
-            <button id="siguiente" class="mover fin">Siguiente</button>
+            <input id="atras" class="mover" value="Atrás" readonly>
+            <input id="siguiente" class="mover fin" value="Siguiente" readonly>
         </div>
     </form>
 </div>

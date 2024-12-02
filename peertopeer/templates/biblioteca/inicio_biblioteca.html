@@ -1,15 +1,16 @@
 {% extends "layout.html" %}
 
 {% block content %}
+
 <div class="biblioteca">
     <aside class="">
         <div class="buscador">
             <input type="text" id="buscador" autofocus placeholder="Buscar">
-            <!-- <button>Buscar</button> >
-            <a href="/docs">Ir a todos los docs</a-->
+            <!-- <button>Buscar</button> > -->
+            <a href="/docs">Ir a todos los docs</a
         </div>
 
-        <ul class="materias">
+        <ul class="materias catalogo">
             {% set countTema=namespace(value=0) %}
             {% set countSubTema=namespace(value=0) %}
             <!-- aqui va un for -->

@@ -131,12 +131,12 @@ document.querySelector(".buscador input").addEventListener("keyup",key=>{
     
     // if(buscando==""){
     // }
-    document.querySelector(".materias").querySelectorAll(".ocultar,.mostrar-2").forEach(item=>{
+    document.querySelector(".catalogo").querySelectorAll(".ocultar,.mostrar-2").forEach(item=>{
         item.classList.remove("ocultar")
         item.classList.remove("mostrar-2")
     })
     
-    document.querySelectorAll(".menu-categoria").forEach(categoria =>{
+    document.querySelectorAll(".catalogo .menu-categoria").forEach(categoria =>{
         let opcionEncontrada=false
         let temaEncontrado=[];
         
