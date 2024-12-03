@@ -812,14 +812,20 @@ def documento_peticion():
 @app.route('/inicio_biblioteca')
 @login_required
 def inicio_biblioteca():
-    cbd.cursor.execute("select id_categoria,nombre,descripcion from categoria order by id_categoria asc ,nombre asc;")
-    categorias=cbd.cursor.fetchall()
+    categorias=cbd.ejecutarQuery("select id_categoria,nombre,descripcion from categoria order by id_categoria asc ,nombre asc;",fetch=0)
     
-    cbd.cursor.execute("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc ,nombre asc;")
-    temas=separarSubCategorias(cbd.cursor.fetchall())
+    # temas=separarSubCategorias(cbd.ejecutarQuery("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc ,nombre asc;",fetch=0))
+    temas=separarSubCategorias(cbd.ejecutarQuery("""
+    select t.id_tema,t.id_categoria,t.nombre,t.descripcion from tema t 
+	join categoria c on t.id_categoria=c.id_categoria 
+    order by id_categoria asc,id_tema asc""",fetch=0))
 
-    cbd.cursor.execute("select id_subtema,id_tema,nombre,descripcion from subtema order by id_tema;")
-    subtemas=separarSubCategorias(cbd.cursor.fetchall())
+    # subtemas=separarSubCategorias(cbd.ejecutarQuery("select id_subtema,id_tema,nombre,descripcion from subtema order by id_tema;",fetch=0),returnLen=True)
+    subtemas=separarSubCategorias(cbd.ejecutarQuery("""
+    select s.id_subtema,s.id_tema,s.nombre,s.descripcion from subtema s 
+	join tema t on s.id_tema=t.id_tema 
+    join categoria c on t.id_categoria=c.id_categoria
+    order by c.id_categoria asc, t.id_tema asc, id_subtema asc """,fetch=0),returnLen=False)
     
     myprint("temas=",temas)
     myprint("subtemas=",subtemas)
@@ -829,6 +835,25 @@ def inicio_biblioteca():
         limiteSubtemas=len(subtemas)
         ,biblioteca=True
     )
+def separarSubCategorias(tupla,returnLen=False):
+    nuevoOrden=()
+    nivel=()
+    longitud_registros=len(tupla)
+    for index in range(longitud_registros):
+        if(nivel==()):
+            nivel+=tupla[index][1], # id del padre como primera posicion
+        nivel+=(tupla[index][0],tupla[index][2],tupla[index][3]), #generas un nivel con los datos del hijo
+        try:
+            if(tupla[index][1]!=tupla[index+1][1]): 
+                #entra si el siguiente elemento es de un padre diferente
+                    #es decir, llegaste al final de los hijos del actual
+                if(returnLen):
+                    nivel+=len(nivel)-1, # agregamos la cantidad de hijos
+                nuevoOrden+=nivel, #agregamos al nuevo orden
+                nivel=() #refrescamos el nivel
+        except Exception as ex:
+            nuevoOrden+=nivel, #salta cuando llegas al final de la tupla
+    return nuevoOrden
 
 @app.route('/docs')
 def documentos():
@@ -857,31 +882,6 @@ def view_file(id):
     # if(doc):
     #     return send_file(io.BytesIO(doc['documento']),nombre=doc['nombre_archivo'],as_attachment=True)
     # return "DOC NO ENCONTRADO"
-
-def separarSubCategorias(tupla):
-    nuevoOrden=()
-    nivel=()
-    longitud_registros=len(tupla)
-    for index in range(longitud_registros):
-        if(nivel==()):
-            nivel+=tupla[index][1],
-        #nivel+=tupla[index],
-        nivel+=(tupla[index][0],tupla[index][2],tupla[index][3]),
-        #myprint(nivel)
-        try:
-            if(tupla[index][1]!=tupla[index+1][1]):
-                #este es el ultimo elemento del nivel
-                nuevoOrden+=nivel, #agregamos al nuevo orden
-                #myprint("f===",nivel)
-                nivel=() #refrescamos el nivel
-        except Exception as ex:
-            nuevoOrden+=nivel,
-    #f[0][0]
-    #1
-    #f[0][1]
-    #(id,'martin','desc')
-    return nuevoOrden
-
 
 @app.route('/verarchivo/<int:idpeticion>')
 @admin_required

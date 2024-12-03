@@ -1,18 +1,36 @@
+#/////////////////////////////////////////////////////////////////////////
+#               L I B R E R I A S   P E R M A N E N T E S
+#///////////////////////////////////////////////////////////////////////////
 import pymysql
-from colorama import Back,Fore
 import re
-import os
 from hashlib import sha256
-from colorama import Fore,Back
-# from utiles.myprint import myprint
-colorImpresion=Back.BLUE
+#/////////////////////////////////////////////////////////////////////////
+#           F I N   L I B R E R I A S   P E R M A N E N T E S
+#///////////////////////////////////////////////////////////////////////////
 
+
+
+#/////////////////////////////////////////////////////////////////////////
+#               L I B R E R I A S   T E M P O R A L E S
+#///////////////////////////////////////////////////////////////////////////
+
+from colorama import Back,Fore  #(eliminar cuando se suba)
 if(__name__=="__main__"):
     from bdTablas import * 
     #from peertopeer.utiles.myprint import myprint
 else:    
-    from utiles.myprint import myprint
+    from utiles.myprint import myprint 
     from .bdTablas import *
+#/////////////////////////////////////////////////////////////////////////
+#           F I N   L I B R E R I A S   T E M P O R A L E S
+#///////////////////////////////////////////////////////////////////////////
+
+
+
+#/////////////////////////////////////////////////////////////////////////
+#      F U N C I O N E S  E X T R A S  (Eliminar cuando se suba)
+#///////////////////////////////////////////////////////////////////////////
+colorImpresion=Back.BLUE 
 
 def myprint(*args): 
     print(f"{colorImpresion}", end=" ")
@@ -34,7 +52,14 @@ def abrirArchivo(archivo,modo):
         return None
 myprint("BD")
 
+#/////////////////////////////////////////////////////////////////////////
+#      F U N C I O N E S  E X T R A S  (Eliminar cuando se suba)
+#///////////////////////////////////////////////////////////////////////////
+
 class CC():
+    #/////////////////////////////////////////////////////////////////////////
+    #       I N I C I O   D E   L A   C O N E X I O N
+    #///////////////////////////////////////////////////////////////////////////
     def __init__(self,auto_destruir=None):
         try:
             self.connection = pymysql.connect(host='localhost', user=self.usuarioXampp, passwd='', port=self.puertoXampp, db='peertopeer')
@@ -68,36 +93,6 @@ class CC():
             except pymysql.Error as err:
                 myprint("\n error al intentar crear las tablas o procedimientos: " .format(err))
 
-    def auto_destruccion(self,tablas_excepcion=()):
-        myprint("GOKUUUUUUUUUUUUUUUUUUUUUUUAH!")
-        abrirArchivo("inserts.txt","w") # reinicia el txt para que haga inserts de nuevo
-
-        adicional=""
-        for tabla in tablas_excepcion:
-            # and table_name!='perfil'
-            adicional+=f"and table_name!='{tabla}' "
-
-        if(adicional==""):
-            res=self.ejecutarQuery("drop database peertopeer")
-            self.ejecutarQuery("create database peertopeer")
-            self.ejecutarQuery("use peertopeer")
-            return res
-
-        try:
-            self.cursor.execute(f"select table_name from INFORMATION_SCHEMA.tables where table_schema='peertopeer' {adicional} order by create_time desc ;")
-        except Exception as ex:
-            myprint("Error en InformationSChema ",ex)
-        tablas_borrar=self.cursor.fetchall()
-        for tabla in tablas_borrar:
-            myprint(f"----drop table {tabla[0]}")
-            try:
-                self.cursor.execute(f'drop table {tabla[0]}')
-                myprint("se pudo borrar la tabla ",tabla[0])
-            except Exception as ex:
-                myprint("no se pudo borrar la tabla ",tabla[0],ex)
-        
-        # abrirArchivo("inserts.txt","w") # reinicia el txt para que haga inserts de nuevo
-
     def detectarPuertosXampp(rutaXampp='C:/xampp/mysql/bin/my.ini'):
         try:
             with open(rutaXampp, 'r') as archivo:
@@ -125,7 +120,6 @@ class CC():
         except FileNotFoundError:
             myprint(f"No se encontro Xampp en la ruta {rutaXampp}")
             return None, None
-        
 
     # def detectarPuertoApache(rutaApache='C:/xampp/apache/conf/httpd.conf'):
     #     try:
@@ -157,6 +151,43 @@ class CC():
     #     myprint(f"El puerto de Apache es {puertoApache}")
     # else:
     #     myprint("No se pudo encontrar")
+
+    #/////////////////////////////////////////////////////////////////////////
+    #       F I N    D E   I N I C I O   D E   L A   C O N E X I O N
+    #///////////////////////////////////////////////////////////////////////////
+
+
+    
+    #/////////////////////////////////////////////////////////////////////////
+    #      M E T O D O S  Q U E   C R E A N  L A  B D (Eliminar cuando se suba)
+    #///////////////////////////////////////////////////////////////////////////
+    def auto_destruccion(self,tablas_excepcion=()):
+        myprint("AUTODESTRUCCION !!!!!")
+        abrirArchivo("inserts.txt","w") # reinicia el txt para que haga inserts de nuevo
+
+        adicional=""
+        for tabla in tablas_excepcion:
+            # and table_name!='perfil'
+            adicional+=f"and table_name!='{tabla}' "
+
+        if(adicional==""):
+            res=self.ejecutarQuery("drop database peertopeer")
+            self.ejecutarQuery("create database peertopeer")
+            self.ejecutarQuery("use peertopeer")
+            return res
+
+        try:
+            self.cursor.execute(f"select table_name from INFORMATION_SCHEMA.tables where table_schema='peertopeer' {adicional} order by create_time desc ;")
+        except Exception as ex:
+            myprint("Error en InformationSChema ",ex)
+        tablas_borrar=self.cursor.fetchall()
+        for tabla in tablas_borrar:
+            myprint(f"----drop table {tabla[0]}")
+            try:
+                self.cursor.execute(f'drop table {tabla[0]}')
+                myprint("se pudo borrar la tabla ",tabla[0])
+            except Exception as ex:
+                myprint("no se pudo borrar la tabla ",tabla[0],ex)
 
     def ejecutarCreaciones(self,lista_funciones,confirmarCommit=False):
         if(not isinstance(lista_funciones,tuple)):
@@ -200,6 +231,7 @@ class CC():
 
         except pymysql.Error as err:
             myprint("\n error al intentar crear las tablas " .format(err))
+    
     def crearProcedimientos(self):
         try:
             myprint("##########empezo la creacion de procedimientos")
@@ -238,6 +270,15 @@ class CC():
         # inserts=(codigo_insert_Roles,codigo_insert_Imagenes)
         self.ejecutarCreaciones(inserts,True)
 
+    #/////////////////////////////////////////////////////////////////////////
+    # F I N   M E T O D O S  Q U E   C R E A N  L A  B D (Eliminar cuando se suba)
+    #///////////////////////////////////////////////////////////////////////////
+
+
+
+    #/////////////////////////////////////////////////////////////////////////
+    #        M E T O D O S   P A R A  L A S   P E T I C I O N E S (secciones)
+    #///////////////////////////////////////////////////////////////////////////
     @staticmethod
     def crearHashParaBd(data):
         # Datos a hashear
@@ -248,41 +289,6 @@ class CC():
 
         myprint(f"Hash SHA-256: {hash_hex}")
         return hash_hex
-
-    def ejecutarProcedimiento(self,nombreProcc,args,fetch=None):
-        cadUnion=""
-        complemento=""
-        myprint(f"{nombreProcc}({args})")
-        # myprint("inicia procc")
-        for arg in args:
-            complemento=""
-            myprint(arg)
-            if(isinstance(arg,str)):
-                complemento="'"
-            cadUnion+=complemento+"%s"+complemento+","
-        myprint(f"comp={complemento}")
-        if(not fetch):
-            # no devuelve fetch, por lo que la comilla sobra
-            quitar=1 #quita la coma
-            cadUnion=cadUnion[:-1]
-
-        if(fetch):
-            cadUnion+="%s"
-
-        query="call %s (%s)"%(nombreProcc,cadUnion)
-        tupla=()
-        for elemento in args:
-            tupla+=elemento,
-        if(fetch):
-            tupla+=fetch,
-        myprint("query=",query)
-        myprint("tupla=",tupla)
-
-        myprint(query%tupla)
-        self.ejecutarQuery(query%tupla)
-        res=self.ejecutarQuery(f"select {fetch}",fetch=1)[-1]
-        self.connection.commit()
-        return res
 
     def crearCategoriaCompleta(self,nombre_categoria,descripcion):
         tema=self.crearHashParaBd(f"{nombre_categoria}-General")
@@ -318,6 +324,51 @@ class CC():
         self.connection.commit()
         return res
 
+    #/////////////////////////////////////////////////////////////////////////
+    #  F I N  D E   M E T O D O S   P A R A  L A S   P E T I C I O N E S (secciones)
+    #///////////////////////////////////////////////////////////////////////////
+
+
+
+    #/////////////////////////////////////////////////////////////////////////
+    #      M E T O D O S   Q U E   D E B E S   T E N E R  E N  C U E N T A
+    #///////////////////////////////////////////////////////////////////////////
+
+    def ejecutarProcedimiento(self,nombreProcc,args,fetch=None):
+        cadUnion=""
+        complemento=""
+        myprint(f"{nombreProcc}({args})")
+        # myprint("inicia procc")
+        for arg in args:
+            complemento=""
+            myprint(arg)
+            if(isinstance(arg,str)):
+                complemento="'"
+            cadUnion+=complemento+"%s"+complemento+","
+        myprint(f"comp={complemento}")
+        if(not fetch):
+            # no devuelve fetch, por lo que la comilla sobra
+            quitar=1 #quita la coma
+            cadUnion=cadUnion[:-1]
+
+        if(fetch):
+            cadUnion+="%s"
+
+        query="call %s (%s)"%(nombreProcc,cadUnion)
+        tupla=()
+        for elemento in args:
+            tupla+=elemento,
+        if(fetch):
+            tupla+=fetch,
+        myprint("query=",query)
+        myprint("tupla=",tupla)
+
+        myprint(query%tupla)
+        self.ejecutarQuery(query%tupla)
+        res=self.ejecutarQuery(f"select {fetch}",fetch=1)[-1]
+        self.connection.commit()
+        return res
+    
     def ejecutarQuery(self,query,commit=False,fetch=None):
         try:
             self.cursor.execute(query)
@@ -336,6 +387,32 @@ class CC():
             myprint("#--",ex)
             return False
 
+    #/////////////////////////////////////////////////////////////////////////
+    #   F I N   M E T O D O S   Q U E   D E B E S   T E N E R  E N  C U E N T A
+    #///////////////////////////////////////////////////////////////////////////
+
+def separarSubCategorias(tupla):
+    nuevoOrden=()
+    nivel=()
+    longitud_registros=len(tupla)
+    for index in range(longitud_registros):
+        if(nivel==()):
+            nivel+=tupla[index][1], # id del padre como primera posicion
+        nivel+=(tupla[index][0],tupla[index][2],tupla[index][3]), #generas un nivel con los datos del hijo
+        try:
+            if(tupla[index][1]!=tupla[index+1][1]): 
+                #entra si el siguiente elemento es de un padre diferente
+                    #es decir, llegaste al final de los hijos del actual
+                nivel+=len(nivel)-1, # agregamos la cantidad de hijos
+                nuevoOrden+=nivel, #agregamos al nuevo orden
+                nivel=() #refrescamos el nivel
+        except Exception as ex:
+            nuevoOrden+=nivel, #salta cuando llegas al final de la tupla
+    #f[0][0]
+    #1
+    #f[0][1]
+    #(id,'martin','desc')
+    return nuevoOrden
 cx=None
 
 
@@ -356,3 +433,11 @@ if(__name__=="__main__"):
     #     except Exception as ex:
     #         myprint("fallido")
     #         pass
+    cx.cursor.execute("select id_categoria,nombre,descripcion from categoria order by id_categoria asc ,nombre asc;")
+    categorias=cx.cursor.fetchall()
+    
+    cx.cursor.execute("select id_tema,id_categoria,nombre,descripcion from tema order by id_categoria asc ,nombre asc;")
+    temas=separarSubCategorias(cx.cursor.fetchall())
+
+    cx.cursor.execute("select id_subtema,id_tema,nombre,descripcion from subtema order by id_tema;")
+    subtemas=separarSubCategorias(cx.cursor.fetchall())

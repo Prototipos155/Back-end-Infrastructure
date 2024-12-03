@@ -85,80 +85,16 @@ for(let puntos of document.querySelectorAll(".puntos")){
 
 document.querySelector(".buscador input").addEventListener("keyup",key=>{
     let buscando=key.target.value.toLocaleLowerCase();
-    // console.error("esta buscando a '"+buscando+"'")
-    // si esta en blanco hay que mostrar todo
-    // si es puro texto hay que buscar en todos los option
-    // si lleva algunos guinones medios hay que buscar siguiendo el patron:
-        // categoria-subcategoria-tema
-    // document.querySelectorAll(".menu-categoria").forEach(categoria =>{
-    //     let opcionEncontrada=false
-    //     let temaEncontrado=[];
-    //     categoria.querySelectorAll(".opciones").forEach(opcion=>{
-    //         // console.log("opcion=",opcion)
-    //         if(buscando=="" || opcion.innerText.trim().toLocaleLowerCase().includes(buscando)){
-    //             opcionEncontrada=true
-    //             opcion.parentNode.classList.remove("esconder-opcion")
-    //             desbloquearPadre(opcion,true)
-    //             temaEncontrado.push(opcion.padreCategoria)
-    //             // console.log("orgullo:",opcion.padreCategoria)
-    //         }else{
-    //             opcion.parentNode.classList.add("esconder-opcion")
-    //             if(!temaEncontrado.includes(opcion.padreCategoria)){
-    //                 desbloquearPadre(opcion,false)
-    //                 // console.log("deshonra:",opcion.padreCategoria)
-    //             }
-    //         }
-    //     })
-    //     // console.log("_____opcion encontrada?=",opcionEncontrada)
-    //     if(buscando==""){
-    //         categoria.parentNode.classList.remove("mostrar-opcion")
-    //         categoria.parentNode.classList.remove("esconder-opcion")
-    //         // console.log("deberia de reiniciar")
-    //     }else if(opcionEncontrada==false && !categoria.parentNode.children[0].innerText.trim().toLocaleLowerCase().includes(buscando)){
-    //         //ni el ni sus hijos tienen lo que el usuario busca
-    //         // console.log("ni la categoria ni sus hijas tienen lo que busco")
-    //         categoria.parentNode.classList.add("esconder-opcion")
-    //         categoria.parentNode.classList.remove("mostrar-opcion")
-    //     }else if(!categoria.parentNode.checkVisibility()){
-    //         // console.log("deberia de aparecer la categoria")
-    //         categoria.parentNode.classList.add("mostrar-opcion")
-    //         categoria.parentNode.classList.remove("esconder-opcion")
-    //     }else{
-    //         // console.log("Que verga?")
-    //         categoria.parentNode.classList.add("mostrar-opcion")
-    //     }
-    // })
     
-    // if(buscando==""){
-    // }
     document.querySelector(".catalogo").querySelectorAll(".ocultar,.mostrar-2").forEach(item=>{
         item.classList.remove("ocultar")
         item.classList.remove("mostrar-2")
     })
     
     document.querySelectorAll(".catalogo .menu-categoria").forEach(categoria =>{
-        let opcionEncontrada=false
-        let temaEncontrado=[];
+        let opcionEncontrada=false 
         
         opcionEncontrada=(buscarIncidencia(categoria.parentNode,buscando))
-       
-        // console.error(opcionEncontrada)
-        // categoria.querySelectorAll(".opciones").forEach(opcion=>{
-        //     // console.log("opcion=",opcion)
-        //     if(buscando=="" || opcion.innerText.trim().toLocaleLowerCase().includes(buscando)){
-        //         opcionEncontrada=true
-        //         opcion.parentNode.classList.remove("esconder-opcion")
-        //         desbloquearPadre(opcion,true)
-        //         temaEncontrado.push(opcion.padreCategoria)
-        //         // console.log("orgullo:",opcion.padreCategoria)
-        //     }else{
-        //         opcion.parentNode.classList.add("esconder-opcion")
-        //         if(!temaEncontrado.includes(opcion.padreCategoria)){
-        //             desbloquearPadre(opcion,false)
-        //             // console.log("deshonra:",opcion.padreCategoria)
-        //         }
-        //     }
-        // })
         // console.log("_____opcion encontrada?=",opcionEncontrada)
         if(buscando==""){
             categoria.parentNode.classList.remove("mostrar-opcion")
