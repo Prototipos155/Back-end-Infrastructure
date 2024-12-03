@@ -23,7 +23,7 @@ class verify_email:
             print("agarre el error1")  
             return False
         except dns.resolver.NoAnswer:
-            print("agarre el error1")  
+            print("agarre el error2")  
             return False
         except dns.resolver.Timeout:
             print("El tiempo de espera agotado al consultar el dominio")
@@ -43,7 +43,7 @@ class verify_email:
         return suggestions
     
     def send_email(self, email, username):
-        
+        email_errors = {}
         print("recibio correo y nombre de usuario")
         
         verification_code = random.randint(100000, 999999)
@@ -78,9 +78,10 @@ class verify_email:
             suggestions = self.suggest_domain(email)
             
             if suggestions:
+                email_errors["mensaje1"] = f"Quisiste decir {email.split('@')[0]}@{suggestions[0]}?"
+                error_en_login=2
                 print(f"Quisiste decir {email.split('@')[0]}@{suggestions[0]}?")
-
-            return render_template("inicio.html")
+                return verification_code, email_errors
             
         else:
 
@@ -95,7 +96,7 @@ class verify_email:
                             
                     else: 
                         print("El correo fue enviado exitosamente")
-                        return render_template("v_e_r.html", verification_code)
+                        return verification_code, email_errors
                     
             except smtplib.SMTPRecipientsRefused:
                 print(f"El destinatario {addressee} ha sido rechazado")

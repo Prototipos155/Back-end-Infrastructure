@@ -256,12 +256,17 @@ def registration():
                 print("El error de jwt es: ", err)
                 
             try:
-                verify_domain.send_email(email, username)
+                verification_code, error_email = verify_domain.send_email(email, username)
+                print(f"\nErrores: {errores}\n Error_email: {error_email}")
+                if error_email:
+                    return render_template("acceso/registration.html", **error_email,  form_data=form_data)
+                
+                session['verification_code'] = verification_code
                 print("se envio el correo")
                 
                 session['tokenregistro'] = tokenregistro
                 
-                return render_template ("acceso/vericorreo_registration.html", mensaje1="Ingrese el código que le enviamos por correo")
+                return render_template ("acceso/v_e_r.html", mensaje1="Ingrese el código que le enviamos por correo")
             
             except Exception as err:
                 print(f"el error de este pedo es: {err}")
@@ -290,7 +295,7 @@ def v_e_r():
 
         codigo = request.form.get('codigo')
         
-        if not (str(codigo) == str(codigoveri)):
+        if not (str(codigo) == str(verification_code)):
             return render_template("acceso/v_e_r.html", mensaje1= "Los códigos de verificación no coinciden")
 
         try:
@@ -304,9 +309,9 @@ def v_e_r():
             encrypted_password = payload['encrypted_password']
             
             try:
-                print("INSERT INTO perfil (id_role, id_foto_perfil,  names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( names, surnames, username, phone_number, email, encrypted_password ))
+                print("INSERT INTO perfil (id_role, id_foto_perfil, names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( names, surnames, username, phone_number, email, encrypted_password ))
 
-                cbd.cursor.execute("INSERT INTO perfil (id_roleeeee, id_foto_perfil,  names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( names, surnames, username, phone_number, email, encrypted_password ))
+                cbd.cursor.execute("INSERT INTO perfil (id_role, id_foto_perfil, names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( names, surnames, username, phone_number, email, encrypted_password ))
                 cbd.connection.commit()
 
                 return render_template("acceso/login.html", mensaje1 = "Registro exitoso",form_data={})
