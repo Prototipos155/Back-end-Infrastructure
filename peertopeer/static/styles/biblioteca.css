@@ -6,12 +6,14 @@ body{
 }
 .biblioteca {
 
+    border: none;
+
     aside {
       background-color: #201e1a;
-      border: 0;
+      border: none;
       padding-top: 3%;
       align-items: center;
-      padding: 2%;
+      padding: 3% 2%;
       color: #f2f2f2;
       height: 100%;
     }
@@ -19,6 +21,7 @@ body{
     .buscador {
       border: 0;
       background-color: #f2f2f2;
+      color:black;
       /* height: 12%; */
       width: 100%;
       border-radius: 4px;
@@ -35,8 +38,14 @@ body{
       width: 90%;
       height: 100%;
       margin: 1%;
+      padding: 1%;
       font-size: 1em;
       text-align: justify;
+    }
+
+    a{
+        text-decoration: none;
+        color: #ee1c00;
     }
   
     .puntos-mostrar {
@@ -56,8 +65,9 @@ body{
     /* padding: 3% 0%; */
     /* overflow: hidden; */
     list-style:none;
+    
     aside{
-      border:2px solid black;
+      border:0;
       *{
         list-style: none;
       }

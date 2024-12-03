@@ -46,8 +46,7 @@
                     {% endif %}
                     <div class="alminp">
                         <input class="input" type="text" name="username" id="username" class="input"
-                            value="{{ form_data['username'] if form_data['username'] else '' }}"
-                            placeholder=" ">
+                            value="{{ form_data['username'] if form_data['username'] else '' }}" placeholder=" ">
                         <label for="username">Nombre de Usuario</label>
                     </div>
                 </div>
@@ -65,7 +64,8 @@
                     {% endif %}
                     <div class="alminp">
                         <input class="input" type="text" name="phone_number" id="phone_number" class="input"
-                            value="{{ form_data['phone_number'] if form_data['phone_number'] else '' }}" placeholder=" ">
+                            value="{{ form_data['phone_number'] if form_data['phone_number'] else '' }}"
+                            placeholder=" ">
                         <label for="phone_number">Teléfono</label>
                     </div>
                     {% if mensaje3 %}
@@ -105,19 +105,19 @@
                     {% if mensaje4 %}
                     <div class="error">{{ mensaje4 }}</div>
                     {% endif %}
-                    <div class="alminp"><input type="password" name="confirm_password" id="confirm_password" class="input1"
-                            placeholder=" ">
+                    <div class="alminp"><input type="password" name="confirm_password" id="confirm_password"
+                            class="input1" placeholder=" ">
                         <label for="password">Confirmar password</label>
                         <button type="button" id="togglePasswordButton" class="mostrar"></button>
                     </div>
-                    <button type="submit" id="enviar" class="btn-registrarse">Confirmar registro</button>
+                    <input id="enviar" class="btn-registrarse" value="Confirmar registro" readonly>
                 </div>
             </fieldset>
         </div>
 
         <div class="botones">
-            <button id="atras" class="mover">Atrás</button>
-            <button id="siguiente" class="mover fin">Siguiente</button>
+            <input id="atras" class="mover" value="Atrás" readonly>
+            <input id="siguiente" class="mover fin" value="Siguiente" readonly>
         </div>
     </form>
 </div>
