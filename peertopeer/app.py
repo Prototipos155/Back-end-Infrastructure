@@ -51,8 +51,8 @@ socketio = SocketIO(app, logger=True, engineio_logger=True)
 rooms = {}
 
 class Usuario(UserMixin):
-    def __init__(self, id_usuario, rol, username, email, active_account):
-        self.id = id_usuario
+    def __init__(self, id_user, rol, username, email, active_account):
+        self.id = id_user
         self.rol = rol
         self.username = username
         self.email = email
@@ -70,7 +70,7 @@ def load_user(id_user):
     
     try:
     
-        cbd.cursor.execute("SELECT id_user, id_roleeee, username, email, active_account FROM perfil WHERE id_user = %s", (id_user,))
+        cbd.cursor.execute("SELECT id_user, id_role, username, email, active_account FROM perfil WHERE id_user = %s", (id_user,))
         current_user_data = cbd.cursor.fetchone()
         print("Datos de usuario: ", current_user_data)
 
@@ -312,7 +312,7 @@ def v_e_r():
             try:
                 print("INSERT INTO perfil (id_role, id_foto_perfil, names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, '%s', '%s', '%s', '%s', '%s', '%s', 1)"%( names, surnames, username, phone_number, email, encrypted_password ))
 
-                cbd.cursor.execute("INSERT INTO perfil (id_role, id_foto_perfil, names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3,1, %s, %s, %s, %s, %s, %s, 1)", ( names, surnames, username, phone_number, email, encrypted_password ))
+                cbd.cursor.execute("INSERT INTO perfil (id_role, names, surnames, username, phone_number, email, encrypted_password, active_account) VALUES (3, %s, %s, %s, %s, %s, %s, 1)", ( names, surnames, username, phone_number, email, encrypted_password ))
                 cbd.connection.commit()
 
                 return render_template("acceso/login.html", mensaje1 = "Registro exitoso",form_data={})
@@ -429,7 +429,7 @@ def login():
 
                             session['tokenacceso'] = tokenacceso
                             session['codigoveri'] = codigoveri
-                            return redirect(url_for('veriemail_acceso'))
+                            return redirect(url_for('veriemail_acces'))
                         
                         else:
                             print("password incorrecta")
@@ -459,7 +459,7 @@ def login():
 
 
 @app.route ('/veriemail_acces', methods=['GET', 'POST'])
-def veriemail_acceso():
+def veriemail_acces():
 
     codigoveri = session.get('codigoveri')
     tokenacceso = session.get('tokenacceso')
@@ -566,7 +566,7 @@ def categoria_peticion():
                 if tipo == "categoria":
 
                     myprint(f"nombre={nombre}-/-{descripcion}")
-                    res=cbd.crearCategoriaCompleta(nombre,descripcion)
+                    res=cbd.crearMateriaCompleta(nombre,descripcion)
                     
                     # cbd.cursor.execute("INSERT INTO categoria (codigo, nombre, descripcion) VALUES (%s, %s, %s)", (codigo, nombre, descripcion))
                     # cbd.connection.commit()
@@ -945,8 +945,8 @@ def foro():
             return render_template("salas/foro.html", error = "La sala no existe", codigo=codigo)
 
         session["room"] = room
-        session["id_usuario"] = current_user.id
-        session["nombre"] = current_user.username
+        session["id_user"] = current_user.id
+        session["username"] = current_user.username
         #print(f"\n\n'room: ', {room}, 'nombre: ', {current_user.username}\n\n")
         return redirect(url_for('sala'))
                     
@@ -959,7 +959,7 @@ def sala():
     cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
     sala = cbd.cursor.fetchone()
     #id_user = session.get("id_usuario")
-    nombre = session.get("nombre")
+    nombre = session.get("username")
     #print(("sala: ", room), ("nombre: ", nombre))
     
     if room is None or nombre is None or not sala:
@@ -967,7 +967,7 @@ def sala():
     
     cbd.cursor.execute("SELECT id_sala FROM sala WHERE codigo_sala = %s", (room))
     idsala = cbd.cursor.fetchone()
-    cbd.cursor.execute("SELECT m.id_msj,m.id_usuario,p.username,m.id_sala,m.mensaje,DATE_FORMAT(m.fecha,'%%d-%%m-%%Y'),m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_usuario=p.id_usuario AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
+    cbd.cursor.execute("SELECT m.id_msj,m.id_user,p.username,m.id_sala,m.mensaje,DATE_FORMAT(m.fecha,'%%d-%%m-%%Y'),m.hora FROM mensaje m, sala s, perfil p WHERE m.id_sala=s.id_sala AND m.id_user=p.id_user AND s.id_sala=%s ORDER BY m.id_msj DESC LIMIT 100", (idsala[0]))
     mensajes = cbd.cursor.fetchall()
 
     session["id_sala"] = idsala
@@ -977,8 +977,8 @@ def sala():
 @socketio.on("message")
 def message(data):
     room = session.get("room")
-    id_user = session.get("id_usuario")
-    nombre = session.get("nombre")
+    id_user = session.get("id_user")
+    nombre = session.get("username")
     idsala = session.get("id_sala")
     cbd.cursor.execute("SELECT codigo_sala FROM sala WHERE codigo_sala=%s", (room))
     sala = cbd.cursor.fetchone()
@@ -995,13 +995,13 @@ def message(data):
     #rooms[room]["mensajes"].append(contenido)
     print(f"{nombre} dice: {data['mensaje']}")
 
-    cbd.cursor.execute("INSERT INTO mensaje (id_usuario,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],datetime.strptime(data["fecha"],'%d-%m-%Y').strftime('%Y-%m-%d'),data["hora"]))
+    cbd.cursor.execute("INSERT INTO mensaje (id_user,id_sala,mensaje,fecha,hora) VALUES (%s,%s,%s,%s,%s)", (id_user,idsala,data["mensaje"],datetime.strptime(data["fecha"],'%d-%m-%Y').strftime('%Y-%m-%d'),data["hora"]))
     cbd.connection.commit()
 
 @socketio.on("connect")
 def conectar(auth):
     room = session.get("room")
-    nombre = session.get("nombre")
+    nombre = session.get("username")
     if not room or not nombre:
         return
     #if room not in rooms:
@@ -1016,7 +1016,7 @@ def conectar(auth):
 @socketio.on("disconnect")
 def desconectar():
     room = session.get("room")
-    nombre = session.get("nombre")
+    nombre = session.get("username")
     leave_room(room)
 
     #if room in rooms:

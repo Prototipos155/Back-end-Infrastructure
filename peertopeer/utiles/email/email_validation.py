@@ -78,7 +78,7 @@ class verify_email:
             suggestions = self.suggest_domain(email)
             
             if suggestions:
-                email_errors["mensaje1"] = f"Quisiste decir {email.split('@')[0]}@{suggestions[0]}?"
+                email_errors["mensaje3"] = f"¿Quisiste decir {email.split('@')[0]}@{suggestions[0]}?"
                 error_en_login=2
                 print(f"Quisiste decir {email.split('@')[0]}@{suggestions[0]}?")
                 return verification_code, email_errors

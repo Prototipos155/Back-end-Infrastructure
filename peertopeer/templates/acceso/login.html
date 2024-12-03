@@ -17,8 +17,8 @@
 
                     <div class="error"></div>
                     <div class="alminp">
-                        <input type="text" name="correo" id="correo" class="input"
-                            value="{{ form_data['correo'] if form_data['correo'] else '' }}" placeholder="">
+                        <input type="text" name="email" id="correo" class="input"
+                            value="{{ form_data['email'] if form_data['email'] else '' }}" placeholder="">
                         <label for="correo">Correo Electronico</label>
                     </div>
                 </div>
@@ -35,8 +35,8 @@
 
                     <div class="error"></div>
                     <div class="alminp">
-                        <input type="text" name="nombre_usuario" id="nombre_usuario" class="input"
-                            value="{{ form_data['nombre_usuario'] if form_data['nombre_usuario'] else '' }}"
+                        <input type="text" name="username" id="nombre_usuario" class="input"
+                            value="{{ form_data['username'] if form_data['username'] else '' }}"
                             placeholder="">
                         <label for="nombre_usuario">Nombre de Usuario</label>
                     </div>
@@ -54,7 +54,7 @@
                 <div class="derecha">
 
                     <div class="error"></div>
-                    <div class="alminp"> <input type="password" name="contraseña" id="contraseña" class="input1"
+                    <div class="alminp"> <input type="password" name="password" id="contraseña" class="input1"
                             placeholder="">
                         <label for="contraseña">Contraseña</label>
                         <button type="button" id="togglePasswordButton" title="Mostrar" class="mostrar"></button>

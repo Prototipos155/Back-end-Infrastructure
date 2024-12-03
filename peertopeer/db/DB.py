@@ -225,7 +225,7 @@ class CC():
         tema=self.crearHashParaBd(f"{nombre_Materia}-General")
         subtema=self.crearHashParaBd(f"{nombre_Materia}-General-General")
         # print(f"('{nombre_Materia}',' desc ','{tema}','{subtema}')")
-        self.cursor.callproc("crearCategoriaCompleta",(nombre_Materia,descripcion,tema,subtema))
+        self.cursor.callproc("crearCategoria",(nombre_Materia,descripcion))
 
     def ejecutarQuery(self,query,commit=False,fetch=None):
         try:

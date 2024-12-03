@@ -246,7 +246,7 @@ def codigo_tabla_perfil():
             phone_number VARCHAR(13) UNIQUE NOT NULL,
             encrypted_password VARCHAR (256) NOT NULL,
             active_account BOOLEAN NOT NULL,
-            id_foto_perfil int not null,
+            id_foto_perfil int,
             
             foreign key(id_role) references roles(id_role),
             FOREIGN KEY (id_foto_perfil) REFERENCES fotos_perfil (id_foto)
