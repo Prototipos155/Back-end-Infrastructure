@@ -1,3 +1,45 @@
+//CANCELACION DE EVENTO SUBMIT
+document.querySelector("form").addEventListener("submit", (ev) => {
+    // Condición para evitar el envío si no es permitido
+    if (ev.detail == null || ev.detail.allowed == null) {
+        // Prevenir el envío y disparar el evento click
+        ev.preventDefault();
+        console.log("Formulario no permitido, disparando click en #siguiente");
+        document.getElementById("siguiente").dispatchEvent(new Event("click"));
+        return;
+    }
+    // Si pasa la validación, enviar el formulario (esto podría ser un .submit() si deseas hacerlo manualmente)
+    console.log("Formulario enviado correctamente");
+    ev.target.submit()
+});
+
+// Manejo del click en el botón #enviar
+document.getElementById("enviar").addEventListener("click", (ev) => {
+    console.log("Botón #enviar clickeado");
+    // Disparar el evento submit en el formulario manualmente
+    const submitEvent = new CustomEvent('submit', {
+        bubbles: true, // Permitir propagación
+        cancelable: true, // Permitir prevenir el comportamiento predeterminado
+        detail: { allowed: true } // Permitir el envío
+    });
+    document.querySelector("form").dispatchEvent(submitEvent);
+});
+
+
+document.querySelectorAll("input").forEach(input=>{
+    input.addEventListener("change",e=>{
+        // console.error("change")
+        // e.preventDefault()
+        // document.getElementById("siguiente").dispatchEvent(new Event("click"))
+    })
+    input.addEventListener("keyup",ev=>{
+        if(ev.key=='Enter'){
+            console.error("change-2")
+            document.getElementById("siguiente").dispatchEvent(new Event("click"))
+        }
+    })
+})
+
 //ANIMACION DEL REGISTRO E INICIO DE SESION
 console.log("uniste diseño")
 let c = 1;
@@ -26,25 +68,45 @@ export function cambiarField(e = null, modo = 1, direccion = null, sigFieldSet =
     // forma de mover el fieldset( animacion)
     //direccion:
     //-1=atras       fieldset----->
-    //1=siguiente   <-----fieldset    
+    //1=siguiente   <-----fieldset 
+    console.log("direccion=",(direccion==1)?"atras":"adelante")   
     if (window.iniciaCambio == true) {
         // alert("ya hay un proceso en curso")
         console.log("ya hay otro proceso en curso")
         return
     }
     duracionAnimando = (duracionAnimando == null) ? e.target.duracion : duracionAnimando;
-    console.log(duracionAnimando)
+    // console.log(duracionAnimando)
     window.iniciaCambio = true
-
+    
     let index = obtenerCampoActivo();
+    if(direccion!=1){
 
+        let emptyInput=null;
+        for(let input of fields[index].querySelectorAll("input")){
+            if(input.value==""){
+                emptyInput=input;
+                break
+            }
+        }
+        if(emptyInput!=null){
+            emptyInput.focus()
+            window.iniciaCambio = false
+            return        
+        }
+    }
+        
     if(!fields[index].checkValidity()){
         alert("Debes responder bien el campo")
         window.iniciaCambio=false
         return
     }
-
-    if (index - direccion < 0 || index - direccion > fields.length - 1) {
+    if(index-direccion>fields.length -1 ){
+        document.getElementById("enviar").dispatchEvent(new Event("click"))
+        window.iniciaCambio=false
+        return 
+    }
+    if (index - direccion < 0) {
         alert("NO TE SALGAS DE LOS LIMITES")
         window.iniciaCambio = false
         // if( index-direccion>fields.length-1){
